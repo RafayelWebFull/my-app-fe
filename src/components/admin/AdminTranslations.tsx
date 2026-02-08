@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Loader2, Languages } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl } from '@/lib/api';
 
 const LANGS = [
   { code: 'en', label: 'English' },
@@ -30,7 +31,7 @@ export default function AdminTranslations() {
   const { data: keys = [], isLoading: keysLoading } = useQuery({
     queryKey: ['translation-keys'],
     queryFn: async () => {
-      const res = await fetch('/api/admin/translations/keys', { credentials: 'include' });
+      const res = await fetch(apiUrl('/api/admin/translations/keys'), { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -39,7 +40,7 @@ export default function AdminTranslations() {
   const { data: translations = {}, isLoading: transLoading } = useQuery({
     queryKey: ['admin-translations', lang],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/translations/${lang}`, { credentials: 'include' });
+      const res = await fetch(apiUrl(`/api/admin/translations/${lang}`), { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -47,7 +48,7 @@ export default function AdminTranslations() {
 
   const updateMu = useMutation({
     mutationFn: async ({ key, lang, value }: { key: string; lang: string; value: string }) => {
-      const res = await fetch(`/api/admin/translations/${key}/${lang}`, {
+      const res = await fetch(apiUrl(`/api/admin/translations/${key}/${lang}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

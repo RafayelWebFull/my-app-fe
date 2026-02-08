@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { apiUrl } from '@/lib/api';
 
 // Types for our languages and translations
 export type Language = 'en' | 'ru' | 'hy';
@@ -130,7 +131,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const fetchTranslations = async () => {
       setLoading(true);
       try {
-        const response = await fetch(`/api/translations/${language}`);
+        const response = await fetch(apiUrl(`/api/translations/${language}`));
         if (response.ok) {
           const data = await response.json();
           setBackendTranslations(data.translations || {});
@@ -157,9 +158,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang);
     
     // Optionally notify backend about language change
-    fetch(`/lang/${lang}`, { 
+    fetch(apiUrl(`/lang/${lang}`), { 
       method: 'GET',
-      credentials: 'same-origin'
+      credentials: 'include'
     }).catch(console.error); // Don't block on this
   };
 

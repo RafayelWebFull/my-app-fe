@@ -30,13 +30,14 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl } from '@/lib/api';
 
 interface Brand {
   id: number;
   name: string;
 }
 
-const API = '/api/brands';
+const API = () => apiUrl('/api/brands');
 
 export default function AdminBrands() {
   const queryClient = useQueryClient();
@@ -48,7 +49,7 @@ export default function AdminBrands() {
   const { data: brands = [], isLoading } = useQuery({
     queryKey: ['brands'],
     queryFn: async () => {
-      const res = await fetch(API, { credentials: 'include' });
+      const res = await fetch(API(), { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
@@ -56,7 +57,7 @@ export default function AdminBrands() {
 
   const createMu = useMutation({
     mutationFn: async (data: { name: string }) => {
-      const res = await fetch(API, {
+      const res = await fetch(API(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -78,7 +79,7 @@ export default function AdminBrands() {
 
   const updateMu = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: { name: string } }) => {
-      const res = await fetch(`${API}/${id}`, {
+      const res = await fetch(`${API()}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -100,7 +101,7 @@ export default function AdminBrands() {
 
   const deleteMu = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API}/${id}`, {
+      const res = await fetch(`${API()}/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

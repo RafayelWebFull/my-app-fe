@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, Loader2, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl, imageUrl } from '@/lib/api';
 
 interface Category {
   id: number;
@@ -67,9 +68,9 @@ interface Optic {
   discount: number | null;
 }
 
-const OPTICS_API = '/api/optics';
-const CATEGORIES_API = '/api/categories';
-const BRANDS_API = '/api/brands';
+const OPTICS_API = () => apiUrl('/api/optics');
+const CATEGORIES_API = () => apiUrl('/api/categories');
+const BRANDS_API = () => apiUrl('/api/brands');
 
 const emptyForm = {
   name: '',
@@ -97,7 +98,7 @@ export default function AdminOptics() {
   const { data: optics = [], isLoading } = useQuery({
     queryKey: ['optics', categoryFilter],
     queryFn: async () => {
-      const url = categoryFilter !== 'all' ? `${OPTICS_API}?category=${categoryFilter}` : OPTICS_API;
+      const url = categoryFilter !== 'all' ? `${OPTICS_API()}?category=${categoryFilter}` : OPTICS_API();
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
@@ -107,7 +108,7 @@ export default function AdminOptics() {
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch(CATEGORIES_API, { credentials: 'include' });
+      const res = await fetch(CATEGORIES_API(), { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -116,7 +117,7 @@ export default function AdminOptics() {
   const { data: brands = [] } = useQuery({
     queryKey: ['brands'],
     queryFn: async () => {
-      const res = await fetch(BRANDS_API, { credentials: 'include' });
+      const res = await fetch(BRANDS_API(), { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -124,7 +125,7 @@ export default function AdminOptics() {
 
   const createMu = useMutation({
     mutationFn: async (fd: FormData) => {
-      const res = await fetch(OPTICS_API, {
+      const res = await fetch(OPTICS_API(), {
         method: 'POST',
         credentials: 'include',
         body: fd,
@@ -145,7 +146,7 @@ export default function AdminOptics() {
 
   const updateMu = useMutation({
     mutationFn: async ({ id, fd }: { id: number; fd: FormData }) => {
-      const res = await fetch(`${OPTICS_API}/${id}`, {
+      const res = await fetch(`${OPTICS_API()}/${id}`, {
         method: 'PUT',
         credentials: 'include',
         body: fd,
@@ -166,7 +167,7 @@ export default function AdminOptics() {
 
   const deleteMu = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${OPTICS_API}/${id}`, {
+      const res = await fetch(`${OPTICS_API()}/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -304,7 +305,7 @@ export default function AdminOptics() {
                     <div className="w-12 h-12 rounded bg-secondary overflow-hidden">
                       {o.image_url ? (
                         <img
-                          src={o.image_url}
+                          src={imageUrl(o.image_url) || o.image_url || ''}
                           alt=""
                           className="w-full h-full object-cover"
                         />
@@ -447,7 +448,7 @@ export default function AdminOptics() {
                 {(imagePreview || (editing?.image_url && !imageFile)) && (
                   <div className="w-20 h-20 rounded border overflow-hidden">
                     <img
-                      src={imagePreview || editing?.image_url || ''}
+                      src={imagePreview || imageUrl(editing?.image_url) || editing?.image_url || ''}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />

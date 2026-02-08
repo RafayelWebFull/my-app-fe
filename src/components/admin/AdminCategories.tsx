@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl } from '@/lib/api';
 
 interface Category {
   id: number;
@@ -37,7 +38,7 @@ interface Category {
   slug: string;
 }
 
-const API = '/api/categories';
+const API = () => apiUrl('/api/categories');
 
 export default function AdminCategories() {
   const queryClient = useQueryClient();
@@ -50,7 +51,7 @@ export default function AdminCategories() {
   const { data: categories = [], isLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch(API, { credentials: 'include' });
+      const res = await fetch(API(), { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
@@ -58,7 +59,7 @@ export default function AdminCategories() {
 
   const createMu = useMutation({
     mutationFn: async (data: { name: string; slug: string }) => {
-      const res = await fetch(API, {
+      const res = await fetch(API(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -80,7 +81,7 @@ export default function AdminCategories() {
 
   const updateMu = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: { name: string; slug: string } }) => {
-      const res = await fetch(`${API}/${id}`, {
+      const res = await fetch(`${API()}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -102,7 +103,7 @@ export default function AdminCategories() {
 
   const deleteMu = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API}/${id}`, {
+      const res = await fetch(`${API()}/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });

@@ -38,6 +38,7 @@ import {
 } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, Loader2, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl, imageUrl } from '@/lib/api';
 
 interface HomeCategoryCard {
   id: number;
@@ -49,7 +50,7 @@ interface HomeCategoryCard {
   sort_order: number;
 }
 
-const API = '/api/home-category-cards';
+const API = () => apiUrl('/api/home-category-cards');
 
 const ICON_OPTIONS = [
   { value: 'glasses', label: 'Glasses' },
@@ -76,7 +77,7 @@ export default function AdminHomeCategoryCards() {
   const { data: cards = [], isLoading } = useQuery({
     queryKey: ['homeCategoryCards'],
     queryFn: async () => {
-      const res = await fetch(API + '/all', { credentials: 'include' });
+      const res = await fetch(API() + '/all', { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
@@ -88,7 +89,7 @@ export default function AdminHomeCategoryCards() {
       fd.append('slug', formData.slug);
       fd.append('icon', formData.icon);
       fd.append('sort_order', formData.sort_order);
-      const res = await fetch(API, {
+      const res = await fetch(API(), {
         method: 'POST',
         credentials: 'include',
         body: fd,
@@ -114,7 +115,7 @@ export default function AdminHomeCategoryCards() {
       fd.append('icon', formData.icon);
       fd.append('sort_order', formData.sort_order);
       if (keepImageUrl) fd.append('image_url', keepImageUrl);
-      const res = await fetch(`${API}/${id}`, {
+      const res = await fetch(`${API()}/${id}`, {
         method: 'PUT',
         credentials: 'include',
         body: fd,
@@ -135,7 +136,7 @@ export default function AdminHomeCategoryCards() {
 
   const deleteMu = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API}/${id}`, {
+      const res = await fetch(`${API()}/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -243,7 +244,7 @@ export default function AdminHomeCategoryCards() {
                   <TableCell>
                     <div className="w-16 h-10 rounded-lg shrink-0 overflow-hidden bg-secondary">
                       {c.image_url ? (
-                        <img src={c.image_url} alt="" className="w-full h-full object-cover" />
+                        <img src={imageUrl(c.image_url) || c.image_url || ''} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full" style={{ background: c.background || '#ccc' }} />
                       )}
@@ -322,7 +323,7 @@ export default function AdminHomeCategoryCards() {
                 {(imagePreview || (editing?.image_url && !imageFile)) && (
                   <div className="w-24 h-16 rounded border overflow-hidden shrink-0">
                     <img
-                      src={imagePreview || editing?.image_url || ''}
+                      src={imagePreview || imageUrl(editing?.image_url) || editing?.image_url || ''}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />

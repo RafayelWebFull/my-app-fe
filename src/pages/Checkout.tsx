@@ -4,6 +4,7 @@ import { ShoppingBag, Loader2 } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { apiUrl, imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -60,7 +61,7 @@ export default function Checkout() {
         discount: i.discount,
         total: getItemPrice(i),
       }));
-      const res = await fetch('/api/orders', {
+      const res = await fetch(apiUrl('/api/orders'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -167,7 +168,7 @@ export default function Checkout() {
                     <div key={item.id} className="flex gap-3 text-sm">
                       <div className="w-12 h-12 rounded bg-secondary shrink-0 overflow-hidden">
                         {item.image_url ? (
-                          <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                          <img src={imageUrl(item.image_url) || item.image_url || ''} alt="" className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">—</div>
                         )}

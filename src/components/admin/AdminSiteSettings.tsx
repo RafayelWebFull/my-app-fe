@@ -6,8 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ImagePlus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl, imageUrl } from '@/lib/api';
 
-const API = '/api/site-settings';
+const API = () => apiUrl('/api/site-settings');
 
 export default function AdminSiteSettings() {
   const queryClient = useQueryClient();
@@ -17,7 +18,7 @@ export default function AdminSiteSettings() {
   const { data: settings = {}, isLoading } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
-      const res = await fetch(API, { credentials: 'include' });
+      const res = await fetch(API(), { credentials: 'include' });
       if (!res.ok) throw new Error('Failed');
       return res.json();
     },
@@ -29,7 +30,7 @@ export default function AdminSiteSettings() {
 
   const updateMu = useMutation({
     mutationFn: async (fd: FormData) => {
-      const res = await fetch(API, {
+      const res = await fetch(API(), {
         method: 'PUT',
         credentials: 'include',
         body: fd,
@@ -70,7 +71,7 @@ export default function AdminSiteSettings() {
             </Button>
             {form.hero_image && (
               <div className="mt-2">
-                <img src={form.hero_image} alt="Hero" className="w-48 h-32 object-cover rounded-lg border" />
+                <img src={imageUrl(form.hero_image) || form.hero_image || ''} alt="Hero" className="w-48 h-32 object-cover rounded-lg border" />
               </div>
             )}
           </div>

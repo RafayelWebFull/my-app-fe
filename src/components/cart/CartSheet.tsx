@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, Minus, Plus, Trash2 } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import {
   Sheet,
@@ -47,7 +48,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                 >
                   <div className="w-16 h-16 rounded-lg bg-secondary shrink-0 overflow-hidden">
                     {item.image_url ? (
-                      <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                         —

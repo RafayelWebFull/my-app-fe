@@ -41,8 +41,9 @@ import {
 } from '@/components/ui/select';
 import { Plus, Pencil, Trash2, Glasses, Sun, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl, imageUrl } from '@/lib/api';
 
-const API_BASE = '/api/optics';
+const API_BASE = () => apiUrl('/api/optics');
 
 export type OpticCategory = 'eyeglasses' | 'sunglasses' | 'lenses';
 
@@ -110,7 +111,7 @@ const OwnerDashboard = () => {
   const { data: optics = [], isLoading } = useQuery({
     queryKey: ['optics', categoryFilter],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE}${queryParams}`);
+      const res = await fetch(`${API_BASE()}${queryParams}`);
       if (!res.ok) throw new Error('Failed to fetch optics');
       return res.json() as Promise<Optic[]>;
     },
@@ -118,7 +119,7 @@ const OwnerDashboard = () => {
 
   const createMutation = useMutation({
     mutationFn: async (data: OpticFormData) => {
-      const res = await fetch(API_BASE, {
+      const res = await fetch(API_BASE(), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -148,7 +149,7 @@ const OwnerDashboard = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, data }: { id: number; data: OpticFormData }) => {
-      const res = await fetch(`${API_BASE}/${id}`, {
+      const res = await fetch(`${API_BASE()}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -179,7 +180,7 @@ const OwnerDashboard = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${API_BASE}/${id}`, { method: 'DELETE' });
+      const res = await fetch(`${API_BASE()}/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete');
     },
     onSuccess: () => {

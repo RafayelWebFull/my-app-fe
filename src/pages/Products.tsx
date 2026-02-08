@@ -6,6 +6,7 @@ import { Glasses, Sun, Eye, ArrowRight, Loader2, Search, ShoppingCart } from 'lu
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
+import { apiUrl, imageUrl } from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -63,7 +64,7 @@ const Products = () => {
   const { data: optics = [], isLoading } = useQuery({
     queryKey: ['optics', categoryFilter, brandFilter, search],
     queryFn: async () => {
-      const url = queryParams.toString() ? `/api/optics?${queryParams}` : '/api/optics';
+      const url = queryParams.toString() ? apiUrl(`/api/optics?${queryParams}`) : apiUrl('/api/optics');
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch optics');
       return res.json() as Promise<Optic[]>;
@@ -73,7 +74,7 @@ const Products = () => {
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch('/api/categories');
+      const res = await fetch(apiUrl('/api/categories'));
       if (!res.ok) return [];
       return res.json();
     },
@@ -82,7 +83,7 @@ const Products = () => {
   const { data: brandsList = [] } = useQuery({
     queryKey: ['brands'],
     queryFn: async () => {
-      const res = await fetch('/api/brands');
+      const res = await fetch(apiUrl('/api/brands'));
       if (!res.ok) return [];
       return res.json();
     },
@@ -128,7 +129,7 @@ const Products = () => {
           )}
           {product.image_url ? (
             <img
-              src={product.image_url}
+              src={imageUrl(product.image_url) || product.image_url || ''}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
             />

@@ -3,6 +3,7 @@ import { ShoppingCart, Minus, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
@@ -41,7 +42,7 @@ export default function Cart() {
                 >
                   <div className="w-24 h-24 rounded-lg bg-secondary shrink-0 overflow-hidden">
                     {item.image_url ? (
-                      <img src={item.image_url} alt="" className="w-full h-full object-cover" />
+                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">—</div>
                     )}

@@ -4,6 +4,7 @@ import { ArrowRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { apiUrl, imageUrl } from '@/lib/api';
 
 export function Hero() {
   const { t } = useLanguage();
@@ -11,7 +12,7 @@ export function Hero() {
   const { data: settings = {} } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
-      const res = await fetch('/api/site-settings');
+      const res = await fetch(apiUrl('/api/site-settings'));
       if (!res.ok) return {};
       return res.json();
     },
@@ -26,7 +27,7 @@ export function Hero() {
       {heroImage ? (
         <div className="absolute inset-0">
           <img
-            src={heroImage}
+            src={imageUrl(heroImage) || heroImage}
             alt=""
             className="w-full h-full object-cover"
           />

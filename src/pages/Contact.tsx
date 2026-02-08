@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { MapPin, Phone, Clock, Instagram } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { apiUrl } from '@/lib/api';
 
 const Contact = () => {
   const { t } = useLanguage();
@@ -10,7 +11,7 @@ const Contact = () => {
   const { data: settings = {} } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
-      const res = await fetch('/api/site-settings');
+      const res = await fetch(apiUrl('/api/site-settings'));
       if (!res.ok) return {};
       return res.json();
     },

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { apiUrl, imageUrl } from '@/lib/api';
 import {
   Carousel,
   CarouselContent,
@@ -43,7 +44,7 @@ function BannerSlide({
       {banner.image_url ? (
         <div className="relative aspect-[21/9] min-h-[180px] md:min-h-[220px]">
           <img
-            src={banner.image_url}
+            src={imageUrl(banner.image_url) || banner.image_url || ''}
             alt={banner.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
@@ -94,7 +95,7 @@ export function PromoBanner() {
   const { data: banners = [] } = useQuery({
     queryKey: ['banners'],
     queryFn: async () => {
-      const res = await fetch('/api/banners');
+      const res = await fetch(apiUrl('/api/banners'));
       if (!res.ok) return [];
       return res.json();
     },

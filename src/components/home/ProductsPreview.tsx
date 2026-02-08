@@ -5,6 +5,7 @@ import { ArrowRight, Glasses, Sun, Eye, Loader2, Search, ShoppingCart } from 'lu
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
+import { apiUrl, imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -49,7 +50,7 @@ export function ProductsPreview() {
   const { data: opticsRaw = [], isLoading } = useQuery({
     queryKey: ['optics', 'preview', categoryFilter, brandFilter, search],
     queryFn: async () => {
-      const url = queryParams.toString() ? `/api/optics?${queryParams}` : '/api/optics';
+      const url = queryParams.toString() ? apiUrl(`/api/optics?${queryParams}`) : apiUrl('/api/optics');
       const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch optics');
       const data = await res.json();
@@ -61,7 +62,7 @@ export function ProductsPreview() {
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: async () => {
-      const res = await fetch('/api/categories');
+      const res = await fetch(apiUrl('/api/categories'));
       if (!res.ok) return [];
       return res.json();
     },
@@ -70,7 +71,7 @@ export function ProductsPreview() {
   const { data: brandsList = [] } = useQuery({
     queryKey: ['brands'],
     queryFn: async () => {
-      const res = await fetch('/api/brands');
+      const res = await fetch(apiUrl('/api/brands'));
       if (!res.ok) return [];
       return res.json();
     },
@@ -90,7 +91,7 @@ export function ProductsPreview() {
   const { data: homeCards = [] } = useQuery({
     queryKey: ['homeCategoryCards'],
     queryFn: async () => {
-      const res = await fetch('/api/home-category-cards');
+      const res = await fetch(apiUrl('/api/home-category-cards'));
       if (!res.ok) return [];
       return res.json();
     },
@@ -112,8 +113,8 @@ export function ProductsPreview() {
         icon: slugToIcon[c.icon || c.slug] || Glasses,
         title: c.title,
         slug: c.slug,
-        image: c.image_url || c.background || slugToGradient[c.slug] || slugToGradient.optic,
-        imageUrl: c.image_url || null,
+        image: imageUrl(c.image_url) || c.background || slugToGradient[c.slug] || slugToGradient.optic,
+        imageUrl: imageUrl(c.image_url) || null,
       }))
     : null;
   const categoryCardsFromCategories = categories.length > 0
@@ -225,7 +226,7 @@ export function ProductsPreview() {
                           )}
                           {product.image_url ? (
                             <img
-                              src={product.image_url}
+                              src={imageUrl(product.image_url) || product.image_url || ''}
                               alt={product.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                             />
@@ -300,7 +301,7 @@ export function ProductsPreview() {
               <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-110">
                 {category.imageUrl ? (
                   <img
-                    src={category.imageUrl}
+                    src={imageUrl(category.imageUrl) || category.imageUrl}
                     alt={category.title}
                     className="w-full h-full object-cover"
                   />

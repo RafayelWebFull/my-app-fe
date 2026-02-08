@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Plus, Pencil, Trash2, Loader2, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
+import { apiUrl, imageUrl } from '@/lib/api';
 
 interface Banner {
   id: number;
@@ -44,7 +45,7 @@ interface Banner {
   created_at: string;
 }
 
-const BANNERS_API = '/api/banners';
+const BANNERS_API = () => apiUrl('/api/banners');
 
 const emptyForm = {
   title: '',
@@ -78,7 +79,7 @@ export default function AdminBanners() {
   const { data: banners = [], isLoading } = useQuery({
     queryKey: ['banners', 'all'],
     queryFn: async () => {
-      const res = await fetch(BANNERS_API + '/all', { credentials: 'include' });
+      const res = await fetch(BANNERS_API() + '/all', { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
     },
@@ -86,7 +87,7 @@ export default function AdminBanners() {
 
   const createMu = useMutation({
     mutationFn: async (fd: FormData) => {
-      const res = await fetch(BANNERS_API, {
+      const res = await fetch(BANNERS_API(), {
         method: 'POST',
         credentials: 'include',
         body: fd,
@@ -107,7 +108,7 @@ export default function AdminBanners() {
 
   const updateMu = useMutation({
     mutationFn: async ({ id, fd }: { id: number; fd: FormData }) => {
-      const res = await fetch(`${BANNERS_API}/${id}`, {
+      const res = await fetch(`${BANNERS_API()}/${id}`, {
         method: 'PUT',
         credentials: 'include',
         body: fd,
@@ -128,7 +129,7 @@ export default function AdminBanners() {
 
   const deleteMu = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`${BANNERS_API}/${id}`, {
+      const res = await fetch(`${BANNERS_API()}/${id}`, {
         method: 'DELETE',
         credentials: 'include',
       });
@@ -247,7 +248,7 @@ export default function AdminBanners() {
                   <TableCell>
                     <div className="w-16 h-10 rounded bg-secondary overflow-hidden">
                       {b.image_url ? (
-                        <img src={b.image_url} alt="" className="w-full h-full object-cover" />
+                        <img src={imageUrl(b.image_url) || b.image_url || ''} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">—</div>
                       )}
@@ -375,7 +376,7 @@ export default function AdminBanners() {
                 {(imagePreview || (editing?.image_url && !imageFile)) && (
                   <div className="w-24 h-14 rounded border overflow-hidden">
                     <img
-                      src={imagePreview || editing?.image_url || ''}
+                      src={imagePreview || imageUrl(editing?.image_url) || editing?.image_url || ''}
                       alt="Preview"
                       className="w-full h-full object-cover"
                     />
