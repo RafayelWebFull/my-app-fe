@@ -66,7 +66,22 @@ const Products = () => {
     queryFn: async () => {
       const url = queryParams.toString() ? apiUrl(`/api/optics?${queryParams}`) : apiUrl('/api/optics');
       const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to fetch optics');
+      if (!res.ok) {
+        let detail = '';
+        try {
+          const ct = res.headers.get('content-type') || '';
+          if (ct.includes('application/json')) {
+            const err = await res.json().catch(() => ({}));
+            detail = err?.error || err?.message || JSON.stringify(err);
+          } else {
+            detail = await res.text();
+          }
+        } catch {
+          // ignore parse errors
+        }
+        const status = `${res.status}${res.statusText ? ` ${res.statusText}` : ''}`;
+        throw new Error(`Failed to fetch optics (${status})${detail ? `: ${detail}` : ''}`);
+      }
       return res.json() as Promise<Optic[]>;
     },
   });
