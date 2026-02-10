@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Eye, ShoppingCart } from 'lucide-react';
+import { Menu, X, ShoppingCart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
@@ -30,13 +30,13 @@ export function Header() {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-lg border-b border-border">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#e7f0ed]/90 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-full gradient-hero flex items-center justify-center">
-              <Eye className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 rounded-full bg-white border border-white/70 shadow-sm flex items-center justify-center">
+              <img src="/logo.svg" alt="Optic Gallery" className="w-7 h-7" />
             </div>
             <span className="font-heading font-semibold text-xl text-foreground">
               Optic Gallery

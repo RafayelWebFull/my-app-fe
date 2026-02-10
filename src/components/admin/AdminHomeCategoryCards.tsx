@@ -43,6 +43,7 @@ import { apiUrl, imageUrl } from '@/lib/api';
 interface HomeCategoryCard {
   id: number;
   title: string;
+  title_key?: string | null;
   slug: string;
   background: string | null;
   image_url: string | null;
@@ -69,6 +70,7 @@ export default function AdminHomeCategoryCards() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: '',
+    title_key: '',
     slug: '',
     icon: 'glasses',
     sort_order: '0',
@@ -86,6 +88,7 @@ export default function AdminHomeCategoryCards() {
   const createMu = useMutation({
     mutationFn: async ({ formData, fd }: { formData: typeof form; fd: FormData }) => {
       fd.append('title', formData.title);
+      fd.append('title_key', formData.title_key);
       fd.append('slug', formData.slug);
       fd.append('icon', formData.icon);
       fd.append('sort_order', formData.sort_order);
@@ -111,6 +114,7 @@ export default function AdminHomeCategoryCards() {
   const updateMu = useMutation({
     mutationFn: async ({ id, formData, fd, keepImageUrl }: { id: number; formData: typeof form; fd: FormData; keepImageUrl?: string }) => {
       fd.append('title', formData.title);
+      fd.append('title_key', formData.title_key);
       fd.append('slug', formData.slug);
       fd.append('icon', formData.icon);
       fd.append('sort_order', formData.sort_order);
@@ -155,7 +159,7 @@ export default function AdminHomeCategoryCards() {
     setEditing(null);
     setImageFile(null);
     setImagePreview(null);
-    setForm({ title: '', slug: '', icon: 'glasses', sort_order: '0' });
+    setForm({ title: '', title_key: '', slug: '', icon: 'glasses', sort_order: '0' });
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -190,7 +194,7 @@ export default function AdminHomeCategoryCards() {
     setEditing(null);
     setImageFile(null);
     setImagePreview(null);
-    setForm({ title: '', slug: '', icon: 'glasses', sort_order: String(cards.length) });
+    setForm({ title: '', title_key: '', slug: '', icon: 'glasses', sort_order: String(cards.length) });
     setIsOpen(true);
   };
 
@@ -200,6 +204,7 @@ export default function AdminHomeCategoryCards() {
     setImagePreview(c.image_url || null);
     setForm({
       title: c.title,
+      title_key: c.title_key || '',
       slug: c.slug,
       icon: c.icon || 'glasses',
       sort_order: String(c.sort_order),
@@ -291,6 +296,17 @@ export default function AdminHomeCategoryCards() {
                 placeholder="Sunglasses"
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Title Key (for translations)</Label>
+              <Input
+                value={form.title_key}
+                onChange={(e) => setForm((f) => ({ ...f, title_key: e.target.value }))}
+                placeholder="home_card_sunglasses"
+              />
+              <p className="text-xs text-muted-foreground">
+                Use this key in Admin → Translations. Example keys: home_card_sunglasses, home_card_optic, home_card_lenses.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Slug * (URL part)</Label>

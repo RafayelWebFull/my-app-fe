@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Eye, Instagram, Phone, MapPin } from 'lucide-react';
+import { Instagram, Phone, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Footer() {
@@ -12,9 +12,7 @@ export function Footer() {
           {/* Logo & Description */}
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-full bg-primary-foreground/10 flex items-center justify-center">
-                <Eye className="w-5 h-5 text-primary-foreground" />
-              </div>
+              <img src="/logo.svg" alt="Optic Gallery" className="w-10 h-10" />
               <span className="font-heading font-semibold text-xl">
                 Optic Gallery
               </span>

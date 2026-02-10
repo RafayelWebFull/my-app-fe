@@ -126,7 +126,7 @@ export function ProductsPreview() {
   const categoryCardsFromApi = homeCards.length > 0
     ? homeCards.map((c: { title: string; slug: string; background?: string | null; image_url?: string | null; icon?: string }) => ({
         icon: slugToIcon[c.icon || c.slug] || Glasses,
-        title: c.title,
+        title: c.title || t(c.slug),
         slug: c.slug,
         image: imageUrl(c.image_url) || c.background || slugToGradient[c.slug] || slugToGradient.optic,
         imageUrl: imageUrl(c.image_url) || null,
