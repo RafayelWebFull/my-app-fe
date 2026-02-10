@@ -36,7 +36,7 @@ const categoryIcons: Record<string, typeof Glasses> = {
 };
 
 export function ProductsPreview() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { addItem } = useCart();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -104,9 +104,9 @@ export function ProductsPreview() {
   };
 
   const { data: homeCards = [] } = useQuery({
-    queryKey: ['homeCategoryCards'],
+    queryKey: ['homeCategoryCards', language],
     queryFn: async () => {
-      const res = await fetch(apiUrl('/api/home-category-cards'));
+      const res = await fetch(apiUrl(`/api/home-category-cards?lang=${encodeURIComponent(language)}`));
       if (!res.ok) return [];
       return res.json();
     },

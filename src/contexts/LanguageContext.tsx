@@ -103,6 +103,7 @@ interface LanguageContextType {
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
   loading: boolean;
+  refreshTranslations: (lang?: Language) => Promise<void>;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -126,28 +127,36 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const fetchTranslationsFor = async (lang: Language) => {
+    setLoading(true);
+    try {
+      const response = await fetch(apiUrl(`/api/translations/${lang}`));
+      if (response.ok) {
+        const data = await response.json();
+        if (lang === language) {
+          setBackendTranslations(data.translations || {});
+        }
+      } else {
+        console.warn(`Failed to fetch translations for ${lang}, using defaults`);
+        if (lang === language) setBackendTranslations({});
+      }
+    } catch (error) {
+      console.error('Error fetching translations:', error);
+      if (lang === language) setBackendTranslations({});
+    } finally {
+      if (lang === language) setLoading(false);
+    }
+  };
+
+  const refreshTranslations = async (lang?: Language) => {
+    const target = lang || language;
+    if (target !== language) return;
+    await fetchTranslationsFor(target);
+  };
+
   // Fetch translations from backend when language changes
   useEffect(() => {
-    const fetchTranslations = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(apiUrl(`/api/translations/${language}`));
-        if (response.ok) {
-          const data = await response.json();
-          setBackendTranslations(data.translations || {});
-        } else {
-          console.warn(`Failed to fetch translations for ${language}, using defaults`);
-          setBackendTranslations({});
-        }
-      } catch (error) {
-        console.error('Error fetching translations:', error);
-        setBackendTranslations({});
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTranslations();
+    fetchTranslationsFor(language);
     
     // Save language preference to localStorage
     localStorage.setItem('language', language);
@@ -175,7 +184,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, loading }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, loading, refreshTranslations }}>
       {children}
     </LanguageContext.Provider>
   );

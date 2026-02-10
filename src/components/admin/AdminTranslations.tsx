@@ -14,6 +14,7 @@ import {
 import { Loader2, Languages } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUrl } from '@/lib/api';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const LANGS = [
   { code: 'en', label: 'English' },
@@ -23,6 +24,7 @@ const LANGS = [
 
 export default function AdminTranslations() {
   const queryClient = useQueryClient();
+  const { language: currentLang, refreshTranslations } = useLanguage();
   const [lang, setLang] = useState('en');
   const [selectedKey, setSelectedKey] = useState<string>('');
   const [newKeyInput, setNewKeyInput] = useState('');
@@ -59,6 +61,9 @@ export default function AdminTranslations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-translations', lang] });
       queryClient.invalidateQueries({ queryKey: ['optics'] });
+      if (lang === currentLang) {
+        refreshTranslations(lang as any);
+      }
       toast.success('Translation saved');
     },
     onError: () => toast.error('Failed to save'),
