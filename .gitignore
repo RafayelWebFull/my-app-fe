@@ -28,6 +28,7 @@ node_modules/
 # build output
 build/
 dist/
+public/
 
 # environment variables
 .env
