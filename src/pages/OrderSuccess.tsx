@@ -2,10 +2,18 @@ import { useLocation, Link } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSeo } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
 
 export default function OrderSuccess() {
   const { t } = useLanguage();
+
+  useSeo({
+    title: 'Order Confirmed',
+    description: 'Your order has been received successfully.',
+    path: '/order-success',
+    robots: 'noindex, nofollow',
+  });
   const location = useLocation();
   const orderNumber = (location.state as { orderNumber?: string })?.orderNumber;
 

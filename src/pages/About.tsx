@@ -2,9 +2,16 @@ import { motion } from 'framer-motion';
 import { Award, HeartHandshake, Sparkles, Eye } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSeo } from '@/lib/seo';
 
 const About = () => {
   const { t } = useLanguage();
+
+  useSeo({
+    title: 'About Our Optical Store',
+    description: 'Learn about Optic Gallery, our quality standards, and personalized optical service in Yerevan.',
+    path: '/about',
+  });
 
   const values = [
     {

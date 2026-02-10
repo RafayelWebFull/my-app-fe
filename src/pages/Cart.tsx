@@ -5,6 +5,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { useSeo } from '@/lib/seo';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -16,6 +17,13 @@ function getItemPrice(item: { price: number | string | null; discount?: number |
 export default function Cart() {
   const { t } = useLanguage();
   const { items, removeItem, updateQuantity, subtotal } = useCart();
+
+  useSeo({
+    title: 'Shopping Cart',
+    description: 'Review selected products before checkout.',
+    path: '/cart',
+    robots: 'noindex, nofollow',
+  });
 
   return (
     <Layout>
@@ -42,7 +50,7 @@ export default function Cart() {
                 >
                   <div className="w-24 h-24 rounded-lg bg-secondary shrink-0 overflow-hidden">
                     {item.image_url ? (
-                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt="" className="w-full h-full object-cover" />
+                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt="" loading="lazy" className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">—</div>
                     )}
