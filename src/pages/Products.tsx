@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { useSeo } from '@/lib/seo';
 
 export interface Optic {
   id: number;
@@ -39,6 +40,13 @@ const categoryIcons: Record<string, typeof Glasses> = {
 };
 
 const Products = () => {
+  useSeo({
+    title: 'Eyeglasses, Sunglasses & Lenses',
+    description: 'Browse eyeglasses, sunglasses, and contact lenses from top brands at Optic Gallery.',
+    path: '/products',
+    keywords: 'buy glasses yerevan, sunglasses armenia, contact lenses armenia, optic gallery products',
+  });
+
   const { t } = useLanguage();
   const { addItem } = useCart();
   const [searchParams] = useSearchParams();
@@ -146,6 +154,7 @@ const Products = () => {
             <img
               src={imageUrl(product.image_url) || product.image_url || ''}
               alt={product.name}
+              loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform"
             />
           ) : (

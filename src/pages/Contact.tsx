@@ -4,9 +4,16 @@ import { MapPin, Phone, Clock, Instagram } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl } from '@/lib/api';
+import { useSeo } from '@/lib/seo';
 
 const Contact = () => {
   const { t } = useLanguage();
+
+  useSeo({
+    title: 'Contact & Location',
+    description: 'Find Optic Gallery in Yerevan, get our phone number, working hours, and directions.',
+    path: '/contact',
+  });
 
   const { data: settings = {} } = useQuery({
     queryKey: ['site-settings'],

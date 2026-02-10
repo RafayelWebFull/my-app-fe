@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { useSeo } from '@/lib/seo';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -20,6 +21,13 @@ function getItemPrice(item: { price: number | string | null; discount?: number |
 
 export default function Checkout() {
   const { t } = useLanguage();
+
+  useSeo({
+    title: 'Checkout',
+    description: 'Complete your eyewear order securely at Optic Gallery.',
+    path: '/checkout',
+    robots: 'noindex, nofollow',
+  });
   const navigate = useNavigate();
   const { items, subtotal, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
