@@ -29,6 +29,9 @@ node_modules/
 build/
 dist/
 public/
+!public/
+public/*
+!public/.htaccess
 
 # environment variables
 .env
