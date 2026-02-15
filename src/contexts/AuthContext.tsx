@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { apiUrl } from '@/lib/api';
 
 interface User {
@@ -20,9 +20,10 @@ const API = apiUrl('/api/auth');
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${API}/me`, { credentials: 'include' });
       if (res.ok) {
@@ -36,10 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    checkAuth();
   }, []);
 
   const login = async (username: string, password: string) => {

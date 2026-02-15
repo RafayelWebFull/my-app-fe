@@ -42,6 +42,8 @@ import {
 import { Plus, Pencil, Trash2, Glasses, Sun, Eye, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUrl, imageUrl } from '@/lib/api';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { formatAmdByLanguage, toAmdNumber } from '@/lib/currency';
 
 const API_BASE = () => apiUrl('/api/optics');
 
@@ -99,7 +101,9 @@ function opticToForm(optic: Optic): OpticFormData {
 }
 
 const OwnerDashboard = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { data: rates } = useExchangeRates();
+  const formatMoney = (amountAmd: number) => formatAmdByLanguage(amountAmd, language, rates) || '—';
   const queryClient = useQueryClient();
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -302,7 +306,7 @@ const OwnerDashboard = () => {
                       <TableCell>{optic.brand}</TableCell>
                       <TableCell>{optic.style}</TableCell>
                       <TableCell>
-                        {optic.price != null ? `$${Number(optic.price).toFixed(2)}` : '—'}
+                        {optic.price != null ? formatMoney(Number(optic.price)) : '—'}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -403,7 +407,7 @@ const OwnerDashboard = () => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="price">{t('price')}</Label>
+              <Label htmlFor="price">{t('price')} (AMD ֏)</Label>
               <Input
                 id="price"
                 type="number"
@@ -411,8 +415,13 @@ const OwnerDashboard = () => {
                 min="0"
                 value={formData.price}
                 onChange={(e) => setFormData((f) => ({ ...f, price: e.target.value }))}
-                placeholder="199.99"
+                placeholder="75000"
               />
+              {toAmdNumber(formData.price) != null && (
+                <p className="text-xs text-muted-foreground">
+                  {formatMoney(Number(formData.price))}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="description">{t('description')}</Label>

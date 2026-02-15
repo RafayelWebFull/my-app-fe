@@ -232,21 +232,11 @@ export default function AdminHomeCategoryCards() {
         ) : cards.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground">No cards yet. Add cards to show on the home page.</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Preview</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Slug / Link</TableHead>
-                <TableHead>Icon</TableHead>
-                <TableHead>Order</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="block lg:hidden divide-y">
               {cards.map((c: HomeCategoryCard) => (
-                <TableRow key={c.id}>
-                  <TableCell>
+                <div key={c.id} className="p-4 space-y-2">
+                  <div className="flex gap-3">
                     <div className="w-16 h-10 rounded-lg shrink-0 overflow-hidden bg-secondary">
                       {c.image_url ? (
                         <img src={imageUrl(c.image_url) || c.image_url || ''} alt="" className="w-full h-full object-cover" />
@@ -254,28 +244,78 @@ export default function AdminHomeCategoryCards() {
                         <div className="w-full h-full" style={{ background: c.background || '#ccc' }} />
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="font-medium">{c.title}</TableCell>
-                  <TableCell className="text-muted-foreground">/products?category={c.slug}</TableCell>
-                  <TableCell>{c.icon}</TableCell>
-                  <TableCell>{c.sort_order}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
-                      <Pencil className="w-4 h-4" />
+                    <div className="min-w-0">
+                      <p className="font-medium">{c.title}</p>
+                      <p className="text-xs text-muted-foreground truncate">/products?category={c.slug}</p>
+                      <p className="text-xs text-muted-foreground">{c.icon} · order {c.sort_order}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(c)}>
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant="outline"
+                      size="sm"
                       className="text-destructive"
                       onClick={() => setDeleteCard(c)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+
+            <div className="hidden lg:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Preview</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Slug / Link</TableHead>
+                    <TableHead>Icon</TableHead>
+                    <TableHead>Order</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {cards.map((c: HomeCategoryCard) => (
+                    <TableRow key={c.id}>
+                      <TableCell>
+                        <div className="w-16 h-10 rounded-lg shrink-0 overflow-hidden bg-secondary">
+                          {c.image_url ? (
+                            <img src={imageUrl(c.image_url) || c.image_url || ''} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full" style={{ background: c.background || '#ccc' }} />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{c.title}</TableCell>
+                      <TableCell className="text-muted-foreground">/products?category={c.slug}</TableCell>
+                      <TableCell>{c.icon}</TableCell>
+                      <TableCell>{c.sort_order}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => setDeleteCard(c)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </div>
 

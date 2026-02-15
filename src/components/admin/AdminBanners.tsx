@@ -231,64 +231,104 @@ export default function AdminBanners() {
         ) : banners.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground">No banners yet</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Dates</TableHead>
-                <TableHead>Discount</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="block lg:hidden divide-y">
               {banners.map((b: Banner) => (
-                <TableRow key={b.id}>
-                  <TableCell>
-                    <div className="w-16 h-10 rounded bg-secondary overflow-hidden">
+                <div key={b.id} className="p-4 space-y-2">
+                  <div className="flex gap-3">
+                    <div className="w-16 h-10 rounded bg-secondary overflow-hidden shrink-0">
                       {b.image_url ? (
                         <img src={imageUrl(b.image_url) || b.image_url || ''} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">—</div>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="font-medium max-w-[200px] truncate">{b.title}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {formatDate(b.start_date)} – {formatDate(b.end_date)}
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-amber-600 font-medium">{b.discount_percent}%</span>
-                  </TableCell>
-                  <TableCell>
-                    <span
-                      className={
-                        isActive(b)
-                          ? 'text-green-600 text-sm font-medium'
-                          : 'text-muted-foreground text-sm'
-                      }
-                    >
-                      {isActive(b) ? 'Active' : 'Scheduled/Ended'}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(b)}>
-                      <Pencil className="w-4 h-4" />
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{b.title}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(b.start_date)} – {formatDate(b.end_date)}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm">{b.discount_percent}% · {isActive(b) ? 'Active' : 'Scheduled/Ended'}</p>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={() => openEdit(b)}>
+                      <Pencil className="w-4 h-4 mr-1" />
+                      Edit
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
+                      variant="outline"
+                      size="sm"
                       className="text-destructive"
                       onClick={() => setDeleteBanner(b)}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Delete
                     </Button>
-                  </TableCell>
-                </TableRow>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+
+            <div className="hidden lg:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Dates</TableHead>
+                    <TableHead>Discount</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {banners.map((b: Banner) => (
+                    <TableRow key={b.id}>
+                      <TableCell>
+                        <div className="w-16 h-10 rounded bg-secondary overflow-hidden">
+                          {b.image_url ? (
+                            <img src={imageUrl(b.image_url) || b.image_url || ''} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">—</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium max-w-[200px] truncate">{b.title}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {formatDate(b.start_date)} – {formatDate(b.end_date)}
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-amber-600 font-medium">{b.discount_percent}%</span>
+                      </TableCell>
+                      <TableCell>
+                        <span
+                          className={
+                            isActive(b)
+                              ? 'text-green-600 text-sm font-medium'
+                              : 'text-muted-foreground text-sm'
+                          }
+                        >
+                          {isActive(b) ? 'Active' : 'Scheduled/Ended'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(b)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => setDeleteBanner(b)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </div>
 

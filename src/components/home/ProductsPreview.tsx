@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { ArrowRight, Glasses, Sun, Eye, Loader2, Search, ShoppingCart } from 'lucide-react';
+import { ArrowRight, Glasses, Sun, Eye, Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCart } from '@/contexts/CartContext';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,13 +14,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { formatAmdByLanguage } from '@/lib/currency';
 
 export interface Optic {
   id: number;
   name: string;
   brand_name: string;
   style: string;
+  gender?: 'male' | 'female' | 'unisex';
   category_slug: string;
   image_url: string | null;
   price: number | string | null;
@@ -37,18 +39,25 @@ const categoryIcons: Record<string, typeof Glasses> = {
 
 export function ProductsPreview() {
   const { t, language } = useLanguage();
-  const { addItem } = useCart();
+  const { data: rates } = useExchangeRates();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [brandFilter, setBrandFilter] = useState<string>('all');
+  const [genderFilter, setGenderFilter] = useState<string>('all');
+  const [stockFilter, setStockFilter] = useState<string>('all');
+  const [discountFilter, setDiscountFilter] = useState<string>('all');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const queryParams = new URLSearchParams();
   if (categoryFilter !== 'all') queryParams.set('category', categoryFilter);
   if (brandFilter !== 'all') queryParams.set('brand', brandFilter);
+  if (genderFilter !== 'all') queryParams.set('gender', genderFilter);
+  if (stockFilter !== 'all') queryParams.set('stock', stockFilter);
+  if (discountFilter !== 'all') queryParams.set('discounted', discountFilter);
   if (search.trim()) queryParams.set('search', search.trim());
 
   const { data: opticsRaw = [], isLoading } = useQuery({
-    queryKey: ['optics', 'preview', categoryFilter, brandFilter, search],
+    queryKey: ['optics', 'preview', categoryFilter, brandFilter, genderFilter, stockFilter, discountFilter, search],
     queryFn: async () => {
       const url = queryParams.toString() ? apiUrl(`/api/optics?${queryParams}`) : apiUrl('/api/optics');
       const res = await fetch(url);
@@ -96,11 +105,14 @@ export function ProductsPreview() {
     const priceNum = product.price != null ? (typeof product.price === 'string' ? parseFloat(product.price) : product.price) : null;
     if (priceNum == null || isNaN(priceNum)) return null;
     const hasDiscount = product.discount != null && product.discount > 0;
+    const original = formatAmdByLanguage(priceNum, language, rates);
+    if (!original) return null;
     if (hasDiscount) {
       const discounted = priceNum * (1 - product.discount! / 100);
-      return { original: `$${priceNum.toFixed(2)}`, discounted: `$${discounted.toFixed(2)}` };
+      const discountedFormatted = formatAmdByLanguage(discounted, language, rates);
+      return { original, discounted: discountedFormatted };
     }
-    return { original: `$${priceNum.toFixed(2)}`, discounted: null };
+    return { original, discounted: null };
   };
 
   const { data: homeCards = [] } = useQuery({
@@ -141,7 +153,10 @@ export function ProductsPreview() {
         imageUrl: null,
       }))
     : defaultCards.map((d) => ({ ...d, imageUrl: null as string | null }));
-  const categoryCards = categoryCardsFromApi ?? categoryCardsFromCategories;
+  const rawCategoryCards = categoryCardsFromApi ?? categoryCardsFromCategories;
+  const categoryCards = rawCategoryCards.filter((card, index, arr) => {
+    return arr.findIndex((x) => x.slug === card.slug) === index;
+  });
 
   return (
     <section className="py-24">
@@ -158,7 +173,7 @@ export function ProductsPreview() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             {t('productsSubtitle')}
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-2xl mx-auto">
+          <div className="flex items-center gap-3 justify-center max-w-2xl mx-auto">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -168,34 +183,107 @@ export function ProductsPreview() {
                 className="pl-9"
               />
             </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue placeholder={t('category')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('all')}</SelectItem>
-                {categories.map((c: { id: number; name: string; slug: string }) => (
-                  <SelectItem key={c.id} value={c.slug}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={brandFilter} onValueChange={setBrandFilter}>
-              <SelectTrigger className="w-full sm:w-[140px]">
-                <SelectValue placeholder={t('brand')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('all')}</SelectItem>
-                {brandsList.map((b: { id: number; name: string }) => (
-                  <SelectItem key={b.id} value={String(b.id)}>
-                    {b.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Button type="button" variant="outline" size="icon" onClick={() => setFiltersOpen(true)}>
+              <SlidersHorizontal className="w-4 h-4" />
+            </Button>
           </div>
         </motion.div>
+
+        <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+          <SheetContent side="right" className="w-full sm:max-w-md">
+            <SheetHeader>
+              <SheetTitle>Filters</SheetTitle>
+            </SheetHeader>
+            <div className="space-y-4 mt-6">
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t('category')}</p>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('category')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('all')}</SelectItem>
+                    {categories.map((c: { id: number; name: string; slug: string }) => (
+                      <SelectItem key={c.id} value={c.slug}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">{t('brand')}</p>
+                <Select value={brandFilter} onValueChange={setBrandFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('brand')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">{t('all')}</SelectItem>
+                    {brandsList.map((b: { id: number; name: string }) => (
+                      <SelectItem key={b.id} value={String(b.id)}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Gender</p>
+                <Select value={genderFilter} onValueChange={setGenderFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Gender" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="unisex">Unisex</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Stock</p>
+                <Select value={stockFilter} onValueChange={setStockFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Stock" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="in">In stock</SelectItem>
+                    <SelectItem value="out">Out of stock</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Discount</p>
+                <Select value={discountFilter} onValueChange={setDiscountFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Discount" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All</SelectItem>
+                    <SelectItem value="true">Discounted</SelectItem>
+                    <SelectItem value="false">No discount</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  setCategoryFilter('all');
+                  setBrandFilter('all');
+                  setGenderFilter('all');
+                  setStockFilter('all');
+                  setDiscountFilter('all');
+                }}
+              >
+                Reset filters
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
 
         {optics.length > 0 && (
           <motion.div
@@ -216,11 +304,6 @@ export function ProductsPreview() {
                 {optics.map((product, index) => {
                   const Icon = categoryIcons[product.category_slug] || Glasses;
                   const priceDisplay = getPriceDisplay(product);
-                  const q = new URLSearchParams();
-                  if (categoryFilter !== 'all') q.set('category', categoryFilter);
-                  if (brandFilter !== 'all') q.set('brand', brandFilter);
-                  if (search.trim()) q.set('search', search.trim());
-                  const productsLink = q.toString() ? `/products?${q}` : '/products';
                   return (
                     <motion.div
                       key={product.id}
@@ -230,7 +313,7 @@ export function ProductsPreview() {
                       transition={{ delay: index * 0.05 }}
                     >
                       <Link
-                        to={productsLink}
+                        to={`/products/${product.id}`}
                         className="block group bg-card rounded-2xl p-4 shadow-card hover:shadow-elevated transition-all h-full"
                       >
                         <div className="aspect-square rounded-xl bg-secondary mb-3 flex items-center justify-center overflow-hidden relative">
@@ -253,6 +336,7 @@ export function ProductsPreview() {
                         <h4 className="font-heading font-semibold text-foreground truncate">
                           {product.name}
                         </h4>
+                        <p className="text-xs text-muted-foreground capitalize">{product.gender || 'unisex'}</p>
                         {priceDisplay && (
                           <p className="text-sm font-medium text-muted-foreground">
                             {priceDisplay.discounted ? (
@@ -268,31 +352,7 @@ export function ProductsPreview() {
                         {product.in_stock === false || product.in_stock === 0 ? (
                           <span className="text-xs text-destructive">{t('outOfStock')}</span>
                         ) : (
-                          <>
-                            <span className="text-xs text-green-600">{t('inStock')}</span>
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              className="mt-2 gap-1 h-8 text-xs"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                addItem({
-                                  id: product.id,
-                                  name: product.name,
-                                  brand_name: product.brand_name,
-                                  style: product.style || '',
-                                  image_url: product.image_url,
-                                  price: product.price,
-                                  discount: product.discount,
-                                });
-                                toast.success(t('addedToCart'));
-                              }}
-                            >
-                              <ShoppingCart className="w-3 h-3" />
-                              {t('addToCart')}
-                            </Button>
-                          </>
+                          <span className="text-xs text-green-600">{t('inStock')}</span>
                         )}
                       </Link>
                     </motion.div>
@@ -305,7 +365,7 @@ export function ProductsPreview() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {categoryCards.map((category, index) => (
-            <Link key={category.slug} to={`/products?category=${category.slug}`}>
+            <Link key={`${category.slug}-${index}`} to={`/products?category=${category.slug}`}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}

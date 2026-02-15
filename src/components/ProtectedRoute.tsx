@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -8,8 +9,14 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireAdmin = true }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+  const { user, loading, checkAuth } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    if (!user) {
+      checkAuth();
+    }
+  }, [user, checkAuth]);
 
   if (loading) {
     return (

@@ -10,6 +10,8 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { formatAmdByLanguage } from '@/lib/currency';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -24,8 +26,10 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { items, removeItem, updateQuantity, totalItems, subtotal } = useCart();
+  const { data: rates } = useExchangeRates();
+  const formatMoney = (amountAmd: number) => formatAmdByLanguage(amountAmd, language, rates) || '—';
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -59,8 +63,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                     <p className="font-medium text-sm truncate">{item.name}</p>
                     <p className="text-xs text-muted-foreground">{item.brand_name}</p>
                     <p className="text-sm font-semibold mt-1">
-                      ${(getItemPrice(item) / item.quantity).toFixed(2)} × {item.quantity} = $
-                      {getItemPrice(item).toFixed(2)}
+                      {formatMoney(getItemPrice(item) / item.quantity)} × {item.quantity} = {formatMoney(getItemPrice(item))}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1">
@@ -101,7 +104,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
           <div className="border-t pt-4 space-y-4">
             <p className="flex justify-between font-semibold">
               <span>{t('subtotal')}</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatMoney(subtotal)}</span>
             </p>
             <Button asChild className="w-full" onClick={() => onOpenChange(false)}>
               <Link to="/checkout">{t('checkout')}</Link>

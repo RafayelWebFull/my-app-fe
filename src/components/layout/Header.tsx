@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ShoppingCart } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
-import { CartSheet } from '@/components/cart/CartSheet';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const { totalItems } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
 
@@ -64,21 +60,8 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Cart & Language Switcher & Mobile Menu */}
+          {/* Language Switcher & Mobile Menu */}
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setCartOpen(true)}
-              className="relative"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-accent-foreground text-xs font-bold flex items-center justify-center">
-                  {totalItems > 99 ? '99+' : totalItems}
-                </span>
-              )}
-            </Button>
             <div className="hidden sm:flex items-center gap-1 bg-secondary rounded-full p-1">
               {languages.map((lang) => (
                 <button
@@ -152,8 +135,6 @@ export function Header() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <CartSheet open={cartOpen} onOpenChange={setCartOpen} />
     </header>
   );
 }

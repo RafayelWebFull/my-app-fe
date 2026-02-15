@@ -47,11 +47,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
           setBackendTranslations(data.translations || {});
         }
       } else {
-        console.warn(`Failed to fetch translations for ${lang}`);
         if (lang === language) setBackendTranslations({});
       }
-    } catch (error) {
-      console.error('Error fetching translations:', error);
+    } catch {
       if (lang === language) setBackendTranslations({});
     } finally {
       if (lang === language) setLoading(false);

@@ -6,6 +6,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { formatAmdByLanguage } from '@/lib/currency';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -15,8 +17,10 @@ function getItemPrice(item: { price: number | string | null; discount?: number |
 }
 
 export default function Cart() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { items, removeItem, updateQuantity, subtotal } = useCart();
+  const { data: rates } = useExchangeRates();
+  const formatMoney = (amountAmd: number) => formatAmdByLanguage(amountAmd, language, rates) || '—';
 
   useSeo({
     title: 'Shopping Cart',
@@ -59,8 +63,7 @@ export default function Cart() {
                     <p className="font-semibold">{item.name}</p>
                     <p className="text-sm text-muted-foreground">{item.brand_name} · {item.style}</p>
                     <p className="text-sm font-medium mt-2">
-                      ${(getItemPrice(item) / item.quantity).toFixed(2)} × {item.quantity} = $
-                      {getItemPrice(item).toFixed(2)}
+                      {formatMoney(getItemPrice(item) / item.quantity)} × {item.quantity} = {formatMoney(getItemPrice(item))}
                     </p>
                   </div>
                   <div className="flex flex-col items-end justify-between">
@@ -99,7 +102,7 @@ export default function Cart() {
               <div className="sticky top-24 p-6 rounded-xl border bg-card">
                 <p className="flex justify-between text-lg font-semibold mb-6">
                   <span>{t('subtotal')}</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatMoney(subtotal)}</span>
                 </p>
                 <Button asChild className="w-full" size="lg">
                   <Link to="/checkout" className="gap-2">

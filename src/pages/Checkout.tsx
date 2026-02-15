@@ -11,6 +11,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { useSeo } from '@/lib/seo';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { formatAmdByLanguage } from '@/lib/currency';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -20,7 +22,9 @@ function getItemPrice(item: { price: number | string | null; discount?: number |
 }
 
 export default function Checkout() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { data: rates } = useExchangeRates();
+  const formatMoney = (amountAmd: number) => formatAmdByLanguage(amountAmd, language, rates) || '—';
 
   useSeo({
     title: 'Checkout',
@@ -185,14 +189,14 @@ export default function Checkout() {
                         <p className="font-medium truncate">{item.name}</p>
                         <p className="text-muted-foreground">× {item.quantity}</p>
                       </div>
-                      <p className="font-medium">${getItemPrice(item).toFixed(2)}</p>
+                      <p className="font-medium">{formatMoney(getItemPrice(item))}</p>
                     </div>
                   ))}
                 </div>
                 <div className="border-t pt-4 mt-4">
                   <p className="flex justify-between font-semibold text-lg">
                     <span>{t('subtotal')}</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{formatMoney(subtotal)}</span>
                   </p>
                 </div>
                 <Button type="submit" className="w-full mt-6" size="lg" disabled={loading}>

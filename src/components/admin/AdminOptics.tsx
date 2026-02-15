@@ -37,9 +37,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Loader2, ImagePlus } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUrl, imageUrl } from '@/lib/api';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { convertFromAmd, formatCurrency, toAmdNumber } from '@/lib/currency';
 
 interface Category {
   id: number;
@@ -56,12 +58,14 @@ interface Optic {
   id: number;
   name: string;
   style: string;
+  gender?: 'male' | 'female' | 'unisex';
   category_id: number;
   category_name: string;
   category_slug: string;
   brand_id: number;
   brand_name: string;
   image_url: string | null;
+  image_urls?: string[];
   price: number | string | null;
   description: string | null;
   in_stock: boolean | number;
@@ -75,11 +79,11 @@ const BRANDS_API = () => apiUrl('/api/brands');
 const emptyForm = {
   name: '',
   style: '',
+  gender: 'unisex',
   category_id: '',
   brand_id: '',
   price: '',
   description: '',
-  image_url: '',
   in_stock: 'true',
   discount: '',
 };
@@ -91,9 +95,11 @@ export default function AdminOptics() {
   const [editing, setEditing] = useState<Optic | null>(null);
   const [deleteOptic, setDeleteOptic] = useState<Optic | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const { data: rates } = useExchangeRates();
 
   const { data: optics = [], isLoading } = useQuery({
     queryKey: ['optics', categoryFilter],
@@ -185,17 +191,21 @@ export default function AdminOptics() {
     setIsOpen(false);
     setEditing(null);
     setForm(emptyForm);
-    setImageFile(null);
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImageUrls([]);
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0];
-    if (f) {
-      setImageFile(f);
-      const url = URL.createObjectURL(f);
-      setImagePreview(url);
+    const selected = Array.from(e.target.files || []);
+    if (!selected.length) return;
+    const total = existingImageUrls.length + imageFiles.length + selected.length;
+    if (total > 4) {
+      toast.error('Maximum 4 images allowed');
+      return;
     }
+    setImageFiles((prev) => prev.concat(selected));
+    setImagePreviews((prev) => prev.concat(selected.map((f) => URL.createObjectURL(f))));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -204,17 +214,29 @@ export default function AdminOptics() {
       toast.error('Name, style, category, and brand are required');
       return;
     }
+    const effectiveCount = existingImageUrls.length + imageFiles.length;
+    if (effectiveCount < 1) {
+      toast.error('At least 1 image is required');
+      return;
+    }
+    if (effectiveCount > 4) {
+      toast.error('Maximum 4 images allowed');
+      return;
+    }
     const fd = new FormData();
     fd.append('name', form.name.trim());
     fd.append('style', form.style.trim());
+    fd.append('gender', form.gender);
     fd.append('category_id', form.category_id);
     fd.append('brand_id', form.brand_id);
     fd.append('price', form.price || '');
     fd.append('description', form.description || '');
     fd.append('in_stock', form.in_stock || 'true');
     if (form.discount) fd.append('discount', form.discount);
-    if (imageFile) fd.append('image', imageFile);
-    if (editing && !imageFile && form.image_url) fd.append('image_url', form.image_url);
+    imageFiles.forEach((f) => fd.append('images', f));
+    if (editing) {
+      fd.append('image_urls', JSON.stringify(existingImageUrls));
+    }
 
     if (editing) {
       updateMu.mutate({ id: editing.id, fd });
@@ -226,8 +248,9 @@ export default function AdminOptics() {
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
-    setImageFile(null);
-    setImagePreview(null);
+    setImageFiles([]);
+    setImagePreviews([]);
+    setExistingImageUrls([]);
     setIsOpen(true);
   };
 
@@ -236,20 +259,25 @@ export default function AdminOptics() {
     setForm({
       name: o.name,
       style: o.style,
+      gender: o.gender || 'unisex',
       category_id: String(o.category_id),
       brand_id: String(o.brand_id),
       price: o.price != null ? String(o.price) : '',
       description: o.description || '',
-      image_url: o.image_url || '',
       in_stock: o.in_stock ? 'true' : 'false',
       discount: o.discount != null ? String(o.discount) : '',
     });
-    setImageFile(null);
-    setImagePreview(o.image_url || null);
+    const urls = Array.isArray(o.image_urls) && o.image_urls.length > 0
+      ? o.image_urls
+      : (o.image_url ? [o.image_url] : []);
+    setExistingImageUrls(urls);
+    setImageFiles([]);
+    setImagePreviews([]);
     setIsOpen(true);
   };
 
   const isPending = createMu.isPending || updateMu.isPending;
+  const formPriceAmd = toAmdNumber(form.price);
 
   return (
     <div className="space-y-4">
@@ -284,25 +312,12 @@ export default function AdminOptics() {
         ) : optics.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground">No products yet</div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Image</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Brand</TableHead>
-                <TableHead>Style</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Discount</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="block lg:hidden divide-y">
               {optics.map((o: Optic) => (
-                <TableRow key={o.id}>
-                  <TableCell>
-                    <div className="w-12 h-12 rounded bg-secondary overflow-hidden">
+                <div key={o.id} className="p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <div className="w-14 h-14 rounded bg-secondary overflow-hidden shrink-0">
                       {o.image_url ? (
                         <img
                           src={imageUrl(o.image_url) || o.image_url || ''}
@@ -315,43 +330,124 @@ export default function AdminOptics() {
                         </div>
                       )}
                     </div>
-                  </TableCell>
-                  <TableCell className="font-medium">{o.name}</TableCell>
-                  <TableCell>{o.category_name}</TableCell>
-                  <TableCell>{o.brand_name}</TableCell>
-                  <TableCell>{o.style}</TableCell>
-                  <TableCell>
-                    {o.price != null ? `$${Number(o.price).toFixed(2)}` : '—'}
-                  </TableCell>
-                  <TableCell>
-                    {o.discount != null ? (
-                      <span className="text-amber-600 font-medium">{o.discount}%</span>
-                    ) : (
-                      '—'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <span className={o.in_stock ? 'text-green-600' : 'text-destructive'}>
+                    <div className="min-w-0">
+                      <p className="font-medium truncate">{o.name}</p>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {o.brand_name} · {o.style}
+                      </p>
+                      <p className="text-xs text-muted-foreground capitalize">
+                        {o.category_name} · {o.gender || 'unisex'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-sm">
+                    {o.price != null ? (
+                      <span>
+                        {formatCurrency(Number(o.price), 'AMD')} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'USD', rates) || 0, 'USD') : '...'} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'RUB', rates) || 0, 'RUB') : '...'}
+                      </span>
+                    ) : '—'}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className={o.in_stock ? 'text-green-600 text-sm' : 'text-destructive text-sm'}>
                       {o.in_stock ? 'In Stock' : 'Out of Stock'}
                     </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(o)}>
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-destructive"
-                      onClick={() => setDeleteOptic(o)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" onClick={() => openEdit(o)}>
+                        <Pencil className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-destructive"
+                        onClick={() => setDeleteOptic(o)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </TableBody>
-          </Table>
+            </div>
+
+            <div className="hidden lg:block overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Image</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Brand</TableHead>
+                    <TableHead>Style</TableHead>
+                    <TableHead>For</TableHead>
+                    <TableHead>Price (AMD / USD / RUB)</TableHead>
+                    <TableHead>Discount</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {optics.map((o: Optic) => (
+                    <TableRow key={o.id}>
+                      <TableCell>
+                        <div className="w-12 h-12 rounded bg-secondary overflow-hidden">
+                          {o.image_url ? (
+                            <img
+                              src={imageUrl(o.image_url) || o.image_url || ''}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
+                              —
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">{o.name}</TableCell>
+                      <TableCell>{o.category_name}</TableCell>
+                      <TableCell>{o.brand_name}</TableCell>
+                      <TableCell>{o.style}</TableCell>
+                      <TableCell className="capitalize">{o.gender || 'unisex'}</TableCell>
+                      <TableCell>
+                        {o.price != null ? (
+                          <span className="text-sm">
+                            {formatCurrency(Number(o.price), 'AMD')} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'USD', rates) || 0, 'USD') : '...'} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'RUB', rates) || 0, 'RUB') : '...'}
+                          </span>
+                        ) : '—'}
+                      </TableCell>
+                      <TableCell>
+                        {o.discount != null ? (
+                          <span className="text-amber-600 font-medium">{o.discount}%</span>
+                        ) : (
+                          '—'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <span className={o.in_stock ? 'text-green-600' : 'text-destructive'}>
+                          {o.in_stock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" onClick={() => openEdit(o)}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive"
+                          onClick={() => setDeleteOptic(o)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </div>
 
@@ -405,7 +501,7 @@ export default function AdminOptics() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Name *</Label>
                 <Input
@@ -424,14 +520,31 @@ export default function AdminOptics() {
                   required
                 />
               </div>
+              <div className="space-y-2">
+                <Label>For *</Label>
+                <Select
+                  value={form.gender}
+                  onValueChange={(v) => setForm((f) => ({ ...f, gender: v as 'male' | 'female' | 'unisex' }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="female">Female</SelectItem>
+                    <SelectItem value="male">Male</SelectItem>
+                    <SelectItem value="unisex">Unisex</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Image (from PC)</Label>
+              <Label>Images (1-4 from PC)</Label>
               <input
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 className="hidden"
                 onChange={handleImageChange}
               />
@@ -443,31 +556,80 @@ export default function AdminOptics() {
                   className="gap-2"
                 >
                   <ImagePlus className="w-4 h-4" />
-                  {imageFile ? imageFile.name : 'Choose image'}
+                  {imageFiles.length > 0 ? `${imageFiles.length} selected` : 'Choose images'}
                 </Button>
-                {(imagePreview || (editing?.image_url && !imageFile)) && (
-                  <div className="w-20 h-20 rounded border overflow-hidden">
-                    <img
-                      src={imagePreview || imageUrl(editing?.image_url) || editing?.image_url || ''}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                {imageFiles.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={() => { setImageFiles([]); setImagePreviews([]); }}
+                  >
+                    Clear selected
+                  </Button>
                 )}
               </div>
+              {(existingImageUrls.length > 0 || imagePreviews.length > 0) && (
+                <div className="grid grid-cols-4 gap-2">
+                  {existingImageUrls.map((src, idx) => (
+                    <div key={`existing-${src}-${idx}`} className="relative w-20 h-20 rounded border overflow-hidden">
+                      <img
+                        src={imageUrl(src) || src || ''}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        className="absolute top-1 right-1 bg-black/60 text-white rounded p-0.5"
+                        onClick={() =>
+                          setExistingImageUrls((prev) => prev.filter((_, i) => i !== idx))
+                        }
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {imagePreviews.map((src, idx) => (
+                    <div key={`new-${src}-${idx}`} className="relative w-20 h-20 rounded border overflow-hidden">
+                      <img
+                        src={src}
+                        alt="New preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        className="absolute top-1 right-1 bg-black/60 text-white rounded p-0.5"
+                        onClick={() => {
+                          setImageFiles((prev) => prev.filter((_, i) => i !== idx));
+                          setImagePreviews((prev) => prev.filter((_, i) => i !== idx));
+                        }}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {existingImageUrls.length} existing kept, {imageFiles.length} new selected. Delete manually if needed.
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Price</Label>
+                <Label>Price (AMD ֏)</Label>
                 <Input
                   type="number"
                   step="0.01"
                   min="0"
                   value={form.price}
                   onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                  placeholder="199.99"
+                  placeholder="75000"
                 />
+                {formPriceAmd != null && (
+                  <p className="text-xs text-muted-foreground">
+                    Live conversion: {rates ? formatCurrency(convertFromAmd(formPriceAmd, 'USD', rates) || 0, 'USD') : '...'} / {rates ? formatCurrency(convertFromAmd(formPriceAmd, 'RUB', rates) || 0, 'RUB') : '...'}
+                  </p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Discount % (optional)</Label>
