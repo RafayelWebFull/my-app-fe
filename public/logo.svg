@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60" role="img" aria-label="Optic Gallery logo">
+  <g fill="none" stroke="#0b4d3b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="35" cy="30" r="20"/>
+    <circle cx="85" cy="30" r="20"/>
+    <path d="M55 30h10"/>
+    <path d="M15 30 C6 28 2 18 8 10"/>
+    <path d="M105 30 C114 28 118 18 112 10"/>
+  </g>
+</svg>

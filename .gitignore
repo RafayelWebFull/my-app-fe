@@ -32,6 +32,7 @@ public/
 !public/
 public/*
 !public/.htaccess
+!public/logo.svg
 
 # environment variables
 .env
