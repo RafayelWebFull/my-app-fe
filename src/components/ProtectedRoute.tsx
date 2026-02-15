@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -11,14 +11,25 @@ interface ProtectedRouteProps {
 export function ProtectedRoute({ children, requireAdmin = true }: ProtectedRouteProps) {
   const { user, loading, checkAuth } = useAuth();
   const location = useLocation();
+  const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!user) {
-      checkAuth();
+    let active = true;
+    if (user) {
+      setChecked(true);
+      return () => {
+        active = false;
+      };
     }
+    checkAuth().finally(() => {
+      if (active) setChecked(true);
+    });
+    return () => {
+      active = false;
+    };
   }, [user, checkAuth]);
 
-  if (loading) {
+  if (loading || !checked) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="w-10 h-10 animate-spin text-muted-foreground" />
