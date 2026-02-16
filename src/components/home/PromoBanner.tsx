@@ -40,7 +40,7 @@ function BannerSlide({
   return (
     <Link
       to={productsUrl}
-      className="block w-full group relative overflow-hidden"
+      className="block w-full group relative overflow-hidden lg:rounded-3xl lg:shadow-elevated lg:hover:shadow-xl transition-shadow"
     >
       {banner.image_url ? (
         <div className="relative h-[220px] sm:h-[260px] md:h-[320px] lg:h-[360px] max-h-[360px]">
@@ -102,51 +102,53 @@ export function PromoBanner({ overlap = true }: { overlap?: boolean }) {
 
   return (
     <section className={`${overlap ? '-mt-24 md:-mt-32' : 'mt-0'} w-full pb-8 relative z-10`}>
-      {isSlider ? (
-        <Carousel
-          setApi={setApi}
-          opts={{ loop: true }}
-          className="w-full"
-        >
-          <div className="relative">
-            <CarouselContent className="-ml-0">
-              {banners.map((banner: Banner, index: number) => (
-                <CarouselItem key={banner.id} className="pl-0">
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <BannerSlide banner={banner} t={t} />
-                  </motion.div>
-                </CarouselItem>
+      <div className="w-full lg:container lg:mx-auto lg:px-4">
+        {isSlider ? (
+          <Carousel
+            setApi={setApi}
+            opts={{ loop: true }}
+            className="w-full"
+          >
+            <div className="relative">
+              <CarouselContent className="-ml-0">
+                {banners.map((banner: Banner, index: number) => (
+                  <CarouselItem key={banner.id} className="pl-0">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <BannerSlide banner={banner} t={t} />
+                    </motion.div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </div>
+            <div className="flex justify-center gap-2 mt-4">
+              {banners.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => api?.scrollTo(index)}
+                  className={`h-2 rounded-full transition-all ${
+                    current === index
+                      ? 'w-6 bg-accent'
+                      : 'w-2 bg-black hover:bg-black/80'
+                  }`}
+                  aria-label={`Go to slide ${index + 1}`}
+                />
               ))}
-            </CarouselContent>
-          </div>
-          <div className="flex justify-center gap-2 mt-4">
-            {banners.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => api?.scrollTo(index)}
-                className={`h-2 rounded-full transition-all ${
-                  current === index
-                    ? 'w-6 bg-accent'
-                    : 'w-2 bg-black hover:bg-black/80'
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        </Carousel>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <BannerSlide banner={banners[0]} t={t} />
-        </motion.div>
-      )}
+            </div>
+          </Carousel>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <BannerSlide banner={banners[0]} t={t} />
+          </motion.div>
+        )}
+      </div>
     </section>
   );
 }
