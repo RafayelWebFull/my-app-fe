@@ -40,7 +40,7 @@ function BannerSlide({
       className="block w-full group relative overflow-hidden"
     >
       {banner.image_url ? (
-        <div className="relative aspect-[21/9] min-h-[180px] md:min-h-[220px]">
+        <div className="relative h-[220px] sm:h-[260px] md:h-[320px] lg:h-[360px] max-h-[360px]">
           <img
             src={imageUrl(banner.image_url) || banner.image_url || ''}
             alt={banner.title}
@@ -49,7 +49,7 @@ function BannerSlide({
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
         </div>
       ) : (
-        <div className="relative aspect-[21/9] min-h-[180px] md:min-h-[220px] bg-gradient-to-r from-accent via-primary to-accent/80" />
+        <div className="relative h-[220px] sm:h-[260px] md:h-[320px] lg:h-[360px] max-h-[360px] bg-gradient-to-r from-accent via-primary to-accent/80" />
       )}
 
       <div className="absolute inset-0 flex flex-col md:flex-row md:items-center md:justify-between p-6 md:p-10 lg:p-12">

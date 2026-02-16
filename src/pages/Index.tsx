@@ -17,8 +17,8 @@ const Index = () => {
     <Layout>
       <Hero />
       <PromoBanner overlap={false} />
-      <Features />
       <ProductsPreview />
+      <Features />
     </Layout>
   );
 };
