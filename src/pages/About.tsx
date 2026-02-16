@@ -1,11 +1,33 @@
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Award, HeartHandshake, Sparkles, Eye } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { apiUrl, imageUrl } from '@/lib/api';
 import { useSeo } from '@/lib/seo';
 
 const About = () => {
   const { t } = useLanguage();
+  const { data: settings = {} } = useQuery({
+    queryKey: ['site-settings'],
+    queryFn: async () => {
+      const res = await fetch(apiUrl('/api/site-settings'));
+      if (!res.ok) return {};
+      return res.json();
+    },
+  });
+
+  const aboutImages = useMemo(() => {
+    if (!settings.about_images) return [] as string[];
+    try {
+      const parsed = JSON.parse(settings.about_images);
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  }, [settings.about_images]);
 
   useSeo({
     title: 'About Our Optical Store',
@@ -75,16 +97,39 @@ const About = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 flex items-center justify-center relative overflow-hidden">
-                {/* Decorative glasses */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-48 h-24 border-8 border-primary/20 rounded-[100px] relative">
-                    <div className="absolute left-1/2 top-1/2 w-12 h-2 bg-primary/20 -translate-y-1/2" />
+              {aboutImages.length > 0 ? (
+                <Carousel opts={{ loop: aboutImages.length > 1 }} className="w-full">
+                  <CarouselContent>
+                    {aboutImages.map((img: string, index: number) => (
+                      <CarouselItem key={`${img}-${index}`}>
+                        <div className="aspect-square rounded-3xl overflow-hidden">
+                          <img
+                            src={imageUrl(img) || img}
+                            alt={`About gallery ${index + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  {aboutImages.length > 1 && (
+                    <>
+                      <CarouselPrevious className="left-3 top-1/2 -translate-y-1/2 bg-background/90" />
+                      <CarouselNext className="right-3 top-1/2 -translate-y-1/2 bg-background/90" />
+                    </>
+                  )}
+                </Carousel>
+              ) : (
+                <div className="aspect-square rounded-3xl bg-gradient-to-br from-primary/10 via-accent/10 to-primary/5 flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-48 h-24 border-8 border-primary/20 rounded-[100px] relative">
+                      <div className="absolute left-1/2 top-1/2 w-12 h-2 bg-primary/20 -translate-y-1/2" />
+                    </div>
                   </div>
+                  <div className="absolute top-10 left-10 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
+                  <div className="absolute bottom-10 right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl" />
                 </div>
-                <div className="absolute top-10 left-10 w-24 h-24 bg-accent/10 rounded-full blur-2xl" />
-                <div className="absolute bottom-10 right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl" />
-              </div>
+              )}
             </motion.div>
 
             <motion.div

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Glasses, Sun, Eye, ArrowRight, Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { PromoBanner } from '@/components/home/PromoBanner';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -278,6 +279,8 @@ const Products = () => {
           </motion.p>
         </div>
       </section>
+
+      <PromoBanner />
 
       <div className="container mx-auto px-4 py-6 border-b border-border">
         <div className="flex items-center gap-3">

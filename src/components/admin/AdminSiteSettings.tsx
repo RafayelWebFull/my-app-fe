@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +12,10 @@ const API = () => apiUrl('/api/site-settings');
 
 export default function AdminSiteSettings() {
   const queryClient = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const heroFileRef = useRef<HTMLInputElement>(null);
+  const aboutFilesRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<Record<string, string>>({});
+  const [aboutFileCount, setAboutFileCount] = useState(0);
 
   const { data: settings = {}, isLoading } = useQuery({
     queryKey: ['site-settings'],
@@ -27,6 +29,18 @@ export default function AdminSiteSettings() {
   useEffect(() => {
     if (Object.keys(settings).length) setForm(settings);
   }, [settings]);
+
+  const aboutImages = useMemo(() => {
+    const raw = form.about_images;
+    if (!raw) return [] as string[];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      return [];
+    } catch {
+      return [];
+    }
+  }, [form.about_images]);
 
   const updateMu = useMutation({
     mutationFn: async (fd: FormData) => {
@@ -52,8 +66,11 @@ export default function AdminSiteSettings() {
       if (k === 'hero_title' || k === 'hero_subtitle') return;
       fd.append(k, v || '');
     });
-    if (fileRef.current?.files?.[0]) {
-      fd.append('hero_image', fileRef.current.files[0]);
+    if (heroFileRef.current?.files?.[0]) {
+      fd.append('hero_image', heroFileRef.current.files[0]);
+    }
+    if (aboutFilesRef.current?.files?.length) {
+      Array.from(aboutFilesRef.current.files).forEach((file) => fd.append('about_images', file));
     }
     updateMu.mutate(fd);
   };
@@ -67,8 +84,8 @@ export default function AdminSiteSettings() {
         <div className="space-y-4">
           <div>
             <Label>Hero Image</Label>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={() => {}} />
-            <Button type="button" variant="outline" onClick={() => fileRef.current?.click()} className="gap-2 mt-2">
+            <input ref={heroFileRef} type="file" accept="image/*" className="hidden" onChange={() => {}} />
+            <Button type="button" variant="outline" onClick={() => heroFileRef.current?.click()} className="gap-2 mt-2">
               <ImagePlus className="w-4 h-4" />
               Upload new image
             </Button>
@@ -87,6 +104,49 @@ export default function AdminSiteSettings() {
             {' '}
             <code>heroSubtitle</code>.
           </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold text-lg mb-4">About Page Gallery</h3>
+        <div className="space-y-4">
+          <div>
+            <Label>About Images (Multiple)</Label>
+            <input
+              ref={aboutFilesRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => setAboutFileCount(e.currentTarget.files?.length || 0)}
+            />
+            <Button type="button" variant="outline" onClick={() => aboutFilesRef.current?.click()} className="gap-2 mt-2">
+              <ImagePlus className="w-4 h-4" />
+              Upload gallery images
+            </Button>
+            {aboutFileCount > 0 && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {aboutFileCount}
+                {' '}
+                new image(s) selected. Saving will add them to current gallery.
+              </p>
+            )}
+          </div>
+          {aboutImages.length > 0 && (
+            <div>
+              <Label>Current About Gallery</Label>
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {aboutImages.map((img, i) => (
+                  <img
+                    key={`${img}-${i}`}
+                    src={imageUrl(img) || img}
+                    alt={`About ${i + 1}`}
+                    className="w-full h-24 object-cover rounded-md border"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -5,6 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
   Table,
   TableBody,
   TableCell,
@@ -42,6 +49,8 @@ interface Banner {
   start_date: string;
   end_date: string;
   discount_percent: number;
+  target_type?: 'all' | 'brand' | 'optic';
+  target_id?: number | null;
   created_at: string;
 }
 
@@ -53,17 +62,47 @@ const emptyForm = {
   start_date: '',
   end_date: '',
   discount_percent: '50',
+  target_type: 'all' as 'all' | 'brand' | 'optic',
+  target_id: '',
   image_url: '',
 };
 
+function toDateInputValue(d: string) {
+  if (!d) return '';
+  if (d.length >= 10) return d.slice(0, 10);
+  const parsed = new Date(d);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return parsed.toISOString().slice(0, 10);
+}
+
 function formatDate(d: string) {
   if (!d) return '—';
-  return new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  const dateOnly = toDateInputValue(d);
+  if (!dateOnly) return '—';
+  return new Date(`${dateOnly}T00:00:00`).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
 function isActive(b: Banner) {
   const today = new Date().toISOString().slice(0, 10);
-  return today >= b.start_date && today <= b.end_date;
+  const start = toDateInputValue(b.start_date);
+  const end = toDateInputValue(b.end_date);
+  return !!start && !!end && today >= start && today <= end;
+}
+
+function targetLabel(
+  b: Banner,
+  brands: Array<{ id: number; name: string }>,
+  optics: Array<{ id: number; name: string; brand_name?: string }>
+) {
+  if (b.target_type === 'brand' && b.target_id) {
+    const brand = brands.find((x) => x.id === b.target_id);
+    return brand ? `Brand: ${brand.name}` : `Brand #${b.target_id}`;
+  }
+  if (b.target_type === 'optic' && b.target_id) {
+    const optic = optics.find((x) => x.id === b.target_id);
+    return optic ? `Product: ${optic.name}` : `Product #${b.target_id}`;
+  }
+  return 'All products';
 }
 
 export default function AdminBanners() {
@@ -81,6 +120,24 @@ export default function AdminBanners() {
     queryFn: async () => {
       const res = await fetch(BANNERS_API() + '/all', { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch');
+      return res.json();
+    },
+  });
+
+  const { data: brands = [] } = useQuery({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const res = await fetch(apiUrl('/api/brands'), { credentials: 'include' });
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
+
+  const { data: optics = [] } = useQuery({
+    queryKey: ['optics', 'for-banner-targets'],
+    queryFn: async () => {
+      const res = await fetch(apiUrl('/api/optics'), { credentials: 'include' });
+      if (!res.ok) return [];
       return res.json();
     },
   });
@@ -169,12 +226,18 @@ export default function AdminBanners() {
       toast.error('End date must be after start date');
       return;
     }
+    if ((form.target_type === 'brand' || form.target_type === 'optic') && !form.target_id) {
+      toast.error('Please select target brand/product');
+      return;
+    }
     const fd = new FormData();
     fd.append('title', form.title.trim());
     fd.append('description', form.description);
     fd.append('start_date', form.start_date);
     fd.append('end_date', form.end_date);
     fd.append('discount_percent', form.discount_percent || '0');
+    fd.append('target_type', form.target_type);
+    fd.append('target_id', form.target_type === 'all' ? '' : form.target_id || '');
     if (imageFile) fd.append('image', imageFile);
     if (editing && !imageFile && form.image_url) fd.append('image_url', form.image_url);
 
@@ -199,9 +262,11 @@ export default function AdminBanners() {
     setForm({
       title: b.title,
       description: b.description || '',
-      start_date: b.start_date,
-      end_date: b.end_date,
+      start_date: toDateInputValue(b.start_date),
+      end_date: toDateInputValue(b.end_date),
       discount_percent: String(b.discount_percent),
+      target_type: b.target_type || 'all',
+      target_id: b.target_id ? String(b.target_id) : '',
       image_url: b.image_url || '',
     });
     setImageFile(null);
@@ -215,7 +280,7 @@ export default function AdminBanners() {
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
-          Create promotional banners. Active banners (today between start and end date) are shown on the home page.
+          Create promotional banners. Active banners (today between start and end date) are shown in Home and Products.
         </p>
         <Button onClick={openCreate} className="gap-2">
           <Plus className="w-4 h-4" />
@@ -248,7 +313,9 @@ export default function AdminBanners() {
                       <p className="text-xs text-muted-foreground">{formatDate(b.start_date)} – {formatDate(b.end_date)}</p>
                     </div>
                   </div>
-                  <p className="text-sm">{b.discount_percent}% · {isActive(b) ? 'Active' : 'Scheduled/Ended'}</p>
+                  <p className="text-sm">
+                    {b.discount_percent}% · {targetLabel(b, brands, optics)} · {isActive(b) ? 'Active' : 'Scheduled/Ended'}
+                  </p>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => openEdit(b)}>
                       <Pencil className="w-4 h-4 mr-1" />
@@ -276,6 +343,7 @@ export default function AdminBanners() {
                     <TableHead>Title</TableHead>
                     <TableHead>Dates</TableHead>
                     <TableHead>Discount</TableHead>
+                    <TableHead>Applies To</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -298,6 +366,9 @@ export default function AdminBanners() {
                       </TableCell>
                       <TableCell>
                         <span className="text-amber-600 font-medium">{b.discount_percent}%</span>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {targetLabel(b, brands, optics)}
                       </TableCell>
                       <TableCell>
                         <span
@@ -337,7 +408,7 @@ export default function AdminBanners() {
           <DialogHeader>
             <DialogTitle>{editing ? 'Edit Banner' : 'Add Banner'}</DialogTitle>
             <DialogDescription>
-              Create a promotional banner. It will be shown on the home page when today is between the start and end dates.
+              Create a promotional banner. It is active only when today is between the start and end dates.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -393,6 +464,61 @@ export default function AdminBanners() {
                 placeholder="50"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label>Apply Discount To</Label>
+              <Select
+                value={form.target_type}
+                onValueChange={(value: 'all' | 'brand' | 'optic') =>
+                  setForm((f) => ({ ...f, target_type: value, target_id: '' }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select target type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All products</SelectItem>
+                  <SelectItem value="brand">Specific brand</SelectItem>
+                  <SelectItem value="optic">Specific product</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {form.target_type === 'brand' && (
+              <div className="space-y-2">
+                <Label>Brand</Label>
+                <Select value={form.target_id || ''} onValueChange={(value) => setForm((f) => ({ ...f, target_id: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {brands.map((b: { id: number; name: string }) => (
+                      <SelectItem key={b.id} value={String(b.id)}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            {form.target_type === 'optic' && (
+              <div className="space-y-2">
+                <Label>Product (Optic)</Label>
+                <Select value={form.target_id || ''} onValueChange={(value) => setForm((f) => ({ ...f, target_id: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select product" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {optics.map((o: { id: number; name: string; brand_name?: string }) => (
+                      <SelectItem key={o.id} value={String(o.id)}>
+                        {o.brand_name ? `${o.brand_name} - ${o.name}` : o.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label>Image</Label>
