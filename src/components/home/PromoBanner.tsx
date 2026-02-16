@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl, imageUrl } from '@/lib/api';
 import {
@@ -20,6 +19,8 @@ interface Banner {
   start_date: string;
   end_date: string;
   discount_percent: number;
+  target_type?: 'all' | 'brand' | 'optic';
+  target_id?: number | null;
 }
 
 function formatDate(d: string) {
@@ -34,9 +35,11 @@ function BannerSlide({
   banner: Banner;
   t: (key: string) => string;
 }) {
+  const productsUrl = `/products?banner=${encodeURIComponent(String(banner.id))}`;
+
   return (
     <Link
-      to="/products"
+      to={productsUrl}
       className="block w-full group relative overflow-hidden"
     >
       {banner.image_url ? (
@@ -52,7 +55,7 @@ function BannerSlide({
         <div className="relative h-[220px] sm:h-[260px] md:h-[320px] lg:h-[360px] max-h-[360px] bg-gradient-to-r from-accent via-primary to-accent/80" />
       )}
 
-      <div className="absolute inset-0 flex flex-col md:flex-row md:items-center md:justify-between p-6 md:p-10 lg:p-12">
+      <div className="absolute inset-0 flex flex-col p-6 md:p-10 lg:p-12">
         <div className="max-w-2xl">
           <span className="inline-block px-3 py-1 bg-amber-500 text-white text-sm font-bold rounded-full mb-3">
             {banner.discount_percent}% {t('discountOff')}
@@ -67,12 +70,6 @@ function BannerSlide({
             {t('bannerValidFrom')} {formatDate(banner.start_date)} {t('bannerValidTo')}{' '}
             {formatDate(banner.end_date)}
           </p>
-        </div>
-        <div className="mt-4 md:mt-0 md:ml-6">
-          <span className="inline-flex items-center gap-2 px-6 py-3 bg-white text-primary font-semibold rounded-lg shadow-lg group-hover:bg-white/95 transition-colors">
-            {t('viewCollection')}
-            <ArrowRight className="w-5 h-5" />
-          </span>
         </div>
       </div>
     </Link>

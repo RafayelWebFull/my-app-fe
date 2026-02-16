@@ -69,6 +69,9 @@ const Products = () => {
   const [discountFilter, setDiscountFilter] = useState<string>(
     searchParams.get('discounted') || 'all'
   );
+  const [bannerFilter, setBannerFilter] = useState<string>(
+    searchParams.get('banner') || 'all'
+  );
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
@@ -78,6 +81,7 @@ const Products = () => {
     setGenderFilter(searchParams.get('gender') || 'all');
     setStockFilter(searchParams.get('stock') || 'all');
     setDiscountFilter(searchParams.get('discounted') || 'all');
+    setBannerFilter(searchParams.get('banner') || 'all');
   }, [searchParams]);
 
   const queryParams = new URLSearchParams();
@@ -86,10 +90,11 @@ const Products = () => {
   if (genderFilter !== 'all') queryParams.set('gender', genderFilter);
   if (stockFilter !== 'all') queryParams.set('stock', stockFilter);
   if (discountFilter !== 'all') queryParams.set('discounted', discountFilter);
+  if (bannerFilter !== 'all') queryParams.set('banner', bannerFilter);
   if (search.trim()) queryParams.set('search', search.trim());
 
   const { data: optics = [], isLoading } = useQuery({
-    queryKey: ['optics', categoryFilter, brandFilter, genderFilter, stockFilter, discountFilter, search],
+    queryKey: ['optics', categoryFilter, brandFilter, genderFilter, stockFilter, discountFilter, bannerFilter, search],
     queryFn: async () => {
       const url = queryParams.toString() ? apiUrl(`/api/optics?${queryParams}`) : apiUrl('/api/optics');
       const res = await fetch(url);
@@ -137,6 +142,7 @@ const Products = () => {
     genderFilter !== 'all' ||
     stockFilter !== 'all' ||
     discountFilter !== 'all' ||
+    bannerFilter !== 'all' ||
     search.trim();
   const opticsByCategory = hasFilters
     ? { filtered: optics }
@@ -387,6 +393,7 @@ const Products = () => {
                 setGenderFilter('all');
                 setStockFilter('all');
                 setDiscountFilter('all');
+                setBannerFilter('all');
               }}
             >
               Reset filters
