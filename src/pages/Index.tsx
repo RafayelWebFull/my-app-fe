@@ -16,7 +16,7 @@ const Index = () => {
   return (
     <Layout>
       <Hero />
-      <PromoBanner />
+      <PromoBanner overlap={false} />
       <Features />
       <ProductsPreview />
     </Layout>

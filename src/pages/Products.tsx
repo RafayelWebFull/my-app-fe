@@ -280,7 +280,7 @@ const Products = () => {
         </div>
       </section>
 
-      <PromoBanner />
+      <PromoBanner overlap={false} />
 
       <div className="container mx-auto px-4 py-6 border-b border-border">
         <div className="flex items-center gap-3">

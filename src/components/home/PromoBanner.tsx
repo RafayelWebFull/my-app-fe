@@ -81,7 +81,7 @@ function BannerSlide({
   );
 }
 
-export function PromoBanner() {
+export function PromoBanner({ overlap = true }: { overlap?: boolean }) {
   const { t } = useLanguage();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
@@ -106,7 +106,7 @@ export function PromoBanner() {
   const isSlider = banners.length > 1;
 
   return (
-    <section className="-mt-24 md:-mt-32 px-4 pb-8 relative z-10">
+    <section className={`${overlap ? '-mt-24 md:-mt-32' : 'mt-0'} px-4 pb-8 relative z-10`}>
       <div className="container mx-auto">
         {isSlider ? (
           <Carousel
