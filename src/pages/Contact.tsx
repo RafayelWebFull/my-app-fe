@@ -26,6 +26,7 @@ const Contact = () => {
 
   const phone = settings.contact_phone || '+374 XX XXX XXX';
   const instagram = settings.contact_instagram || '@opticgallery.am';
+  const mapLink = settings.contact_map_link || 'https://maps.google.com/?q=Yerevan,Armenia';
   const mapEmbed = settings.contact_map_embed || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d97459.36117797645!2d44.43373!3d40.17712!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x406abd2ad0420d43%3A0x5c7825e2d8e72100!2sYerevan%2C%20Armenia!5e0!3m2!1sen!2s!4v1704067200000!5m2!1sen!2s';
 
   const contactInfo = [
@@ -33,7 +34,7 @@ const Contact = () => {
       icon: MapPin,
       title: t('address'),
       value: t('addressValue'),
-      link: 'https://maps.google.com/?q=Yerevan,Armenia',
+      link: mapLink,
     },
     {
       icon: Phone,

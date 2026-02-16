@@ -116,6 +116,14 @@ export default function AdminSiteSettings() {
               placeholder="Google Maps embed URL"
             />
           </div>
+          <div className="space-y-2">
+            <Label>Map Link URL (Address Click)</Label>
+            <Input
+              value={form.contact_map_link || ''}
+              onChange={(e) => setForm((f) => ({ ...f, contact_map_link: e.target.value }))}
+              placeholder="https://maps.google.com/?q=Yerevan,Armenia"
+            />
+          </div>
         </div>
       </div>
 

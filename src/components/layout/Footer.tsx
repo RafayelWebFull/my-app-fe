@@ -1,9 +1,22 @@
+import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { Instagram, Phone, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { apiUrl } from '@/lib/api';
 
 export function Footer() {
   const { t } = useLanguage();
+  const { data: settings = {} } = useQuery({
+    queryKey: ['site-settings'],
+    queryFn: async () => {
+      const res = await fetch(apiUrl('/api/site-settings'));
+      if (!res.ok) return {};
+      return res.json();
+    },
+  });
+
+  const phone = settings.contact_phone || '+374 XX XXX XXX';
+  const instagram = settings.contact_instagram || '@opticgallery.am';
 
   return (
     <footer className="bg-primary text-primary-foreground">
@@ -58,11 +71,11 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
-                +374 XX XXX XXX
+                {phone}
               </li>
               <li className="flex items-center gap-2">
                 <Instagram className="w-4 h-4" />
-                @opticgallery.am
+                {instagram}
               </li>
             </ul>
           </div>
