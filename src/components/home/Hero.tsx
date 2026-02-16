@@ -19,8 +19,8 @@ export function Hero() {
   });
 
   const heroImage = settings.hero_image;
-  const heroTitle = settings.hero_title || t('heroTitle');
-  const heroSubtitle = settings.hero_subtitle || t('heroSubtitle');
+  const heroTitle = t('heroTitle');
+  const heroSubtitle = t('heroSubtitle');
 
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">

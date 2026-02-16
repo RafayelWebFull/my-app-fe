@@ -48,7 +48,10 @@ export default function AdminSiteSettings() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, v || ''));
+    Object.entries(form).forEach(([k, v]) => {
+      if (k === 'hero_title' || k === 'hero_subtitle') return;
+      fd.append(k, v || '');
+    });
     if (fileRef.current?.files?.[0]) {
       fd.append('hero_image', fileRef.current.files[0]);
     }
@@ -75,21 +78,14 @@ export default function AdminSiteSettings() {
               </div>
             )}
           </div>
-          <div className="space-y-2">
-            <Label>Hero Title</Label>
-            <Input
-              value={form.hero_title || ''}
-              onChange={(e) => setForm((f) => ({ ...f, hero_title: e.target.value }))}
-              placeholder="Discover Premium Eyewear"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Hero Subtitle</Label>
-            <Input
-              value={form.hero_subtitle || ''}
-              onChange={(e) => setForm((f) => ({ ...f, hero_subtitle: e.target.value }))}
-              placeholder="Quality glasses and expert service"
-            />
+          <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
+            Hero title and subtitle are managed in Admin Translations using keys:
+            {' '}
+            <code>heroTitle</code>
+            {' '}
+            and
+            {' '}
+            <code>heroSubtitle</code>.
           </div>
         </div>
       </div>
