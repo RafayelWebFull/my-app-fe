@@ -9,8 +9,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
   type CarouselApi,
 } from '@/components/ui/carousel';
 
@@ -39,7 +37,7 @@ function BannerSlide({
   return (
     <Link
       to="/products"
-      className="block group relative overflow-hidden rounded-2xl md:rounded-3xl shadow-elevated hover:shadow-xl transition-shadow"
+      className="block w-full group relative overflow-hidden"
     >
       {banner.image_url ? (
         <div className="relative aspect-[21/9] min-h-[180px] md:min-h-[220px]">
@@ -106,56 +104,52 @@ export function PromoBanner({ overlap = true }: { overlap?: boolean }) {
   const isSlider = banners.length > 1;
 
   return (
-    <section className={`${overlap ? '-mt-24 md:-mt-32' : 'mt-0'} px-4 pb-8 relative z-10`}>
-      <div className="container mx-auto">
-        {isSlider ? (
-          <Carousel
-            setApi={setApi}
-            opts={{ loop: true }}
-            className="w-full"
-          >
-            <div className="relative">
-              <CarouselContent className="-ml-0">
-                {banners.map((banner: Banner, index: number) => (
-                  <CarouselItem key={banner.id} className="pl-0">
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <BannerSlide banner={banner} t={t} />
-                    </motion.div>
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="left-2 md:left-4 h-10 w-10 rounded-full border-0 bg-white/20 hover:bg-white/40 text-white shadow-lg" />
-              <CarouselNext className="right-2 md:right-4 h-10 w-10 rounded-full border-0 bg-white/20 hover:bg-white/40 text-white shadow-lg" />
-            </div>
-            <div className="flex justify-center gap-2 mt-4">
-              {banners.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => api?.scrollTo(index)}
-                  className={`h-2 rounded-full transition-all ${
-                    current === index
-                      ? 'w-6 bg-amber-500'
-                      : 'w-2 bg-white/40 hover:bg-white/60'
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                />
+    <section className={`${overlap ? '-mt-24 md:-mt-32' : 'mt-0'} w-full pb-8 relative z-10`}>
+      {isSlider ? (
+        <Carousel
+          setApi={setApi}
+          opts={{ loop: true }}
+          className="w-full"
+        >
+          <div className="relative">
+            <CarouselContent className="-ml-0">
+              {banners.map((banner: Banner, index: number) => (
+                <CarouselItem key={banner.id} className="pl-0">
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <BannerSlide banner={banner} t={t} />
+                  </motion.div>
+                </CarouselItem>
               ))}
-            </div>
-          </Carousel>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <BannerSlide banner={banners[0]} t={t} />
-          </motion.div>
-        )}
-      </div>
+            </CarouselContent>
+          </div>
+          <div className="flex justify-center gap-2 mt-4">
+            {banners.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => api?.scrollTo(index)}
+                className={`h-2 rounded-full transition-all ${
+                  current === index
+                    ? 'w-6 bg-accent'
+                    : 'w-2 bg-black hover:bg-black/80'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </Carousel>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <BannerSlide banner={banners[0]} t={t} />
+        </motion.div>
+      )}
     </section>
   );
 }
