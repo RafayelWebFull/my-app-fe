@@ -32,7 +32,7 @@ export function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-full bg-white border border-white/70 shadow-sm flex items-center justify-center">
-              <img src="/logo.svg" alt="Optic Gallery" className="w-7 h-7" />
+              <img src="/logo.png" alt="Optic Gallery" className="w-7 h-7 object-contain" />
             </div>
             <span className="font-heading font-semibold text-xl text-foreground">
               Optic Gallery
