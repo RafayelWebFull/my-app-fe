@@ -77,13 +77,17 @@ export default function RepairService() {
                   />
                 </div>
                 <div>
-                  <p className="text-muted-foreground">{t('repairServiceDescriptionTop')}</p>
+                  <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                    {t('repairServiceDescriptionTop')}
+                  </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
                 <div className="order-2 md:order-1">
-                  <p className="text-muted-foreground">{t('repairServiceDescriptionBottom')}</p>
+                  <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                    {t('repairServiceDescriptionBottom')}
+                  </p>
                 </div>
                 <div className="order-1 md:order-2 rounded-xl overflow-hidden border bg-secondary/40">
                   <img
