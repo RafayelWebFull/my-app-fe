@@ -24,7 +24,7 @@ export function Footer() {
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo & Description */}
           <div className="md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
@@ -38,30 +38,6 @@ export function Footer() {
             <p className="text-primary-foreground/70 max-w-md">
               {t('aboutText1')}
             </p>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="font-heading font-semibold text-lg mb-4">
-              {t('products')}
-            </h4>
-            <ul className="space-y-2 text-primary-foreground/70">
-              <li>
-                <Link to="/products" className="hover:text-primary-foreground transition-colors">
-                  {t('eyeglasses')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/products" className="hover:text-primary-foreground transition-colors">
-                  {t('sunglasses')}
-                </Link>
-              </li>
-              <li>
-                <Link to="/products" className="hover:text-primary-foreground transition-colors">
-                  {t('lenses')}
-                </Link>
-              </li>
-            </ul>
           </div>
 
           {/* Contact Info */}
