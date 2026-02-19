@@ -13,6 +13,7 @@ export function Header() {
   const navItems = [
     { key: 'home', path: '/' },
     { key: 'products', path: '/products' },
+    { key: 'repairServiceCenter', path: '/repair-service' },
     { key: 'about', path: '/about' },
     { key: 'contact', path: '/contact' },
   ];

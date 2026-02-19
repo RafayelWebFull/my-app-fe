@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ImagePlus, Loader2 } from 'lucide-react';
+import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUrl, imageUrl } from '@/lib/api';
 
@@ -19,8 +19,10 @@ export default function AdminSiteSettings() {
   const queryClient = useQueryClient();
   const heroFileRef = useRef<HTMLInputElement>(null);
   const aboutFilesRef = useRef<HTMLInputElement>(null);
+  const repairFilesRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<Record<string, string>>({});
   const [aboutFileCount, setAboutFileCount] = useState(0);
+  const [repairFileCount, setRepairFileCount] = useState(0);
 
   const { data: settings = {}, isLoading } = useQuery({
     queryKey: ['site-settings'],
@@ -46,6 +48,23 @@ export default function AdminSiteSettings() {
       return [];
     }
   }, [form.about_images]);
+
+  const repairImages = useMemo(() => {
+    const raw = form.repair_images;
+    if (!raw) return [] as string[];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      return [];
+    } catch {
+      return [];
+    }
+  }, [form.repair_images]);
+
+  const removeRepairImage = (index: number) => {
+    const next = repairImages.filter((_, i) => i !== index);
+    setForm((f) => ({ ...f, repair_images: next.length ? JSON.stringify(next) : '' }));
+  };
 
   const updateMu = useMutation({
     mutationFn: async (fd: FormData) => {
@@ -76,6 +95,9 @@ export default function AdminSiteSettings() {
     }
     if (aboutFilesRef.current?.files?.length) {
       Array.from(aboutFilesRef.current.files).forEach((file) => fd.append('about_images', file));
+    }
+    if (repairFilesRef.current?.files?.length) {
+      Array.from(repairFilesRef.current.files).forEach((file) => fd.append('repair_images', file));
     }
     updateMu.mutate(fd);
   };
@@ -180,6 +202,58 @@ export default function AdminSiteSettings() {
                     alt={`About ${i + 1}`}
                     className="w-full h-24 object-cover rounded-md border"
                   />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold text-lg mb-4">Repair Page Gallery</h3>
+        <div className="space-y-4">
+          <div>
+            <Label>Repair Images (Multiple)</Label>
+            <input
+              ref={repairFilesRef}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => setRepairFileCount(e.currentTarget.files?.length || 0)}
+            />
+            <Button type="button" variant="outline" onClick={() => repairFilesRef.current?.click()} className="gap-2 mt-2">
+              <ImagePlus className="w-4 h-4" />
+              Upload repair images
+            </Button>
+            {repairFileCount > 0 && (
+              <p className="text-xs text-muted-foreground mt-2">
+                {repairFileCount}
+                {' '}
+                new image(s) selected. Saving will add them to current repair gallery.
+              </p>
+            )}
+          </div>
+          {repairImages.length > 0 && (
+            <div>
+              <Label>Current Repair Gallery</Label>
+              <div className="mt-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {repairImages.map((img, i) => (
+                  <div key={`${img}-${i}`} className="relative">
+                    <img
+                      src={imageUrl(img) || img}
+                      alt={`Repair ${i + 1}`}
+                      className="w-full h-24 object-cover rounded-md border"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeRepairImage(i)}
+                      className="absolute top-1 right-1 inline-flex items-center justify-center w-7 h-7 rounded-full bg-black/60 text-white hover:bg-destructive transition-colors"
+                      aria-label={`Remove repair image ${i + 1}`}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>

@@ -86,9 +86,24 @@ export default function AdminTranslations() {
           credentials: 'include',
           body: JSON.stringify({ value: values[code] ?? '' }),
         });
-        if (!res.ok) throw new Error(`Failed ${code}`);
+        if (!res.ok) {
+          let detail = '';
+          try {
+            const data = await res.json();
+            detail = data?.error || data?.message || '';
+          } catch {
+            detail = await res.text().catch(() => '');
+          }
+          throw new Error(`${code}: ${detail || `HTTP ${res.status}`}`);
+        }
       });
-      await Promise.all(requests);
+      const results = await Promise.allSettled(requests);
+      const failed = results
+        .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+        .map((r) => r.reason?.message || 'unknown error');
+      if (failed.length) {
+        throw new Error(failed.join(' | '));
+      }
     },
     onSuccess: async () => {
       await Promise.all(
@@ -101,7 +116,7 @@ export default function AdminTranslations() {
       await refreshTranslations(currentLang);
       toast.success('Translations saved for all languages');
     },
-    onError: () => toast.error('Failed to save translations'),
+    onError: (err: Error) => toast.error(`Failed to save translations: ${err.message}`),
   });
 
   const fillValuesForKey = (key: string): TranslationValues => ({
@@ -117,7 +132,12 @@ export default function AdminTranslations() {
   };
 
   const handleNewKeyChange = (v: string) => {
-    setNewKeyInput(v);
+    // Keep translation keys URL-safe and backend-friendly.
+    const normalized = v
+      .trimStart()
+      .replace(/\s+/g, '_')
+      .replace(/[^a-zA-Z0-9_]/g, '');
+    setNewKeyInput(normalized);
     if (v) {
       setSelectedKey('');
       setValues(EMPTY_VALUES);
