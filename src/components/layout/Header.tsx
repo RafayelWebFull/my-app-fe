@@ -34,7 +34,7 @@ export function Header() {
             <div className="w-10 h-10 rounded-full bg-white border border-white/70 shadow-sm flex items-center justify-center">
               <img src="/logo.png" alt="Optic Gallery" className="w-7 h-7 object-contain" />
             </div>
-            <span className="font-heading font-semibold text-xl text-foreground">
+            <span className="font-heading font-semibold text-xl text-foreground uppercase">
               Optic Gallery
             </span>
           </Link>

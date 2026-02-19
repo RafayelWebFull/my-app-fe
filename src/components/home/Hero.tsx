@@ -19,11 +19,9 @@ export function Hero() {
   });
 
   const heroImage = settings.hero_image;
-  const heroTitle = t('heroTitle');
-  const heroSubtitle = t('heroSubtitle');
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[90vh] overflow-hidden">
       {heroImage ? (
         <div className="absolute inset-0">
           <img
@@ -41,53 +39,13 @@ export function Hero() {
         </>
       )}
 
-      {/* Floating Glasses Shapes */}
-      <div className="absolute top-1/4 right-[15%] hidden lg:block">
-        <motion.div
-          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="w-32 h-16 border-4 border-accent/30 rounded-[100px] relative"
-        >
-          <div className="absolute left-1/2 top-1/2 w-8 h-1 bg-accent/30 -translate-y-1/2" />
-        </motion.div>
-      </div>
-
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-accent/10 text-accent rounded-full text-sm font-medium mb-6">
-              <MapPin className="w-4 h-4" />
-              {t('addressValue')}
-            </span>
-          </motion.div>
-
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
-            className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6"
-          >
-            {heroTitle}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg sm:text-xl text-muted-foreground max-w-2xl mb-8"
-          >
-            {heroSubtitle}
-          </motion.p>
-
+      <div className="container mx-auto px-4 relative z-10 min-h-[90vh] pt-24 pb-8">
+        <div className="max-w-3xl min-h-[calc(90vh-8rem)] flex flex-col">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="flex flex-col sm:flex-row gap-4"
+            className="flex flex-col sm:flex-row gap-4 mt-auto pt-6"
           >
             <Button asChild size="lg" className="gradient-hero border-0 text-lg px-8 py-6 shadow-elevated hover:opacity-90 transition-opacity">
               <Link to="/contact">

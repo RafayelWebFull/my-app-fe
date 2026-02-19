@@ -4,6 +4,7 @@ import { MapPin, Phone, Clock, Instagram } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl } from '@/lib/api';
+import { parseMultiValue } from '@/lib/contactInfo';
 import { useSeo } from '@/lib/seo';
 
 const Contact = () => {
@@ -24,35 +25,35 @@ const Contact = () => {
     },
   });
 
-  const phone = settings.contact_phone || '+374 XX XXX XXX';
+  const phoneRaw = settings.contact_phone || '+374 XX XXX XXX';
   const instagram = settings.contact_instagram || '@opticgallery.am';
-  const mapLink = settings.contact_map_link || 'https://maps.google.com/?q=Yerevan,Armenia';
   const mapEmbed = settings.contact_map_embed || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d97459.36117797645!2d44.43373!3d40.17712!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x406abd2ad0420d43%3A0x5c7825e2d8e72100!2sYerevan%2C%20Armenia!5e0!3m2!1sen!2s!4v1704067200000!5m2!1sen!2s';
+  const addresses = parseMultiValue(t('addressValue'));
+  const phones = parseMultiValue(phoneRaw);
+  const workingHours = parseMultiValue(t('workingHoursValue'));
 
   const contactInfo = [
     {
       icon: MapPin,
       title: t('address'),
-      value: t('addressValue'),
-      link: mapLink,
+      values: addresses.length ? addresses : [t('addressValue')],
     },
     {
       icon: Phone,
       title: t('phone'),
-      value: phone,
-      link: `tel:${phone.replace(/\s/g, '')}`,
+      values: phones.length ? phones : [phoneRaw],
+      linkForValue: (value: string) => `tel:${value.replace(/\s/g, '')}`,
     },
     {
       icon: Clock,
       title: t('workingHours'),
-      value: t('workingHoursValue'),
-      subValue: t('sunday'),
+      values: workingHours.length ? workingHours : [t('workingHoursValue')],
     },
     {
       icon: Instagram,
       title: 'Instagram',
-      value: instagram,
-      link: `https://instagram.com/${instagram.replace('@', '')}`,
+      values: [instagram],
+      linkForValue: () => `https://instagram.com/${instagram.replace('@', '')}`,
     },
   ];
 
@@ -96,21 +97,30 @@ const Contact = () => {
                 <h3 className="font-heading font-semibold text-foreground mb-2">
                   {info.title}
                 </h3>
-                {info.link ? (
-                  <a
-                    href={info.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent hover:underline break-all"
-                  >
-                    {info.value}
-                  </a>
-                ) : (
-                  <p className="text-muted-foreground">{info.value}</p>
-                )}
-                {info.subValue && (
-                  <p className="text-sm text-muted-foreground mt-1">{info.subValue}</p>
-                )}
+                <div className="space-y-1">
+                  {info.values.map((value) => {
+                    const link = info.linkForValue ? info.linkForValue(value) : '';
+                    const isExternal = link.startsWith('http');
+                    if (link) {
+                      return (
+                        <a
+                          key={value}
+                          href={link}
+                          target={isExternal ? '_blank' : undefined}
+                          rel={isExternal ? 'noopener noreferrer' : undefined}
+                          className="block text-accent hover:underline break-all"
+                        >
+                          {value}
+                        </a>
+                      );
+                    }
+                    return (
+                      <p key={value} className="text-muted-foreground">
+                        {value}
+                      </p>
+                    );
+                  })}
+                </div>
               </motion.div>
             ))}
           </div>
@@ -163,11 +173,11 @@ const Contact = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <a
-              href={`tel:${phone.replace(/\s/g, '')}`}
+              href={`tel:${(phones[0] || phoneRaw).replace(/\s/g, '')}`}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary rounded-xl font-medium hover:bg-white/90 transition-colors"
             >
               <Phone className="w-5 h-5" />
-              {phone}
+              {phones[0] || phoneRaw}
             </a>
             <a
               href={`https://instagram.com/${instagram.replace('@', '')}`}

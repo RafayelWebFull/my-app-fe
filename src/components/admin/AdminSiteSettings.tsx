@@ -9,6 +9,11 @@ import { toast } from 'sonner';
 import { apiUrl, imageUrl } from '@/lib/api';
 
 const API = () => apiUrl('/api/site-settings');
+const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
+
+function getColorValue(raw: string | undefined, fallback: string): string {
+  return raw && HEX_COLOR_RE.test(raw) ? raw : fallback;
+}
 
 export default function AdminSiteSettings() {
   const queryClient = useQueryClient();
@@ -104,6 +109,38 @@ export default function AdminSiteSettings() {
             {' '}
             <code>heroSubtitle</code>.
           </div>
+          <div className="space-y-4 rounded-md border p-4">
+            <h4 className="font-medium">Hero Text Colors</h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Address Badge Text</Label>
+                <Input
+                  type="color"
+                  value={getColorValue(form.hero_badge_text_color, '#1d9db5')}
+                  onChange={(e) => setForm((f) => ({ ...f, hero_badge_text_color: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Hero Title Text</Label>
+                <Input
+                  type="color"
+                  value={getColorValue(form.hero_title_color, '#0f1e3b')}
+                  onChange={(e) => setForm((f) => ({ ...f, hero_title_color: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Hero Subtitle Text</Label>
+              <Input
+                type="color"
+                value={getColorValue(form.hero_subtitle_color, '#5a7899')}
+                onChange={(e) => setForm((f) => ({ ...f, hero_subtitle_color: e.target.value }))}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              These colors are applied on the home hero texts.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -155,10 +192,13 @@ export default function AdminSiteSettings() {
         <div className="space-y-4">
           <div className="space-y-2">
             <Label>Phone</Label>
-            <Input
+            <Textarea
               value={form.contact_phone || ''}
               onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))}
+              rows={3}
+              placeholder={'+374 XX XXX XXX\n+374 YY YYY YYY'}
             />
+            <p className="text-xs text-muted-foreground">Add one phone per line.</p>
           </div>
           <div className="space-y-2">
             <Label>Instagram</Label>
@@ -174,14 +214,6 @@ export default function AdminSiteSettings() {
               onChange={(e) => setForm((f) => ({ ...f, contact_map_embed: e.target.value }))}
               rows={3}
               placeholder="Google Maps embed URL"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Map Link URL (Address Click)</Label>
-            <Input
-              value={form.contact_map_link || ''}
-              onChange={(e) => setForm((f) => ({ ...f, contact_map_link: e.target.value }))}
-              placeholder="https://maps.google.com/?q=Yerevan,Armenia"
             />
           </div>
         </div>
