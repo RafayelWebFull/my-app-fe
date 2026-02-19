@@ -19,7 +19,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('ru');
+  const [language, setLanguageState] = useState<Language>('hy');
   const [backendTranslations, setBackendTranslations] = useState<BackendTranslations>({});
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -28,12 +28,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     const savedLanguage = localStorage.getItem('language') as Language | null;
     if (savedLanguage && ['en', 'ru', 'hy'].includes(savedLanguage)) {
       setLanguageState(savedLanguage);
-    } else {
-      // Try to detect browser language
-      const browserLang = navigator.language.substring(0, 2) as Language;
-      if (['en', 'ru', 'hy'].includes(browserLang)) {
-        setLanguageState(browserLang);
-      }
     }
   }, []);
 
