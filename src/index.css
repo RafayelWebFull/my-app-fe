@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Serif+Armenian:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -47,7 +47,7 @@
     --shadow-card: 0 8px 32px -8px hsl(215 50% 23% / 0.12);
     --shadow-elevated: 0 16px 48px -12px hsl(215 50% 23% / 0.18);
 
-    --font-heading: 'Playfair Display', Georgia, serif;
+    --font-heading: 'Noto Serif Armenian', Georgia, serif;
     --font-body: 'Inter', system-ui, sans-serif;
 
     --sidebar-background: 0 0% 98%;

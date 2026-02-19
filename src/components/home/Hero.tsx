@@ -6,6 +6,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { apiUrl, imageUrl } from '@/lib/api';
 
+const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
+
+function toColorOrUndefined(raw: string | undefined): string | undefined {
+  if (!raw) return undefined;
+  return HEX_COLOR_RE.test(raw) ? raw : undefined;
+}
+
 export function Hero() {
   const { t } = useLanguage();
 
@@ -19,6 +26,24 @@ export function Hero() {
   });
 
   const heroImage = settings.hero_image;
+  const heroTitle = t('heroTitle');
+  const titleColor = toColorOrUndefined(settings.hero_title_color);
+  const heroTitleWords = heroTitle.trim().split(/\s+/).filter(Boolean);
+  const totalLen = heroTitleWords.join(' ').length;
+  let accLen = 0;
+  let splitIndex = 1;
+  for (let i = 0; i < heroTitleWords.length; i += 1) {
+    accLen += heroTitleWords[i].length + (i > 0 ? 1 : 0);
+    if (accLen >= totalLen / 2) {
+      splitIndex = i + 1;
+      break;
+    }
+  }
+  if (heroTitleWords[splitIndex] === '&') {
+    splitIndex += 1;
+  }
+  const heroTitleLine1 = heroTitleWords.slice(0, splitIndex).join(' ');
+  const heroTitleLine2 = heroTitleWords.slice(splitIndex).join(' ');
 
   return (
     <section className="relative min-h-[90vh] overflow-hidden">
@@ -41,6 +66,20 @@ export function Hero() {
 
       <div className="container mx-auto px-4 relative z-10 min-h-[90vh] pt-24 pb-8">
         <div className="max-w-3xl min-h-[calc(90vh-8rem)] flex flex-col">
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.1 }}
+            className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6"
+            style={titleColor ? { color: titleColor } : undefined}
+          >
+            <span className="sm:hidden leading-[1.15]">
+              <span className="block">{heroTitleLine1}</span>
+              <span className="block">{heroTitleLine2}</span>
+            </span>
+            <span className="hidden sm:inline">{heroTitle}</span>
+          </motion.h1>
+
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
