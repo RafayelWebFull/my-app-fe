@@ -38,17 +38,17 @@ const About = () => {
   const values = [
     {
       icon: Award,
-      title: t('quality'),
+      title: t('premiumBrands'),
       description: t('qualityDesc'),
     },
     {
       icon: HeartHandshake,
-      title: t('service'),
+      title: t('expertService'),
       description: t('serviceDesc'),
     },
     {
       icon: Sparkles,
-      title: t('style'),
+      title: t('modernDesign'),
       description: t('styleDesc'),
     },
   ];

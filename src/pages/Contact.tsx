@@ -43,6 +43,7 @@ const Contact = () => {
       title: t('phone'),
       values: phones.length ? phones : [phoneRaw],
       linkForValue: (value: string) => `tel:${value.replace(/\s/g, '')}`,
+      valueIcon: Phone,
     },
     {
       icon: Clock,
@@ -98,24 +99,27 @@ const Contact = () => {
                   {info.title}
                 </h3>
                 <div className="space-y-1">
-                  {info.values.map((value) => {
+                  {info.values.map((value, valueIndex) => {
                     const link = info.linkForValue ? info.linkForValue(value) : '';
                     const isExternal = link.startsWith('http');
+                    const ValueIcon = info.valueIcon;
                     if (link) {
                       return (
                         <a
-                          key={value}
+                          key={`${info.title}-${value}-${valueIndex}`}
                           href={link}
                           target={isExternal ? '_blank' : undefined}
                           rel={isExternal ? 'noopener noreferrer' : undefined}
-                          className="block text-accent hover:underline break-all"
+                          className="flex items-center gap-2 text-accent hover:underline break-all"
                         >
+                          {ValueIcon && <ValueIcon className="w-4 h-4 shrink-0" />}
                           {value}
                         </a>
                       );
                     }
                     return (
-                      <p key={value} className="text-muted-foreground">
+                      <p key={`${info.title}-${value}-${valueIndex}`} className="flex items-center gap-2 text-muted-foreground">
+                        {ValueIcon && <ValueIcon className="w-4 h-4 shrink-0" />}
                         {value}
                       </p>
                     );
