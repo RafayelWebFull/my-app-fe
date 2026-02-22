@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const SITE_NAME = 'Optic Gallery';
 const BASE_URL = 'https://opticgallery.am';
 const DEFAULT_OG_IMAGE = `${BASE_URL}/placeholder.svg`;
+const SEO_LANGS = ['en', 'ru', 'hy'] as const;
 
 type SeoOptions = {
   title: string;
@@ -44,12 +46,43 @@ function upsertCanonical(href: string) {
   link.setAttribute('href', href);
 }
 
+function upsertAlternateLinks(path: string) {
+  const existing = document.head.querySelectorAll('link[rel="alternate"][data-seo-lang]');
+  existing.forEach((el) => el.remove());
+
+  SEO_LANGS.forEach((lang) => {
+    const href = new URL(path, BASE_URL);
+    href.searchParams.set('lang', lang);
+
+    const link = document.createElement('link');
+    link.setAttribute('rel', 'alternate');
+    link.setAttribute('hreflang', lang);
+    link.setAttribute('href', href.toString());
+    link.setAttribute('data-seo-lang', lang);
+    document.head.appendChild(link);
+  });
+
+  const xDefault = document.createElement('link');
+  const xDefaultHref = new URL(path, BASE_URL);
+  xDefaultHref.searchParams.set('lang', 'en');
+  xDefault.setAttribute('rel', 'alternate');
+  xDefault.setAttribute('hreflang', 'x-default');
+  xDefault.setAttribute('href', xDefaultHref.toString());
+  xDefault.setAttribute('data-seo-lang', 'x-default');
+  document.head.appendChild(xDefault);
+}
+
 export function useSeo({ title, description, path = '/', keywords, robots, image, type = 'website' }: SeoOptions) {
+  const { language } = useLanguage();
+
   useEffect(() => {
-    const canonical = new URL(path, BASE_URL).toString();
+    const canonicalUrl = new URL(path, BASE_URL);
+    canonicalUrl.searchParams.set('lang', language);
+    const canonical = canonicalUrl.toString();
     const fullTitle = `${title} | ${SITE_NAME}`;
     const shareImage = image || DEFAULT_OG_IMAGE;
 
+    document.documentElement.setAttribute('lang', language);
     document.title = fullTitle;
     upsertMetaByName('description', description);
     upsertMetaByName('title', fullTitle);
@@ -57,6 +90,7 @@ export function useSeo({ title, description, path = '/', keywords, robots, image
     if (robots) upsertMetaByName('robots', robots);
 
     upsertCanonical(canonical);
+    upsertAlternateLinks(path);
 
     upsertMetaByProperty('og:type', type);
     upsertMetaByProperty('og:url', canonical);
@@ -70,5 +104,5 @@ export function useSeo({ title, description, path = '/', keywords, robots, image
     upsertMetaByProperty('twitter:title', fullTitle);
     upsertMetaByProperty('twitter:description', description);
     upsertMetaByProperty('twitter:image', shareImage);
-  }, [description, image, keywords, path, robots, title, type]);
+  }, [description, image, keywords, language, path, robots, title, type]);
 }

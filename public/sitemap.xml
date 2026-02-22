@@ -6,7 +6,37 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://opticgallery.am/?lang=en</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/?lang=ru</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/?lang=hy</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
     <loc>https://opticgallery.am/products</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/products?lang=en</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/products?lang=ru</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/products?lang=hy</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
@@ -16,7 +46,57 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://opticgallery.am/about?lang=en</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/about?lang=ru</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/about?lang=hy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://opticgallery.am/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/contact?lang=en</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/contact?lang=ru</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/contact?lang=hy</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/repair-service</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/repair-service?lang=en</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/repair-service?lang=ru</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://opticgallery.am/repair-service?lang=hy</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

@@ -25,6 +25,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Load language from localStorage on initial render
   useEffect(() => {
+    const urlLang = new URLSearchParams(window.location.search).get('lang') as Language | null;
+    if (urlLang && ['en', 'ru', 'hy'].includes(urlLang)) {
+      setLanguageState(urlLang);
+      return;
+    }
     const savedLanguage = localStorage.getItem('language') as Language | null;
     if (savedLanguage && ['en', 'ru', 'hy'].includes(savedLanguage)) {
       setLanguageState(savedLanguage);
@@ -62,6 +67,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     
     // Save language preference to localStorage
     localStorage.setItem('language', language);
+
+    // Keep language in URL for SEO/shareable links.
+    const url = new URL(window.location.href);
+    url.searchParams.set('lang', language);
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
   }, [language]);
 
   const setLanguage = (lang: Language) => {
