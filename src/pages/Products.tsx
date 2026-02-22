@@ -18,8 +18,6 @@ import {
 } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useSeo } from '@/lib/seo';
-import { useExchangeRates } from '@/hooks/useExchangeRates';
-import { formatAmdByLanguage } from '@/lib/currency';
 
 export interface Optic {
   id: number;
@@ -32,6 +30,7 @@ export interface Optic {
   image_url: string | null;
   price: number | string | null;
   description: string | null;
+  description_translations?: { en?: string | null; ru?: string | null; hy?: string | null };
   in_stock?: boolean | number;
   discount?: number | null;
 }
@@ -50,8 +49,7 @@ const Products = () => {
     keywords: 'buy glasses yerevan, sunglasses armenia, contact lenses armenia, optic gallery products',
   });
 
-  const { t, language } = useLanguage();
-  const { data: rates } = useExchangeRates();
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [categoryFilter, setCategoryFilter] = useState<string>(
@@ -152,23 +150,8 @@ const Products = () => {
         lenses: optics.filter((o) => o.category_slug === 'lenses'),
       };
 
-  const getPriceDisplay = (product: Optic) => {
-    const priceNum = product.price != null ? (typeof product.price === 'string' ? parseFloat(product.price) : product.price) : null;
-    if (priceNum == null || isNaN(priceNum)) return null;
-    const hasDiscount = product.discount != null && product.discount > 0;
-    const original = formatAmdByLanguage(priceNum, language, rates);
-    if (!original) return null;
-    if (hasDiscount) {
-      const discounted = priceNum * (1 - product.discount! / 100);
-      const discountedFormatted = formatAmdByLanguage(discounted, language, rates);
-      return { original, discounted: discountedFormatted };
-    }
-    return { original, discounted: null };
-  };
-
   const ProductCard = ({ product, index }: { product: Optic; index: number }) => {
     const Icon = categoryIcons[product.category_slug] || Glasses;
-    const priceDisplay = getPriceDisplay(product);
     return (
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -181,7 +164,7 @@ const Products = () => {
           <div className="aspect-square rounded-xl bg-secondary mb-4 flex items-center justify-center overflow-hidden relative">
             {product.discount != null && product.discount > 0 && (
               <span className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-md">
-                {product.discount}% {t('discountOff')}
+                {product.discount}%
               </span>
             )}
             {product.image_url ? (
@@ -200,20 +183,8 @@ const Products = () => {
           <div>
             <p className="text-sm text-accent font-medium mb-1">{product.brand_name}</p>
             <h3 className="font-heading font-semibold text-foreground mb-1">{product.name}</h3>
-          <p className="text-sm text-muted-foreground">{product.style}</p>
+          {product.style ? <p className="text-sm text-muted-foreground">{product.style}</p> : null}
           <p className="text-xs text-muted-foreground capitalize">{product.gender || 'unisex'}</p>
-          {priceDisplay && (
-              <p className="text-sm font-medium text-foreground mt-1">
-                {priceDisplay.discounted ? (
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="line-through text-muted-foreground/70">{priceDisplay.original}</span>
-                    <span className="font-semibold">{priceDisplay.discounted}</span>
-                  </span>
-                ) : (
-                  priceDisplay.original
-                )}
-              </p>
-            )}
             {product.in_stock === false || product.in_stock === 0 ? (
               <span className="inline-block mt-2 text-xs font-medium text-destructive">{t('outOfStock')}</span>
             ) : (

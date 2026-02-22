@@ -7,8 +7,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
-import { useExchangeRates } from '@/hooks/useExchangeRates';
-import { formatAmdByLanguage } from '@/lib/currency';
 
 type OpticDetails = {
   id: number;
@@ -21,6 +19,14 @@ type OpticDetails = {
   image_urls?: string[];
   price: number | string | null;
   description: string | null;
+  description_en?: string | null;
+  description_ru?: string | null;
+  description_hy?: string | null;
+  description_translations?: {
+    en?: string | null;
+    ru?: string | null;
+    hy?: string | null;
+  };
   in_stock?: boolean | number;
   discount?: number | null;
 };
@@ -28,7 +34,6 @@ type OpticDetails = {
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
-  const { data: rates } = useExchangeRates();
 
   const { data: product, isLoading, isError } = useQuery({
     queryKey: ['optic-details', id],
@@ -88,11 +93,10 @@ export default function ProductDetails() {
     );
   }
 
-  const priceNum = product.price != null ? (typeof product.price === 'string' ? parseFloat(product.price) : product.price) : null;
-  const hasDiscount = product.discount != null && product.discount > 0;
-  const originalPrice = priceNum != null ? formatAmdByLanguage(priceNum, language, rates) : null;
-  const discountedPrice =
-    hasDiscount && priceNum != null ? formatAmdByLanguage(priceNum * (1 - product.discount! / 100), language, rates) : null;
+  const localizedDescription =
+    product.description_translations?.[language] ||
+    (language === 'en' ? product.description_en : language === 'ru' ? product.description_ru : product.description_hy) ||
+    product.description;
 
   const goPrevImage = () => {
     if (!hasMultipleImages) return;
@@ -174,24 +178,15 @@ export default function ProductDetails() {
             <div className="space-y-4">
               <p className="text-sm text-accent font-medium">{product.brand_name}</p>
               <h1 className="font-heading text-3xl sm:text-4xl font-bold text-foreground">{product.name}</h1>
-              <p className="text-muted-foreground">{product.category_name} - {product.style}</p>
+              <p className="text-muted-foreground">
+                {product.category_name}{product.style ? ` - ${product.style}` : ''}
+              </p>
               <p className="text-sm text-muted-foreground capitalize">For: {product.gender || 'unisex'}</p>
-
-              {originalPrice && (
-                <div className="text-lg font-semibold">
-                  {discountedPrice ? (
-                    <div className="flex items-center gap-3">
-                      <span className="line-through text-muted-foreground">{originalPrice}</span>
-                      <span>{discountedPrice}</span>
-                      <span className="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">
-                        -{product.discount}%
-                      </span>
-                    </div>
-                  ) : (
-                    <span>{originalPrice}</span>
-                  )}
-                </div>
-              )}
+              {product.discount != null && product.discount > 0 ? (
+                <span className="inline-flex w-fit text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">
+                  {product.discount}%
+                </span>
+              ) : null}
 
               <p className={product.in_stock === false || product.in_stock === 0 ? 'text-destructive text-sm' : 'text-green-600 text-sm'}>
                 {product.in_stock === false || product.in_stock === 0 ? t('outOfStock') : t('inStock')}
@@ -200,7 +195,7 @@ export default function ProductDetails() {
               <div className="pt-2">
                 <h2 className="font-semibold mb-2">{t('description')}</h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  {product.description || 'No description yet.'}
+                  {localizedDescription || 'No description yet.'}
                 </p>
               </div>
             </div>

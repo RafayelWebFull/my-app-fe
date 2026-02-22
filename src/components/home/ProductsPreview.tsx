@@ -15,8 +15,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { useExchangeRates } from '@/hooks/useExchangeRates';
-import { formatAmdByLanguage } from '@/lib/currency';
 
 export interface Optic {
   id: number;
@@ -39,7 +37,6 @@ const categoryIcons: Record<string, typeof Glasses> = {
 
 export function ProductsPreview() {
   const { t, language } = useLanguage();
-  const { data: rates } = useExchangeRates();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [brandFilter, setBrandFilter] = useState<string>('all');
@@ -100,20 +97,6 @@ export function ProductsPreview() {
       return res.json();
     },
   });
-
-  const getPriceDisplay = (product: Optic) => {
-    const priceNum = product.price != null ? (typeof product.price === 'string' ? parseFloat(product.price) : product.price) : null;
-    if (priceNum == null || isNaN(priceNum)) return null;
-    const hasDiscount = product.discount != null && product.discount > 0;
-    const original = formatAmdByLanguage(priceNum, language, rates);
-    if (!original) return null;
-    if (hasDiscount) {
-      const discounted = priceNum * (1 - product.discount! / 100);
-      const discountedFormatted = formatAmdByLanguage(discounted, language, rates);
-      return { original, discounted: discountedFormatted };
-    }
-    return { original, discounted: null };
-  };
 
   const { data: homeCards = [] } = useQuery({
     queryKey: ['homeCategoryCards', language],
@@ -303,7 +286,6 @@ export function ProductsPreview() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                 {optics.map((product, index) => {
                   const Icon = categoryIcons[product.category_slug] || Glasses;
-                  const priceDisplay = getPriceDisplay(product);
                   return (
                     <motion.div
                       key={product.id}
@@ -319,7 +301,7 @@ export function ProductsPreview() {
                         <div className="aspect-square rounded-xl bg-secondary mb-3 flex items-center justify-center overflow-hidden relative">
                           {product.discount != null && product.discount > 0 && (
                             <span className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-md">
-                              {product.discount}% {t('discountOff')}
+                              {product.discount}%
                             </span>
                           )}
                           {product.image_url ? (
@@ -336,19 +318,8 @@ export function ProductsPreview() {
                         <h4 className="font-heading font-semibold text-foreground truncate">
                           {product.name}
                         </h4>
+                        {product.style ? <p className="text-xs text-muted-foreground truncate">{product.style}</p> : null}
                         <p className="text-xs text-muted-foreground capitalize">{product.gender || 'unisex'}</p>
-                        {priceDisplay && (
-                          <p className="text-sm font-medium text-muted-foreground">
-                            {priceDisplay.discounted ? (
-                              <span className="flex flex-wrap items-center gap-2">
-                                <span className="line-through text-muted-foreground/70">{priceDisplay.original}</span>
-                                <span className="text-foreground font-semibold">{priceDisplay.discounted}</span>
-                              </span>
-                            ) : (
-                              priceDisplay.original
-                            )}
-                          </p>
-                        )}
                         {product.in_stock === false || product.in_stock === 0 ? (
                           <span className="text-xs text-destructive">{t('outOfStock')}</span>
                         ) : (
