@@ -125,15 +125,15 @@ export default function ProductDetails() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-3">
-              <div className="rounded-2xl overflow-hidden bg-secondary relative">
+              <div className="relative w-full rounded-2xl overflow-hidden bg-white h-[320px] sm:h-[460px] lg:h-[560px] p-4 sm:p-6 flex items-center justify-center">
                 {activeImage ? (
                   <img
                     src={imageUrl(activeImage) || activeImage || ''}
                     alt={product.name}
-                    className="w-full h-full object-cover max-h-[620px]"
+                    className="block w-full h-full object-contain object-center bg-white"
                   />
                 ) : (
-                  <div className="w-full h-[420px] flex items-center justify-center text-muted-foreground">
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                     No image
                   </div>
                 )}
