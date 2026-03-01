@@ -12,6 +12,11 @@ interface Brand {
   name: string;
 }
 
+interface OpticBrandRef {
+  brand_id: number;
+  category_slug: string;
+}
+
 const Brands = () => {
   const { t } = useLanguage();
   const brandsLabel = t('brands') === 'brands' ? 'Brands' : t('brands');
@@ -37,6 +42,33 @@ const Brands = () => {
     },
   });
 
+  const { data: optics = [], isLoading: isOpticsLoading } = useQuery({
+    queryKey: ['optics', 'brands-page'],
+    queryFn: async () => {
+      const res = await fetch(apiUrl('/api/optics'));
+      if (!res.ok) return [] as OpticBrandRef[];
+      const data = await res.json();
+      if (!Array.isArray(data)) return [] as OpticBrandRef[];
+
+      return data.filter(
+        (item): item is OpticBrandRef =>
+          Boolean(
+            item &&
+            typeof item.brand_id === 'number' &&
+            typeof item.category_slug === 'string'
+          )
+      );
+    },
+  });
+
+  const visibleBrandIds = new Set(
+    optics
+      .filter((item) => item.category_slug !== 'lenses')
+      .map((item) => item.brand_id)
+  );
+
+  const visibleBrands = brands.filter((brand) => visibleBrandIds.has(brand.id));
+
   return (
     <Layout>
       <section className="py-20 bg-secondary/50">
@@ -61,15 +93,15 @@ const Brands = () => {
 
       <section className="py-16">
         <div className="container mx-auto px-4">
-          {isLoading ? (
+          {isLoading || isOpticsLoading ? (
             <div className="flex items-center justify-center py-24">
               <Loader2 className="w-10 h-10 animate-spin text-muted-foreground" />
             </div>
-          ) : brands.length === 0 ? (
+          ) : visibleBrands.length === 0 ? (
             <p className="text-center text-muted-foreground py-12">No brands found.</p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {brands.map((brand, index) => (
+              {visibleBrands.map((brand, index) => (
                 <motion.div
                   key={brand.id}
                   initial={{ opacity: 0, y: 24 }}

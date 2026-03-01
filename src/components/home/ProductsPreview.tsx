@@ -78,7 +78,9 @@ export function ProductsPreview() {
       return Array.isArray(data) ? data : [];
     },
   });
-  const optics = opticsRaw.slice(0, 6) as Optic[];
+  const optics = (opticsRaw as Optic[])
+    .filter((product) => product.category_slug !== 'lenses')
+    .slice(0, 6);
 
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
