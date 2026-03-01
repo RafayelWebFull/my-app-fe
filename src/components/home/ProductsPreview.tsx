@@ -298,7 +298,7 @@ export function ProductsPreview() {
                         to={`/products/${product.id}`}
                         className="block group bg-card rounded-2xl p-4 shadow-card hover:shadow-elevated transition-all h-full"
                       >
-                        <div className="aspect-square rounded-xl bg-secondary mb-3 flex items-center justify-center overflow-hidden relative p-3">
+                        <div className="aspect-square rounded-xl bg-secondary/60 mb-3 flex items-center justify-center overflow-hidden relative">
                           {product.discount != null && product.discount > 0 && (
                             <span className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-md">
                               {product.discount}%
@@ -308,7 +308,7 @@ export function ProductsPreview() {
                             <img
                               src={imageUrl(product.image_url) || product.image_url || ''}
                               alt={product.name}
-                              className="w-full h-full object-contain group-hover:scale-105 transition-transform"
+                              className="w-full h-full object-contain object-center scale-110 mix-blend-multiply group-hover:scale-115 transition-transform"
                             />
                           ) : (
                             <Icon className="w-12 h-12 text-muted-foreground/40" />
