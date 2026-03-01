@@ -161,7 +161,7 @@ const Products = () => {
         className="group rounded-2xl"
       >
         <Link to={`/products/${product.id}`} className="block bg-card rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all">
-          <div className="aspect-square rounded-xl bg-secondary mb-4 flex items-center justify-center overflow-hidden relative">
+          <div className="aspect-square rounded-xl bg-secondary/60 mb-4 flex items-center justify-center overflow-hidden relative">
             {product.discount != null && product.discount > 0 && (
               <span className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-md">
                 {product.discount}%
@@ -172,7 +172,7 @@ const Products = () => {
                 src={imageUrl(product.image_url) || product.image_url || ''}
                 alt={product.name}
                 loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                className="w-full h-full object-contain object-center scale-110 mix-blend-multiply group-hover:scale-115 transition-transform"
               />
             ) : (
               <div className="w-24 h-12 border-4 border-muted-foreground/20 rounded-[80px] relative group-hover:border-accent/40 transition-colors">
