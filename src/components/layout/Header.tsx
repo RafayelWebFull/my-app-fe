@@ -13,6 +13,7 @@ export function Header() {
   const navItems = [
     { key: 'home', path: '/' },
     { key: 'products', path: '/products' },
+    { key: 'brands', path: '/brands', fallback: 'Brands' },
     { key: 'repairServiceCenter', path: '/repair-service' },
     { key: 'about', path: '/about' },
     { key: 'contact', path: '/contact' },
@@ -25,6 +26,10 @@ export function Header() {
   ];
 
   const isActive = (path: string) => location.pathname === path;
+  const getNavLabel = (key: string, fallback?: string) => {
+    const translated = t(key);
+    return translated === key ? (fallback || key) : translated;
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#e7f0ed]/90 backdrop-blur-lg border-b border-border">
@@ -50,7 +55,7 @@ export function Header() {
                   isActive(item.path) ? 'text-accent' : 'text-foreground'
                 }`}
               >
-                {t(item.key)}
+                {getNavLabel(item.key, item.fallback)}
                 {isActive(item.path) && (
                   <motion.div
                     layoutId="activeNav"
@@ -113,7 +118,7 @@ export function Header() {
                       : 'text-foreground hover:bg-secondary'
                   }`}
                 >
-                  {t(item.key)}
+                  {getNavLabel(item.key, item.fallback)}
                 </Link>
               ))}
               
