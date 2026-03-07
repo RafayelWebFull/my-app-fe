@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, RefreshCw } from 'lucide-react';
+import { Loader2, RefreshCw, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,6 +45,22 @@ interface PreviewResponse {
     en: string;
   };
   media: PreviewMedia[];
+}
+
+interface SuggestionResponse {
+  suggestion: {
+    name: string;
+    style: string;
+    gender: 'female' | 'male' | 'unisex';
+    category_id: number | null;
+    brand_id: number | null;
+    description_hy: string;
+    description_ru: string;
+    description_en: string;
+  };
+  meta?: {
+    model?: string;
+  };
 }
 
 const INSTAGRAM_API = () => apiUrl('/api/instagram');
@@ -151,6 +167,46 @@ export default function AdminInstagramImport() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  const suggestMu = useMutation({
+    mutationFn: async () => {
+      if (!preview) throw new Error('Load Instagram post first');
+      const res = await fetch(`${INSTAGRAM_API()}/suggest-fields`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_link: postLink.trim(),
+          preview,
+          name: form.name.trim(),
+          description_hy: form.description_hy,
+          description_ru: form.description_ru,
+          description_en: form.description_en,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'AI suggestion failed');
+      }
+      return res.json() as Promise<SuggestionResponse>;
+    },
+    onSuccess: (data) => {
+      const s = data.suggestion;
+      setForm((prev) => ({
+        ...prev,
+        name: s.name || prev.name,
+        style: s.style || prev.style,
+        gender: s.gender || prev.gender,
+        category_id: s.category_id ? String(s.category_id) : prev.category_id,
+        brand_id: s.brand_id ? String(s.brand_id) : prev.brand_id,
+        description_hy: s.description_hy || prev.description_hy,
+        description_ru: s.description_ru || prev.description_ru,
+        description_en: s.description_en || prev.description_en,
+      }));
+      toast.success(`AI suggestions applied${data.meta?.model ? ` (${data.meta.model})` : ''}`);
+    },
+    onError: (err: Error) => toast.error(err.message),
+  });
+
   const isPublishDisabled = useMemo(() => {
     if (!preview) return true;
     if (!form.name.trim()) return true;
@@ -213,6 +269,19 @@ export default function AdminInstagramImport() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="flex justify-start">
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2"
+              onClick={() => suggestMu.mutate()}
+              disabled={suggestMu.isPending}
+            >
+              {suggestMu.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Auto-fill with AI
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
