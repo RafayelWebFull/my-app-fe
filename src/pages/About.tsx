@@ -2,14 +2,71 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Award, HeartHandshake, Sparkles, Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { useSeo } from '@/lib/seo';
 
+const ABOUT_SEO_COPY: Record<
+  'en' | 'ru' | 'hy',
+  { title: string; text: string; bullets: string[] }
+> = {
+  en: {
+    title: 'Why customers choose our optical store in Armenia',
+    text:
+      'We work with customers in Yerevan and across Armenia, helping them choose eyeglasses, sunglasses, and contact lenses for vision and daily comfort.',
+    bullets: [
+      'Professional support for frame and lens selection.',
+      'Popular global brands and modern collections.',
+      'Service standards focused on long-term eye comfort.',
+    ],
+  },
+  ru: {
+    title: 'Почему выбирают нашу оптику в Армении',
+    text:
+      'Мы работаем с клиентами в Ереване и по всей Армении, помогая подобрать очки для зрения, солнцезащитные очки и контактные линзы для ежедневного комфорта.',
+    bullets: [
+      'Профессиональная помощь в подборе оправ и линз.',
+      'Популярные мировые бренды и современные коллекции.',
+      'Стандарты сервиса с фокусом на комфорт зрения.',
+    ],
+  },
+  hy: {
+    title: 'Ինչու են ընտրում մեր օպտիկան Հայաստանում',
+    text:
+      'Մենք սպասարկում ենք հաճախորդների Երևանում և Հայաստանի ամբողջ տարածքում՝ օգնելով ընտրել տեսողության ակնոցներ, արևային ակնոցներ և կոնտակտային լինզաներ ամենօրյա հարմարավետության համար։',
+    bullets: [
+      'Մասնագիտական աջակցություն շրջանակների և լինզաների ընտրության հարցում։',
+      'Հայտնի միջազգային բրենդներ և ժամանակակից հավաքածուներ։',
+      'Սպասարկման բարձր ստանդարտներ՝ տեսողության հարմարավետության համար։',
+    ],
+  },
+};
+
+const ABOUT_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
+  en: {
+    title: 'About Optical Store in Armenia',
+    description: 'Learn about Optic Gallery, our standards, and optical service for customers in Yerevan and Armenia.',
+    keywords: 'about optic gallery, optical store armenia, optical store yerevan, eyeglasses armenia, sunglasses armenia',
+  },
+  ru: {
+    title: 'О нашей оптике в Армении',
+    description: 'Узнайте об Optic Gallery, наших стандартах и сервисе для клиентов в Ереване и по всей Армении.',
+    keywords: 'о нас оптика, оптика армения, оптика ереван, очки армения, солнцезащитные очки армения',
+  },
+  hy: {
+    title: 'Մեր օպտիկայի մասին Հայաստանում',
+    description: 'Ծանոթացեք Optic Gallery-ին, մեր չափանիշներին և սպասարկմանը Երևանի և Հայաստանի հաճախորդների համար:',
+    keywords: 'մեր մասին օպտիկա, օպտիկա հայաստան, օպտիկա երևան, ակնոցներ հայաստան, արևային ակնոցներ հայաստան',
+  },
+};
+
 const About = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const seoCopy = ABOUT_SEO_COPY[language];
+  const meta = ABOUT_META[language];
   const { data: settings = {} } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
@@ -30,9 +87,10 @@ const About = () => {
   }, [settings.about_images]);
 
   useSeo({
-    title: 'About Our Optical Store',
-    description: 'Learn about Optic Gallery, our quality standards, and personalized optical service in Yerevan.',
+    title: meta.title,
+    description: meta.description,
     path: '/about',
+    keywords: meta.keywords,
   });
 
   const values = [
@@ -186,6 +244,40 @@ const About = () => {
                 </p>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4 text-center">
+              {seoCopy.title}
+            </h2>
+            <p className="text-lg text-muted-foreground text-center max-w-3xl mx-auto">
+              {seoCopy.text}
+            </p>
+            <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+              {seoCopy.bullets.map((bullet) => (
+                <li key={bullet} className="rounded-2xl border border-border bg-card p-5 text-muted-foreground">
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/products"
+                className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+              >
+                {language === 'ru' ? 'Смотреть продукцию' : language === 'hy' ? 'Դիտել արտադրանք' : 'Browse products'}
+              </Link>
+              <Link
+                to="/contact"
+                className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+              >
+                {language === 'ru' ? 'Контакты оптики' : language === 'hy' ? 'Օպտիկայի կոնտակտներ' : 'Optical store contact'}
+              </Link>
+            </div>
           </div>
         </div>
       </section>

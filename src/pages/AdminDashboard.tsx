@@ -14,8 +14,16 @@ import AdminTranslations from '@/components/admin/AdminTranslations';
 import AdminBanners from '@/components/admin/AdminBanners';
 import AdminHomeCategoryCards from '@/components/admin/AdminHomeCategoryCards';
 import AdminInstagramImport from '@/components/admin/AdminInstagramImport';
+import { useSeo } from '@/lib/seo';
 
 const AdminDashboard = () => {
+  useSeo({
+    title: 'Admin Dashboard',
+    description: 'Admin dashboard page.',
+    path: '/admin',
+    robots: 'noindex, nofollow',
+  });
+
   const { logout } = useAuth();
   const navigate = useNavigate();
 

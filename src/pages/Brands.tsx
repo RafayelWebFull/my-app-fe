@@ -17,15 +17,34 @@ interface OpticBrandRef {
   category_slug: string;
 }
 
+const BRANDS_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
+  en: {
+    title: 'Browse Eyewear Brands',
+    description: 'View all eyewear brands available at Optic Gallery and open each brand collection.',
+    keywords: 'optic gallery brands, eyewear brands, sunglasses brands, glasses brands',
+  },
+  ru: {
+    title: 'Бренды оптики',
+    description: 'Смотрите все бренды очков в Optic Gallery и открывайте коллекции по брендам.',
+    keywords: 'бренды оптики, бренды очков ереван, бренды солнцезащитных очков, optic gallery бренды',
+  },
+  hy: {
+    title: 'Օպտիկայի բրենդներ',
+    description: 'Դիտեք Optic Gallery-ի բոլոր բրենդները և բացեք յուրաքանչյուր բրենդի հավաքածուն:',
+    keywords: 'օպտիկայի բրենդներ, ակնոցների բրենդներ երևան, արևային ակնոցների բրենդներ, optic gallery բրենդներ',
+  },
+};
+
 const Brands = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const meta = BRANDS_META[language];
   const brandsLabel = t('brands') === 'brands' ? 'Brands' : t('brands');
 
   useSeo({
-    title: 'Browse Brands',
-    description: 'View all eyewear brands available at Optic Gallery and open each brand collection.',
+    title: meta.title,
+    description: meta.description,
     path: '/brands',
-    keywords: 'optic gallery brands, eyewear brands, sunglasses brands, glasses brands',
+    keywords: meta.keywords,
   });
 
   const { data: brands = [], isLoading } = useQuery({

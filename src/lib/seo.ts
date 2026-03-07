@@ -3,8 +3,13 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const SITE_NAME = 'Optic Gallery';
 const BASE_URL = 'https://opticgallery.am';
-const DEFAULT_OG_IMAGE = `${BASE_URL}/placeholder.svg`;
+const DEFAULT_OG_IMAGE = `${BASE_URL}/logo.png`;
 const SEO_LANGS = ['en', 'ru', 'hy'] as const;
+const OG_LOCALE_BY_LANG: Record<(typeof SEO_LANGS)[number], string> = {
+  en: 'en_US',
+  ru: 'ru_RU',
+  hy: 'hy_AM',
+};
 
 type SeoOptions = {
   title: string;
@@ -64,7 +69,7 @@ function upsertAlternateLinks(path: string) {
 
   const xDefault = document.createElement('link');
   const xDefaultHref = new URL(path, BASE_URL);
-  xDefaultHref.searchParams.set('lang', 'en');
+  xDefaultHref.searchParams.set('lang', 'hy');
   xDefault.setAttribute('rel', 'alternate');
   xDefault.setAttribute('hreflang', 'x-default');
   xDefault.setAttribute('href', xDefaultHref.toString());
@@ -87,12 +92,13 @@ export function useSeo({ title, description, path = '/', keywords, robots, image
     upsertMetaByName('description', description);
     upsertMetaByName('title', fullTitle);
     if (keywords) upsertMetaByName('keywords', keywords);
-    if (robots) upsertMetaByName('robots', robots);
+    upsertMetaByName('robots', robots || 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1');
 
     upsertCanonical(canonical);
     upsertAlternateLinks(path);
 
     upsertMetaByProperty('og:type', type);
+    upsertMetaByProperty('og:locale', OG_LOCALE_BY_LANG[language]);
     upsertMetaByProperty('og:url', canonical);
     upsertMetaByProperty('og:title', fullTitle);
     upsertMetaByProperty('og:description', description);

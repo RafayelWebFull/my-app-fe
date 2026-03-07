@@ -5,8 +5,24 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSeo } from '@/lib/seo';
 import { apiUrl, imageUrl } from '@/lib/api';
 
+const REPAIR_META: Record<'en' | 'ru' | 'hy', { title: string; description: string }> = {
+  en: {
+    title: 'Eyewear Repair Service in Yerevan',
+    description: 'Request eyewear repair service at Optic Gallery in Yerevan, Armenia.',
+  },
+  ru: {
+    title: 'Ремонт очков в Ереване',
+    description: 'Оформите заявку на ремонт очков в Optic Gallery в Ереване, Армения.',
+  },
+  hy: {
+    title: 'Ակնոցների վերանորոգում Երևանում',
+    description: 'Պատվիրեք ակնոցների վերանորոգում Optic Gallery-ում՝ Երևան, Հայաստան:',
+  },
+};
+
 export default function RepairService() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const meta = REPAIR_META[language];
   const { data: settings = {} } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
@@ -43,8 +59,8 @@ export default function RepairService() {
   }, [settings]);
 
   useSeo({
-    title: 'Repair Service Center',
-    description: 'Request eyewear repair service at Optic Gallery.',
+    title: meta.title,
+    description: meta.description,
     path: '/repair-service',
   });
 

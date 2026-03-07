@@ -34,6 +34,14 @@ type OpticDetails = {
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
+  const baseUrl = 'https://opticgallery.am';
+  const fallbackTitle = language === 'ru' ? 'Товар' : language === 'hy' ? 'Ապրանք' : 'Product';
+  const fallbackDescription =
+    language === 'ru'
+      ? 'Детали товара в Optic Gallery.'
+      : language === 'hy'
+        ? 'Ապրանքի մանրամասները Optic Gallery-ում։'
+        : 'Product details at Optic Gallery.';
 
   const { data: product, isLoading, isError } = useQuery({
     queryKey: ['optic-details', id],
@@ -47,8 +55,11 @@ export default function ProductDetails() {
   const [activeImage, setActiveImage] = useState<string | null>(null);
 
   useSeo({
-    title: product?.name || 'Product',
-    description: product?.description || 'Product details at Optic Gallery.',
+    title: product?.name || fallbackTitle,
+    description:
+      product?.description_translations?.[language] ||
+      product?.description ||
+      fallbackDescription,
     path: `/products/${id || ''}`,
   });
 
@@ -69,6 +80,65 @@ export default function ProductDetails() {
       return allImages[0];
     });
   }, [id, imagesKey]);
+  const localizedDescription = product
+    ? product.description_translations?.[language] ||
+      (language === 'en' ? product.description_en : language === 'ru' ? product.description_ru : product.description_hy) ||
+      product.description ||
+      fallbackDescription
+    : null;
+
+  useEffect(() => {
+    const scriptId = 'product-json-ld';
+    const oldScript = document.getElementById(scriptId);
+    if (oldScript) oldScript.remove();
+
+    if (!product) return;
+
+    const productSchema: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      description: localizedDescription || 'Product details at Optic Gallery.',
+      brand: {
+        '@type': 'Brand',
+        name: product.brand_name,
+      },
+      category: product.category_name,
+      image: allImages.map((img) => imageUrl(img) || img).filter(Boolean),
+      url: `${baseUrl}/products/${product.id}`,
+    };
+
+    const numericPrice =
+      typeof product.price === 'number'
+        ? product.price
+        : typeof product.price === 'string'
+          ? Number(product.price)
+          : NaN;
+
+    if (Number.isFinite(numericPrice) && numericPrice > 0) {
+      productSchema.offers = {
+        '@type': 'Offer',
+        priceCurrency: 'AMD',
+        price: numericPrice,
+        availability:
+          product.in_stock === false || product.in_stock === 0
+            ? 'https://schema.org/OutOfStock'
+            : 'https://schema.org/InStock',
+        url: `${baseUrl}/products/${product.id}`,
+      };
+    }
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(productSchema);
+    document.head.appendChild(script);
+
+    return () => {
+      const mountedScript = document.getElementById(scriptId);
+      if (mountedScript) mountedScript.remove();
+    };
+  }, [allImages, baseUrl, localizedDescription, product]);
 
   if (isLoading) {
     return (
@@ -92,11 +162,6 @@ export default function ProductDetails() {
       </Layout>
     );
   }
-
-  const localizedDescription =
-    product.description_translations?.[language] ||
-    (language === 'en' ? product.description_en : language === 'ru' ? product.description_ru : product.description_hy) ||
-    product.description;
 
   const goPrevImage = () => {
     if (!hasMultipleImages) return;

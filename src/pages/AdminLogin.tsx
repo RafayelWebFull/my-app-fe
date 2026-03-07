@@ -6,8 +6,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Eye, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSeo } from '@/lib/seo';
 
 const AdminLogin = () => {
+  useSeo({
+    title: 'Admin Login',
+    description: 'Admin login page.',
+    path: '/admin/login',
+    robots: 'noindex, nofollow',
+  });
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

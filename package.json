@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "npx vite build",
+    "seo:sitemap": "node scripts/generate-sitemap.mjs",
+    "build:seo": "npm run seo:sitemap && npm run build",
     "install-and-build": "npm install && npm run build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

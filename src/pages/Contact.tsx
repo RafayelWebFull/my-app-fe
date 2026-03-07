@@ -1,5 +1,7 @@
+import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { MapPin, Phone, Clock, Instagram } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,13 +9,53 @@ import { apiUrl } from '@/lib/api';
 import { parseMultiValue } from '@/lib/contactInfo';
 import { useSeo } from '@/lib/seo';
 
+const CONTACT_SEO_COPY: Record<'en' | 'ru' | 'hy', { title: string; text: string }> = {
+  en: {
+    title: 'Visit our optical store in Yerevan, Armenia',
+    text:
+      'If you are searching for an optical store in Armenia, visit Optic Gallery in Yerevan. Contact us for eyeglasses, sunglasses, and contact lens consultation.',
+  },
+  ru: {
+    title: 'Посетите нашу оптику в Ереване, Армения',
+    text:
+      'Если вы ищете оптику в Армении, посетите Optic Gallery в Ереване. Свяжитесь с нами для подбора очков, солнцезащитных очков и контактных линз.',
+  },
+  hy: {
+    title: 'Այցելեք մեր օպտիկան Երևանում, Հայաստանում',
+    text:
+      'Եթե փնտրում եք օպտիկա Հայաստանում, այցելեք Optic Gallery-ը Երևանում։ Կապվեք մեզ հետ տեսողության ակնոցների, արևային ակնոցների և կոնտակտային լինզաների խորհրդատվության համար։',
+  },
+};
+
+const CONTACT_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
+  en: {
+    title: 'Contact Optical Store in Armenia',
+    description: 'Visit Optic Gallery in Yerevan, Armenia. Get phone numbers, address, working hours, and map directions.',
+    keywords: 'optic contact yerevan, optical store armenia address, optical store yerevan phone, optica armenia location',
+  },
+  ru: {
+    title: 'Контакты оптики в Армении',
+    description: 'Посетите Optic Gallery в Ереване, Армения. Адрес, телефоны, часы работы и карта.',
+    keywords: 'контакты оптики ереван, адрес оптики армения, телефон оптики ереван, оптика локация',
+  },
+  hy: {
+    title: 'Օպտիկայի կոնտակտներ Հայաստանում',
+    description: 'Այցելեք Optic Gallery-ը Երևանում, Հայաստանում։ Հասցե, հեռախոս, աշխատանքային ժամեր և քարտեզ:',
+    keywords: 'օպտիկայի կոնտակտներ երևան, օպտիկայի հասցե հայաստան, օպտիկայի հեռախոս երևան, օպտիկայի տեղակայություն',
+  },
+};
+
 const Contact = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const seoCopy = CONTACT_SEO_COPY[language];
+  const meta = CONTACT_META[language];
+  const baseUrl = 'https://opticgallery.am';
 
   useSeo({
-    title: 'Contact & Location',
-    description: 'Find Optic Gallery in Yerevan, get our phone number, working hours, and directions.',
+    title: meta.title,
+    description: meta.description,
     path: '/contact',
+    keywords: meta.keywords,
   });
 
   const { data: settings = {} } = useQuery({
@@ -31,6 +73,43 @@ const Contact = () => {
   const addresses = parseMultiValue(t('addressValue'));
   const phones = parseMultiValue(phoneRaw);
   const workingHours = parseMultiValue(t('workingHoursValue'));
+  const primaryAddress = (addresses[0] || t('addressValue') || '').trim();
+  const primaryPhone = (phones[0] || phoneRaw || '').trim();
+  const openingHours = (workingHours[0] || '').trim();
+
+  useEffect(() => {
+    const scriptId = 'contact-localbusiness-json-ld';
+    const oldScript = document.getElementById(scriptId);
+    if (oldScript) oldScript.remove();
+
+    const schema: Record<string, unknown> = {
+      '@context': 'https://schema.org',
+      '@type': 'OpticalStore',
+      name: 'Optic Gallery',
+      url: `${baseUrl}/contact`,
+      image: `${baseUrl}/logo.png`,
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: primaryAddress || undefined,
+        addressLocality: 'Yerevan',
+        addressCountry: 'AM',
+      },
+      telephone: primaryPhone || undefined,
+      openingHours: openingHours || undefined,
+      sameAs: [`https://instagram.com/${instagram.replace('@', '')}`],
+    };
+
+    const script = document.createElement('script');
+    script.id = scriptId;
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+
+    return () => {
+      const mountedScript = document.getElementById(scriptId);
+      if (mountedScript) mountedScript.remove();
+    };
+  }, [baseUrl, instagram, openingHours, primaryAddress, primaryPhone]);
 
   const contactInfo = [
     {
@@ -193,6 +272,33 @@ const Contact = () => {
               Instagram
             </a>
           </motion.div>
+        </div>
+      </section>
+
+      <section className="py-16 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              {seoCopy.title}
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              {seoCopy.text}
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/products"
+                className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+              >
+                {language === 'ru' ? 'Каталог оптики' : language === 'hy' ? 'Օպտիկայի կատալոգ' : 'Optical catalog'}
+              </Link>
+              <Link
+                to="/about"
+                className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+              >
+                {language === 'ru' ? 'О нашей оптике' : language === 'hy' ? 'Մեր օպտիկայի մասին' : 'About our optical store'}
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </Layout>

@@ -41,15 +41,34 @@ const categoryIcons: Record<string, typeof Glasses> = {
   lenses: Eye,
 };
 
-const Products = () => {
-  useSeo({
-    title: 'Eyeglasses, Sunglasses & Lenses',
-    description: 'Browse eyeglasses, sunglasses, and contact lenses from top brands at Optic Gallery.',
-    path: '/products',
+const PRODUCTS_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
+  en: {
+    title: 'Eyeglasses, Sunglasses and Contact Lenses',
+    description: 'Browse eyeglasses, sunglasses, and contact lenses from top brands at Optic Gallery in Armenia.',
     keywords: 'buy glasses yerevan, sunglasses armenia, contact lenses armenia, optic gallery products',
-  });
+  },
+  ru: {
+    title: 'Очки, солнцезащитные очки и линзы',
+    description: 'Каталог очков, солнцезащитных очков и контактных линз Optic Gallery в Армении.',
+    keywords: 'купить очки ереван, солнцезащитные очки армения, контактные линзы армения, оптика каталог',
+  },
+  hy: {
+    title: 'Ակնոցներ, արևային ակնոցներ և լինզաներ',
+    description: 'Դիտեք տեսողության ակնոցների, արևային ակնոցների և կոնտակտային լինզաների տեսականին Հայաստանում:',
+    keywords: 'գնել ակնոց երևան, արևային ակնոցներ հայաստան, կոնտակտային լինզաներ հայաստան, օպտիկայի կատալոգ',
+  },
+};
 
-  const { t } = useLanguage();
+const Products = () => {
+  const { t, language } = useLanguage();
+  const meta = PRODUCTS_META[language];
+
+  useSeo({
+    title: meta.title,
+    description: meta.description,
+    path: '/products',
+    keywords: meta.keywords,
+  });
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [categoryFilter, setCategoryFilter] = useState<string>(
