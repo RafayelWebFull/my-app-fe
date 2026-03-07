@@ -20,7 +20,7 @@ const COPY_BY_LANG: Record<'en' | 'ru' | 'hy', Copy> = {
       'Service for customers from Yerevan and all regions of Armenia.',
     ],
     links: [
-      { label: 'Browse eyewear collection', to: '/products' },
+      { label: 'Optical Store Yerevan Catalog', to: '/products' },
       { label: 'View brands', to: '/brands' },
       { label: 'Contact optical store', to: '/contact' },
     ],
@@ -35,7 +35,7 @@ const COPY_BY_LANG: Record<'en' | 'ru' | 'hy', Copy> = {
       'Обслуживание клиентов из Еревана и всех регионов Армении.',
     ],
     links: [
-      { label: 'Смотреть коллекцию', to: '/products' },
+      { label: 'Оптика в Ереване: каталог', to: '/products' },
       { label: 'Смотреть бренды', to: '/brands' },
       { label: 'Связаться с оптикой', to: '/contact' },
     ],
@@ -50,7 +50,7 @@ const COPY_BY_LANG: Record<'en' | 'ru' | 'hy', Copy> = {
       'Սպասարկում Երևանի և Հայաստանի բոլոր մարզերից հաճախորդների համար։',
     ],
     links: [
-      { label: 'Դիտել տեսականի', to: '/products' },
+      { label: 'Օպտիկա Երևանում՝ կատալոգ', to: '/products' },
       { label: 'Դիտել բրենդներ', to: '/brands' },
       { label: 'Կապ օպտիկայի հետ', to: '/contact' },
     ],

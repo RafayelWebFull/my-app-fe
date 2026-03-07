@@ -43,25 +43,63 @@ const categoryIcons: Record<string, typeof Glasses> = {
 
 const PRODUCTS_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
   en: {
-    title: 'Eyeglasses, Sunglasses and Contact Lenses',
-    description: 'Browse eyeglasses, sunglasses, and contact lenses from top brands at Optic Gallery in Armenia.',
-    keywords: 'buy glasses yerevan, sunglasses armenia, contact lenses armenia, optic gallery products',
+    title: 'Optical Store in Yerevan: Eyeglasses and Sunglasses',
+    description:
+      'Optic Gallery is an optical store in Yerevan, Armenia. Browse eyeglasses, sunglasses, and contact lenses from trusted brands.',
+    keywords:
+      'optic yerevan, optical store yerevan, eyeglasses yerevan, sunglasses yerevan, contact lenses armenia',
   },
   ru: {
-    title: 'Очки, солнцезащитные очки и линзы',
-    description: 'Каталог очков, солнцезащитных очков и контактных линз Optic Gallery в Армении.',
-    keywords: 'купить очки ереван, солнцезащитные очки армения, контактные линзы армения, оптика каталог',
+    title: 'Оптика в Ереване: очки и линзы',
+    description:
+      'Optic Gallery - оптика в Ереване, Армения. Каталог очков для зрения, солнцезащитных очков и контактных линз.',
+    keywords: 'оптика ереван, оптика в ереване, очки ереван, солнцезащитные очки ереван, линзы армения',
   },
   hy: {
-    title: 'Ակնոցներ, արևային ակնոցներ և լինզաներ',
-    description: 'Դիտեք տեսողության ակնոցների, արևային ակնոցների և կոնտակտային լինզաների տեսականին Հայաստանում:',
-    keywords: 'գնել ակնոց երևան, արևային ակնոցներ հայաստան, կոնտակտային լինզաներ հայաստան, օպտիկայի կատալոգ',
+    title: 'Օպտիկա Երևանում․ ակնոցներ և լինզաներ',
+    description:
+      'Optic Gallery-ը օպտիկա է Երևանում, Հայաստանում։ Դիտեք տեսողության ակնոցների, արևային ակնոցների և լինզաների տեսականին։',
+    keywords: 'օպտիկա երևան, օպտիկա երևանում, ակնոցներ երևան, արևային ակնոցներ երևան, լինզաներ հայաստան',
+  },
+};
+
+const PRODUCTS_SEO_COPY: Record<'en' | 'ru' | 'hy', { title: string; text: string; bullets: string[] }> = {
+  en: {
+    title: 'Optical Store Yerevan: Find the right eyewear',
+    text:
+      'If you are searching for an optical store in Yerevan, browse our eyewear catalog and compare frames, sunglasses, and contact lenses in one place.',
+    bullets: [
+      'Eyeglasses and sunglasses for women, men, and unisex.',
+      'Popular international brands available in Armenia.',
+      'Quick contact with our optical store team in Yerevan.',
+    ],
+  },
+  ru: {
+    title: 'Оптика в Ереване: подбор очков и линз',
+    text:
+      'Если вы ищете оптику в Ереване, изучите наш каталог и выберите оправы, солнцезащитные очки и контактные линзы в одном месте.',
+    bullets: [
+      'Очки и солнцезащитные модели для женщин, мужчин и унисекс.',
+      'Популярные международные бренды в наличии в Армении.',
+      'Быстрый контакт с нашей оптикой в Ереване.',
+    ],
+  },
+  hy: {
+    title: 'Օպտիկա Երևանում․ ընտրեք Ձեր ակնոցը',
+    text:
+      'Եթե փնտրում եք օպտիկա Երևանում, դիտեք մեր կատալոգը և ընտրեք տեսողության ակնոցներ, արևային ակնոցներ և լինզաներ մեկ վայրում։',
+    bullets: [
+      'Ակնոցներ կանանց, տղամարդկանց և unisex տարբերակներով։',
+      'Հայաստանում առկա միջազգային հայտնի բրենդներ։',
+      'Արագ կապ մեր օպտիկայի թիմի հետ Երևանում։',
+    ],
   },
 };
 
 const Products = () => {
   const { t, language } = useLanguage();
   const meta = PRODUCTS_META[language];
+  const seoCopy = PRODUCTS_SEO_COPY[language];
 
   useSeo({
     title: meta.title,
@@ -426,6 +464,40 @@ const Products = () => {
           <CategorySection icon={Eye} title={t('lenses')} products={opticsByCategory.lenses} />
         </>
       )}
+
+      <section className="py-16 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground text-center mb-4">
+              {seoCopy.title}
+            </h2>
+            <p className="text-lg text-muted-foreground text-center max-w-3xl mx-auto">
+              {seoCopy.text}
+            </p>
+            <ul className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+              {seoCopy.bullets.map((bullet) => (
+                <li key={bullet} className="rounded-2xl border border-border bg-card p-5 text-muted-foreground">
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/contact"
+                className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+              >
+                {language === 'ru' ? 'Оптика в Ереване: контакты' : language === 'hy' ? 'Օպտիկա Երևանում՝ կոնտակտներ' : 'Optical store Yerevan contact'}
+              </Link>
+              <Link
+                to="/about"
+                className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+              >
+                {language === 'ru' ? 'О нашей оптике' : language === 'hy' ? 'Մեր օպտիկայի մասին' : 'About our optical store'}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 };
