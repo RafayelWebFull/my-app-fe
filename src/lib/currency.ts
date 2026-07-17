@@ -55,6 +55,7 @@ export function formatAmdByLanguage(
   if (numeric == null) return null;
   var currency = getCurrencyByLanguage(language);
   var converted = convertFromAmd(numeric, currency, rates);
-  if (converted == null) return null;
+  // If rates are not loaded yet (EN/RU), still show AMD so the price is visible.
+  if (converted == null) return formatCurrency(numeric, 'AMD');
   return formatCurrency(converted, currency);
 }

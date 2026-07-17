@@ -7,6 +7,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { formatAmdByLanguage } from '@/lib/currency';
 
 type OpticDetails = {
   id: number;
@@ -34,6 +36,7 @@ type OpticDetails = {
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
+  const { data: rates } = useExchangeRates();
   const baseUrl = 'https://opticgallery.am';
   const fallbackTitle = language === 'ru' ? 'Товар' : language === 'hy' ? 'Ապրանք' : 'Product';
   const fallbackDescription =
@@ -177,6 +180,20 @@ export default function ProductDetails() {
     setActiveImage(allImages[next]);
   };
 
+  const priceNum =
+    product.price != null
+      ? typeof product.price === 'string'
+        ? parseFloat(product.price)
+        : product.price
+      : null;
+  const hasDiscount = product.discount != null && product.discount > 0;
+  const originalPrice =
+    priceNum != null && !isNaN(priceNum) ? formatAmdByLanguage(priceNum, language, rates) : null;
+  const discountedPrice =
+    hasDiscount && priceNum != null && !isNaN(priceNum)
+      ? formatAmdByLanguage(priceNum * (1 - product.discount! / 100), language, rates)
+      : null;
+
   return (
     <Layout>
       <section className="py-14">
@@ -247,11 +264,22 @@ export default function ProductDetails() {
                 {product.category_name}{product.style ? ` - ${product.style}` : ''}
               </p>
               <p className="text-sm text-muted-foreground capitalize">For: {product.gender || 'unisex'}</p>
-              {product.discount != null && product.discount > 0 ? (
-                <span className="inline-flex w-fit text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">
-                  {product.discount}%
-                </span>
-              ) : null}
+
+              {originalPrice && (
+                <div className="text-lg font-semibold">
+                  {discountedPrice ? (
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="line-through text-muted-foreground">{originalPrice}</span>
+                      <span>{discountedPrice}</span>
+                      <span className="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">
+                        -{product.discount}%
+                      </span>
+                    </div>
+                  ) : (
+                    <span>{originalPrice}</span>
+                  )}
+                </div>
+              )}
 
               <p className={product.in_stock === false || product.in_stock === 0 ? 'text-destructive text-sm' : 'text-green-600 text-sm'}>
                 {product.in_stock === false || product.in_stock === 0 ? t('outOfStock') : t('inStock')}
