@@ -40,6 +40,8 @@ import {
 import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUrl, imageUrl } from '@/lib/api';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { convertFromAmd, formatCurrency, toAmdNumber } from '@/lib/currency';
 
 interface Category {
   id: number;
@@ -88,6 +90,7 @@ const emptyForm = {
   gender: 'unisex',
   category_id: '',
   brand_id: '',
+  price: '',
   description_en: '',
   description_ru: '',
   description_hy: '',
@@ -107,6 +110,7 @@ export default function AdminOptics() {
   const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]);
   const [primaryImageSelection, setPrimaryImageSelection] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const { data: rates } = useExchangeRates();
 
   const { data: optics = [], isLoading } = useQuery({
     queryKey: ['optics', categoryFilter],
@@ -244,6 +248,7 @@ export default function AdminOptics() {
     fd.append('gender', form.gender);
     fd.append('category_id', form.category_id);
     fd.append('brand_id', form.brand_id);
+    fd.append('price', form.price || '');
     fd.append('description_en', form.description_en || '');
     fd.append('description_ru', form.description_ru || '');
     fd.append('description_hy', form.description_hy || '');
@@ -285,6 +290,7 @@ export default function AdminOptics() {
       gender: o.gender || 'unisex',
       category_id: String(o.category_id),
       brand_id: String(o.brand_id),
+      price: o.price != null ? String(o.price) : '',
       description_en: o.description_translations?.en || o.description_en || o.description || '',
       description_ru: o.description_translations?.ru || o.description_ru || '',
       description_hy: o.description_translations?.hy || o.description_hy || '',
@@ -302,6 +308,7 @@ export default function AdminOptics() {
   };
 
   const isPending = createMu.isPending || updateMu.isPending;
+  const formPriceAmd = toAmdNumber(form.price);
 
   return (
     <div className="space-y-4">
@@ -364,6 +371,13 @@ export default function AdminOptics() {
                       </p>
                     </div>
                   </div>
+                  <div className="text-sm">
+                    {o.price != null ? (
+                      <span>
+                        {formatCurrency(Number(o.price), 'AMD')} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'USD', rates) || 0, 'USD') : '...'} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'RUB', rates) || 0, 'RUB') : '...'}
+                      </span>
+                    ) : '—'}
+                  </div>
                   <div className="flex items-center justify-between">
                     <span className={o.in_stock ? 'text-green-600 text-sm' : 'text-destructive text-sm'}>
                       {o.in_stock ? 'In Stock' : 'Out of Stock'}
@@ -398,6 +412,7 @@ export default function AdminOptics() {
                     <TableHead>Brand</TableHead>
                     <TableHead>Style</TableHead>
                     <TableHead>For</TableHead>
+                    <TableHead>Price (AMD / USD / RUB)</TableHead>
                     <TableHead>Discount</TableHead>
                     <TableHead>Stock</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -426,6 +441,13 @@ export default function AdminOptics() {
                       <TableCell>{o.brand_name}</TableCell>
                       <TableCell>{o.style || '—'}</TableCell>
                       <TableCell className="capitalize">{o.gender || 'unisex'}</TableCell>
+                      <TableCell>
+                        {o.price != null ? (
+                          <span className="text-sm">
+                            {formatCurrency(Number(o.price), 'AMD')} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'USD', rates) || 0, 'USD') : '...'} / {rates ? formatCurrency(convertFromAmd(Number(o.price), 'RUB', rates) || 0, 'RUB') : '...'}
+                          </span>
+                        ) : '—'}
+                      </TableCell>
                       <TableCell>
                         {o.discount != null ? (
                           <span className="text-amber-600 font-medium">{o.discount}%</span>
@@ -646,16 +668,34 @@ export default function AdminOptics() {
               </p>
             </div>
 
-            <div className="space-y-2">
-              <Label>Discount % (optional)</Label>
-              <Input
-                type="number"
-                min="0"
-                max="100"
-                value={form.discount}
-                onChange={(e) => setForm((f) => ({ ...f, discount: e.target.value }))}
-                placeholder="50"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Price (AMD ֏)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.price}
+                  onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                  placeholder="75000"
+                />
+                {formPriceAmd != null && (
+                  <p className="text-xs text-muted-foreground">
+                    Live conversion: {rates ? formatCurrency(convertFromAmd(formPriceAmd, 'USD', rates) || 0, 'USD') : '...'} / {rates ? formatCurrency(convertFromAmd(formPriceAmd, 'RUB', rates) || 0, 'RUB') : '...'}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label>Discount % (optional)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={form.discount}
+                  onChange={(e) => setForm((f) => ({ ...f, discount: e.target.value }))}
+                  placeholder="50"
+                />
+              </div>
             </div>
 
             <div className="space-y-3">

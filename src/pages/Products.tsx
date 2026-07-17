@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useSeo } from '@/lib/seo';
+import { useExchangeRates } from '@/hooks/useExchangeRates';
+import { formatAmdByLanguage } from '@/lib/currency';
 
 export interface Optic {
   id: number;
@@ -98,6 +100,7 @@ const PRODUCTS_SEO_COPY: Record<'en' | 'ru' | 'hy', { title: string; text: strin
 
 const Products = () => {
   const { t, language } = useLanguage();
+  const { data: rates } = useExchangeRates();
   const meta = PRODUCTS_META[language];
   const seoCopy = PRODUCTS_SEO_COPY[language];
 
@@ -207,8 +210,28 @@ const Products = () => {
         lenses: optics.filter((o) => o.category_slug === 'lenses'),
       };
 
+  const getPriceDisplay = (product: Optic) => {
+    const priceNum =
+      product.price != null
+        ? typeof product.price === 'string'
+          ? parseFloat(product.price)
+          : product.price
+        : null;
+    if (priceNum == null || isNaN(priceNum)) return null;
+    const hasDiscount = product.discount != null && product.discount > 0;
+    const original = formatAmdByLanguage(priceNum, language, rates);
+    if (!original) return null;
+    if (hasDiscount) {
+      const discounted = priceNum * (1 - product.discount! / 100);
+      const discountedFormatted = formatAmdByLanguage(discounted, language, rates);
+      return { original, discounted: discountedFormatted };
+    }
+    return { original, discounted: null };
+  };
+
   const ProductCard = ({ product, index }: { product: Optic; index: number }) => {
     const Icon = categoryIcons[product.category_slug] || Glasses;
+    const priceDisplay = getPriceDisplay(product);
     return (
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -242,6 +265,18 @@ const Products = () => {
             <h3 className="font-heading font-semibold text-foreground mb-1">{product.name}</h3>
           {product.style ? <p className="text-sm text-muted-foreground">{product.style}</p> : null}
           <p className="text-xs text-muted-foreground capitalize">{product.gender || 'unisex'}</p>
+          {priceDisplay && (
+            <p className="text-sm font-medium text-foreground mt-1">
+              {priceDisplay.discounted ? (
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="line-through text-muted-foreground/70">{priceDisplay.original}</span>
+                  <span className="font-semibold">{priceDisplay.discounted}</span>
+                </span>
+              ) : (
+                priceDisplay.original
+              )}
+            </p>
+          )}
             {product.in_stock === false || product.in_stock === 0 ? (
               <span className="inline-block mt-2 text-xs font-medium text-destructive">{t('outOfStock')}</span>
             ) : (
