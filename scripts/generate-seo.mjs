@@ -129,7 +129,7 @@ const template = await readFile(path.join(DIST, 'index.html'), 'utf8');
 const [products, siteSettings] = await Promise.all([fetchProducts(), fetchSiteSettings()]);
 const sitemap = [];
 
-const mobileHero = optimizedUpload(siteSettings.hero_mobile_image || siteSettings.hero_image, 900);
+const mobileHero = optimizedUpload(siteSettings.hero_mobile_image || siteSettings.hero_image, 768);
 const desktopHero = optimizedUpload(siteSettings.hero_image || siteSettings.hero_mobile_image, 1920);
 const heroPreloads = [
   mobileHero && `<link rel="preload" as="image" href="${htmlEscape(mobileHero)}" media="(max-width: 767px)" fetchpriority="high" />`,

@@ -52,7 +52,7 @@ export function Hero() {
         <div className="absolute inset-0">
           <picture className="block w-full h-full">
             {heroMobileImage && (
-              <source media="(max-width: 767px)" srcSet={optimizedImageUrl(heroMobileImage, 900) || heroMobileImage} />
+              <source media="(max-width: 767px)" srcSet={optimizedImageUrl(heroMobileImage, 768) || heroMobileImage} />
             )}
             <img
               src={optimizedImageUrl(heroImage || heroMobileImage, 1920) || heroImage || heroMobileImage}
