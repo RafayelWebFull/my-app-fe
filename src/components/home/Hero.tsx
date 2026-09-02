@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
 import { ArrowRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -74,10 +73,7 @@ export function Hero() {
 
       <div className="container mx-auto px-4 relative z-10 min-h-[90vh] pt-24 pb-8">
         <div className="max-w-3xl min-h-[calc(90vh-8rem)] flex flex-col">
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.1 }}
+          <h1
             className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-tight mb-6"
             style={titleColor ? { color: titleColor } : undefined}
           >
@@ -86,12 +82,9 @@ export function Hero() {
               <span className="block">{heroTitleLine2}</span>
             </span>
             <span className="hidden sm:inline">{heroTitle}</span>
-          </motion.h1>
+          </h1>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+          <div
             className="flex flex-col sm:flex-row gap-4 mt-auto pt-6"
           >
             <Button asChild size="lg" className="gradient-hero border-0 text-lg px-8 py-6 shadow-elevated hover:opacity-90 transition-opacity">
@@ -106,21 +99,18 @@ export function Hero() {
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
             </Button>
-          </motion.div>
+          </div>
         </div>
       </div>
 
       {!heroImage && !heroMobileImage && (
         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full hidden xl:block">
           <div className="relative w-full h-full">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.4 }}
+            <div
               className="absolute inset-0 flex items-center justify-center"
             >
               <div className="w-[500px] h-[500px] rounded-full bg-gradient-to-br from-accent/20 to-primary/20 blur-2xl" />
-            </motion.div>
+            </div>
           </div>
         </div>
       )}

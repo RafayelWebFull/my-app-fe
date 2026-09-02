@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -64,24 +63,20 @@ export function LocalSeoContent() {
   return (
     <section className="py-16 border-y border-border bg-background">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+        <div
           className="max-w-4xl mx-auto"
         >
           <h2 className="font-heading text-3xl sm:text-4xl font-bold text-foreground mb-4 text-center">
             {copy.title}
           </h2>
-          <p className="text-muted-foreground text-lg leading-relaxed text-center mb-8">
+          <p className="text-foreground/80 text-lg leading-relaxed text-center mb-8">
             {copy.intro}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {copy.points.map((point, index) => (
               <article
                 key={`${index}-${point}`}
-                className="rounded-2xl border border-border bg-card px-5 py-4 text-muted-foreground"
+                className="rounded-2xl border border-border bg-card px-5 py-4 text-foreground/80"
               >
                 {point}
               </article>
@@ -98,7 +93,7 @@ export function LocalSeoContent() {
               </Link>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -58,8 +57,7 @@ export function Header() {
               >
                 {getNavLabel(item.key, item.fallback)}
                 {isActive(item.path) && (
-                  <motion.div
-                    layoutId="activeNav"
+                  <div
                     className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
                   />
                 )}
@@ -104,12 +102,8 @@ export function Header() {
       </div>
 
       {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+      {isMenuOpen && (
+          <div
             className="md:hidden bg-card border-b border-border"
           >
             <nav id="mobile-navigation" className="container mx-auto px-4 py-4 flex flex-col gap-2">
@@ -146,9 +140,8 @@ export function Header() {
                 ))}
               </div>
             </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
     </header>
   );
 }

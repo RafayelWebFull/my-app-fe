@@ -1,6 +1,4 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -16,17 +14,31 @@ const RepairService = lazy(() => import("./pages/RepairService"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const GlobalToasters = lazy(() => import("./components/GlobalToasters"));
 
 const queryClient = new QueryClient();
 
+function DeferredToasters() {
+  const [enabled, setEnabled] = useState(false);
+  useEffect(() => {
+    if (enabled) return;
+    const enable = () => setEnabled(true);
+    window.addEventListener('pointerdown', enable, { once: true, passive: true });
+    window.addEventListener('keydown', enable, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', enable);
+      window.removeEventListener('keydown', enable);
+    };
+  }, [enabled]);
+  return enabled ? <Suspense fallback={null}><GlobalToasters /></Suspense> : null;
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
       <LanguageProvider>
         <AuthProvider>
           <CartProvider>
-          <Toaster />
-          <Sonner />
+          <DeferredToasters />
           <BrowserRouter>
             <Suspense fallback={<div className="min-h-screen bg-background" aria-label="Loading" />}>
               <Routes>
@@ -47,9 +59,7 @@ const App = () => (
           </CartProvider>
         </AuthProvider>
       </LanguageProvider>
-    </TooltipProvider>
   </QueryClientProvider>
 );
 
 export default App;
-import { lazy, Suspense } from "react";
