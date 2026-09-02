@@ -8,7 +8,8 @@ const sitemap = await readFile(`${dist}/sitemap.xml`, 'utf8');
 const entries = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1].replace(/&amp;/g, '&'));
 assert(entries.length > 18, `sitemap has only ${entries.length} entries`);
 assert(entries.some((url) => url.includes('/products/') && url.endsWith('?lang=en')), 'sitemap lacks English product URLs');
-assert(entries.some((url) => url.endsWith('/?lang=hy')), 'sitemap lacks Armenian homepage URL');
+assert(entries.some((url) => url === 'https://opticgallery.am/'), 'sitemap lacks canonical Armenian homepage URL');
+assert(!entries.some((url) => url.includes('?lang=hy')), 'default Armenian URLs must not contain a language parameter');
 assert(sitemap.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'sitemap lacks xhtml namespace');
 assert(sitemap.includes('hreflang="x-default"'), 'sitemap lacks x-default alternates');
 

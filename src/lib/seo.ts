@@ -57,7 +57,7 @@ function upsertAlternateLinks(path: string) {
 
   SEO_LANGS.forEach((lang) => {
     const href = new URL(path, BASE_URL);
-    href.searchParams.set('lang', lang);
+    if (lang !== 'hy') href.searchParams.set('lang', lang);
 
     const link = document.createElement('link');
     link.setAttribute('rel', 'alternate');
@@ -69,7 +69,6 @@ function upsertAlternateLinks(path: string) {
 
   const xDefault = document.createElement('link');
   const xDefaultHref = new URL(path, BASE_URL);
-  xDefaultHref.searchParams.set('lang', 'hy');
   xDefault.setAttribute('rel', 'alternate');
   xDefault.setAttribute('hreflang', 'x-default');
   xDefault.setAttribute('href', xDefaultHref.toString());
@@ -82,7 +81,7 @@ export function useSeo({ title, description, path = '/', keywords, robots, image
 
   useEffect(() => {
     const canonicalUrl = new URL(path, BASE_URL);
-    canonicalUrl.searchParams.set('lang', language);
+    if (language !== 'hy') canonicalUrl.searchParams.set('lang', language);
     const canonical = canonicalUrl.toString();
     const fullTitle = `${title} | ${SITE_NAME}`;
     const shareImage = image || DEFAULT_OG_IMAGE;

@@ -70,7 +70,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     // Keep language in URL for SEO/shareable links.
     const url = new URL(window.location.href);
-    url.searchParams.set('lang', language);
+    if (language === 'hy') {
+      url.searchParams.delete('lang');
+    } else {
+      url.searchParams.set('lang', language);
+    }
     window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
   }, [language]);
 

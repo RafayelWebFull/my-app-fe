@@ -38,6 +38,8 @@ export default function ProductDetails() {
   const { t, language } = useLanguage();
   const { data: rates } = useExchangeRates();
   const baseUrl = 'https://opticgallery.am';
+  const localizedProductUrl = (productId: number) =>
+    `${baseUrl}/products/${productId}${language === 'hy' ? '' : `?lang=${language}`}`;
   const fallbackTitle = language === 'ru' ? 'Товар' : language === 'hy' ? 'Ապրանք' : 'Product';
   const fallbackDescription =
     language === 'ru'
@@ -111,7 +113,7 @@ export default function ProductDetails() {
       },
       category: product.category_name,
       image: allImages.map((img) => imageUrl(img) || img).filter(Boolean),
-      url: `${baseUrl}/products/${product.id}?lang=${language}`,
+      url: localizedProductUrl(product.id),
     };
 
     const numericPrice =
@@ -130,7 +132,7 @@ export default function ProductDetails() {
           product.in_stock === false || product.in_stock === 0
             ? 'https://schema.org/OutOfStock'
             : 'https://schema.org/InStock',
-        url: `${baseUrl}/products/${product.id}?lang=${language}`,
+        url: localizedProductUrl(product.id),
       };
     }
 

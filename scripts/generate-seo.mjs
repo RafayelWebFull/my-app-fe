@@ -50,7 +50,7 @@ const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => 
 const xmlEscape = (value) => htmlEscape(value).replace(/&#39;/g, '&apos;');
 const absoluteImage = (value) => !value ? `${SITE_URL}/logo.png` : /^https?:\/\//.test(value) ? value : `${SITE_URL}${value.startsWith('/') ? '' : '/'}${value}`;
 const localizedDescription = (product, lang) => product.description_translations?.[lang] || product[`description_${lang}`] || product.description || '';
-const urlFor = (pathname, lang) => `${SITE_URL}${pathname === '/' ? '/' : pathname}?lang=${lang}`;
+const urlFor = (pathname, lang) => `${SITE_URL}${pathname === '/' ? '/' : pathname}${lang === 'hy' ? '' : `?lang=${lang}`}`;
 
 async function fetchProducts() {
   try {
