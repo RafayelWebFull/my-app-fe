@@ -53,15 +53,20 @@ const localizedDescription = (product, lang) => product.description_translations
 const urlFor = (pathname, lang) => `${SITE_URL}${pathname === '/' ? '/' : pathname}${lang === 'hy' ? '' : `?lang=${lang}`}`;
 
 async function fetchProducts() {
-  try {
-    const response = await fetch(`${API_URL}/optics`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const data = await response.json();
-    if (!Array.isArray(data)) throw new Error('response is not an array');
-    return data.filter((item) => Number.isInteger(Number(item.id)) && Number(item.id) > 0);
-  } catch (error) {
-    throw new Error(`Cannot generate complete SEO output from ${API_URL}/optics: ${error.message}`);
+  var lastError;
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    try {
+      const response = await fetch(`${API_URL}/optics`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error('response is not an array');
+      return data.filter((item) => Number.isInteger(Number(item.id)) && Number(item.id) > 0);
+    } catch (error) {
+      lastError = error;
+      if (attempt < 4) await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+    }
   }
+  throw new Error(`Cannot generate complete SEO output from ${API_URL}/optics after 4 attempts: ${lastError.message}`);
 }
 
 async function fetchSiteSettings() {
