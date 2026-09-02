@@ -26,6 +26,7 @@ export function Hero() {
   });
 
   const heroImage = settings.hero_image;
+  const heroMobileImage = settings.hero_mobile_image;
   const heroTitle = t('heroTitle');
   const titleColor = toColorOrUndefined(settings.hero_title_color);
   const heroTitleWords = heroTitle.trim().split(/\s+/).filter(Boolean);
@@ -47,13 +48,18 @@ export function Hero() {
 
   return (
     <section className="relative min-h-[90vh] overflow-hidden">
-      {heroImage ? (
+      {(heroImage || heroMobileImage) ? (
         <div className="absolute inset-0">
-          <img
-            src={imageUrl(heroImage) || heroImage}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          <picture className="block w-full h-full">
+            {heroMobileImage && (
+              <source media="(max-width: 767px)" srcSet={imageUrl(heroMobileImage) || heroMobileImage} />
+            )}
+            <img
+              src={imageUrl(heroImage || heroMobileImage) || heroImage || heroMobileImage}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          </picture>
           <div className="absolute inset-0 bg-black/40" />
         </div>
       ) : (
@@ -102,7 +108,7 @@ export function Hero() {
         </div>
       </div>
 
-      {!heroImage && (
+      {!heroImage && !heroMobileImage && (
         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full hidden xl:block">
           <div className="relative w-full h-full">
             <motion.div

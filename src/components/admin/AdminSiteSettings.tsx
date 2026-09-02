@@ -17,7 +17,10 @@ function getColorValue(raw: string | undefined, fallback: string): string {
 
 export default function AdminSiteSettings() {
   const queryClient = useQueryClient();
-  const heroFileRef = useRef<HTMLInputElement>(null);
+  const heroDesktopFileRef = useRef<HTMLInputElement>(null);
+  const heroMobileFileRef = useRef<HTMLInputElement>(null);
+  const [heroDesktopFileName, setHeroDesktopFileName] = useState('');
+  const [heroMobileFileName, setHeroMobileFileName] = useState('');
   const aboutFilesRef = useRef<HTMLInputElement>(null);
   const repairFilesRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState<Record<string, string>>({});
@@ -90,8 +93,11 @@ export default function AdminSiteSettings() {
       if (k === 'hero_title' || k === 'hero_subtitle') return;
       fd.append(k, v || '');
     });
-    if (heroFileRef.current?.files?.[0]) {
-      fd.append('hero_image', heroFileRef.current.files[0]);
+    if (heroDesktopFileRef.current?.files?.[0]) {
+      fd.append('hero_image', heroDesktopFileRef.current.files[0]);
+    }
+    if (heroMobileFileRef.current?.files?.[0]) {
+      fd.append('hero_mobile_image', heroMobileFileRef.current.files[0]);
     }
     if (aboutFilesRef.current?.files?.length) {
       Array.from(aboutFilesRef.current.files).forEach((file) => fd.append('about_images', file));
@@ -109,18 +115,48 @@ export default function AdminSiteSettings() {
       <div>
         <h3 className="font-semibold text-lg mb-4">Hero Section (Home Main Picture)</h3>
         <div className="space-y-4">
-          <div>
-            <Label>Hero Image</Label>
-            <input ref={heroFileRef} type="file" accept="image/*" className="hidden" onChange={() => {}} />
-            <Button type="button" variant="outline" onClick={() => heroFileRef.current?.click()} className="gap-2 mt-2">
-              <ImagePlus className="w-4 h-4" />
-              Upload new image
-            </Button>
-            {form.hero_image && (
-              <div className="mt-2">
-                <img src={imageUrl(form.hero_image) || form.hero_image || ''} alt="Hero" className="w-48 h-32 object-cover rounded-lg border" />
-              </div>
-            )}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label>Desktop Hero Image</Label>
+              <p className="text-xs text-muted-foreground mt-1">Recommended: wide landscape image</p>
+              <input
+                ref={heroDesktopFileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setHeroDesktopFileName(e.currentTarget.files?.[0]?.name || '')}
+              />
+              <Button type="button" variant="outline" onClick={() => heroDesktopFileRef.current?.click()} className="gap-2 mt-2 w-full">
+                <ImagePlus className="w-4 h-4" />
+                <span className="truncate">{heroDesktopFileName || 'Upload desktop image'}</span>
+              </Button>
+              {form.hero_image && (
+                <div className="mt-2 aspect-[16/9]">
+                  <img src={imageUrl(form.hero_image) || form.hero_image || ''} alt="Desktop hero" className="w-full h-full object-cover rounded-lg border" />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Label>Mobile Hero Image</Label>
+              <p className="text-xs text-muted-foreground mt-1">Optional: portrait image for phones</p>
+              <input
+                ref={heroMobileFileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => setHeroMobileFileName(e.currentTarget.files?.[0]?.name || '')}
+              />
+              <Button type="button" variant="outline" onClick={() => heroMobileFileRef.current?.click()} className="gap-2 mt-2 w-full">
+                <ImagePlus className="w-4 h-4" />
+                <span className="truncate">{heroMobileFileName || 'Upload mobile image'}</span>
+              </Button>
+              {form.hero_mobile_image && (
+                <div className="mt-2 aspect-[3/4] max-h-64">
+                  <img src={imageUrl(form.hero_mobile_image) || form.hero_mobile_image || ''} alt="Mobile hero" className="w-full h-full object-cover rounded-lg border" />
+                </div>
+              )}
+            </div>
           </div>
           <div className="rounded-md border bg-muted/30 p-3 text-sm text-muted-foreground">
             Hero title and subtitle are managed in Admin Translations using keys:
