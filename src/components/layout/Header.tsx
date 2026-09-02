@@ -52,14 +52,15 @@ export function Header() {
                 key={item.key}
                 to={item.path}
                 className={`relative font-medium transition-colors hover:text-accent ${
-                  isActive(item.path) ? 'text-accent' : 'text-foreground'
+                  isActive(item.path) ? 'text-primary' : 'text-foreground'
                 }`}
+                aria-current={isActive(item.path) ? 'page' : undefined}
               >
                 {getNavLabel(item.key, item.fallback)}
                 {isActive(item.path) && (
                   <motion.div
                     layoutId="activeNav"
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-accent rounded-full"
+                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
                   />
                 )}
               </Link>
@@ -73,10 +74,12 @@ export function Header() {
                 <button
                   key={lang.code}
                   onClick={() => setLanguage(lang.code)}
+                  aria-label={`Switch language to ${lang.code === 'en' ? 'English' : lang.code === 'ru' ? 'Russian' : 'Armenian'}`}
+                  aria-pressed={language === lang.code}
                   className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${
                     language === lang.code
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      : 'text-foreground/80 hover:text-foreground'
                   }`}
                 >
                   {lang.label}
@@ -90,6 +93,9 @@ export function Header() {
               size="icon"
               className="md:hidden"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </Button>
@@ -106,7 +112,7 @@ export function Header() {
             exit={{ opacity: 0, height: 0 }}
             className="md:hidden bg-card border-b border-border"
           >
-            <nav className="container mx-auto px-4 py-4 flex flex-col gap-2">
+            <nav id="mobile-navigation" className="container mx-auto px-4 py-4 flex flex-col gap-2">
               {navItems.map((item) => (
                 <Link
                   key={item.key}
@@ -126,11 +132,13 @@ export function Header() {
                 {languages.map((lang) => (
                   <button
                     key={lang.code}
-                    onClick={() => setLanguage(lang.code)}
+                  onClick={() => setLanguage(lang.code)}
+                  aria-label={`Switch language to ${lang.code === 'en' ? 'English' : lang.code === 'ru' ? 'Russian' : 'Armenian'}`}
+                  aria-pressed={language === lang.code}
                     className={`px-3 py-1 text-sm font-medium rounded-full transition-all ${
                       language === lang.code
                         ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
+                        : 'text-foreground/80 hover:text-foreground'
                     }`}
                   >
                     {lang.label}

@@ -185,12 +185,19 @@ export function ProductsPreview() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder={t('search')}
+                aria-label={t('search')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9"
               />
             </div>
-            <Button type="button" variant="outline" size="icon" onClick={() => setFiltersOpen(true)}>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              aria-label="Open product filters"
+              onClick={() => setFiltersOpen(true)}
+            >
               <SlidersHorizontal className="w-4 h-4" />
             </Button>
           </div>

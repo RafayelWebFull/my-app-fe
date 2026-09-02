@@ -70,7 +70,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-primary-foreground/10 mt-8 pt-8 text-center text-primary-foreground/50 text-sm">
+        <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center text-primary-foreground/75 text-sm">
           {t('copyright')}
         </div>
       </div>
