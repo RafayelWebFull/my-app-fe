@@ -42,9 +42,9 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="font-heading font-semibold text-lg mb-4">
+            <h2 className="font-heading font-semibold text-lg mb-4">
               {t('contactUs')}
-            </h4>
+            </h2>
             <ul className="space-y-3 text-primary-foreground/70">
               <li className="flex items-start gap-2">
                 <MapPin className="w-4 h-4" />
