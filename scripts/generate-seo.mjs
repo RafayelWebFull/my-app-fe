@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 const SITE_URL = (process.env.SITE_URL || 'https://opticgallery.am').replace(/\/$/, '');
-const API_URL = (process.env.API_BASE_URL || `${SITE_URL}/api`).replace(/\/$/, '');
+const API_URL = (process.env.API_BASE_URL || `${process.env.VITE_API_URL || 'https://api.opticgallery.am'}/api`).replace(/\/$/, '');
 const DIST = process.env.SEO_DIST || 'dist';
 const LANGS = ['hy', 'ru', 'en'];
 const locales = { hy: 'hy_AM', ru: 'ru_RU', en: 'en_US' };
@@ -64,11 +64,29 @@ async function fetchProducts() {
   }
 }
 
+async function fetchSiteSettings() {
+  try {
+    const response = await fetch(`${API_URL}/site-settings`);
+    if (!response.ok) return {};
+    return await response.json();
+  } catch {
+    return {};
+  }
+}
+
+function optimizedUpload(value, width) {
+  if (!value) return null;
+  const apiOrigin = new URL(API_URL).origin;
+  const pathname = new URL(value, apiOrigin).pathname;
+  if (!pathname.startsWith('/uploads/')) return null;
+  return `${apiOrigin}/api/image?src=${encodeURIComponent(pathname)}&w=${width}`;
+}
+
 function alternates(pathname) {
   return [...LANGS.map((lang) => `<link rel="alternate" hreflang="${lang}" href="${htmlEscape(urlFor(pathname, lang))}" data-seo-lang="${lang}" />`), `<link rel="alternate" hreflang="x-default" href="${htmlEscape(urlFor(pathname, 'hy'))}" data-seo-lang="x-default" />`].join('\n    ');
 }
 
-function render(template, { lang, pathname, title, description, image, type = 'website', robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1', schema }) {
+function render(template, { lang, pathname, title, description, image, type = 'website', robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1', schema, headLinks = '' }) {
   const canonical = urlFor(pathname, lang);
   const fullTitle = `${title} | Optic Gallery`;
   let html = template
@@ -89,6 +107,7 @@ function render(template, { lang, pathname, title, description, image, type = 'w
     html = html.replace(new RegExp(`<meta (?:name|property)="twitter:${name}"[^>]*>`), `<meta name="twitter:${name}" content="${htmlEscape(content)}" />`);
   }
   html = html.replace('</head>', `    <meta property="og:locale" content="${locales[lang]}" />\n  </head>`);
+  if (headLinks) html = html.replace('</head>', `    ${headLinks}\n  </head>`);
   if (schema) html = html.replace('</head>', `    <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>\n  </head>`);
   return html;
 }
@@ -107,13 +126,20 @@ function sitemapEntry(pathname, changefreq, priority) {
 }
 
 const template = await readFile(path.join(DIST, 'index.html'), 'utf8');
-const products = await fetchProducts();
+const [products, siteSettings] = await Promise.all([fetchProducts(), fetchSiteSettings()]);
 const sitemap = [];
+
+const mobileHero = optimizedUpload(siteSettings.hero_mobile_image || siteSettings.hero_image, 900);
+const desktopHero = optimizedUpload(siteSettings.hero_image || siteSettings.hero_mobile_image, 1920);
+const heroPreloads = [
+  mobileHero && `<link rel="preload" as="image" href="${htmlEscape(mobileHero)}" media="(max-width: 767px)" fetchpriority="high" />`,
+  desktopHero && `<link rel="preload" as="image" href="${htmlEscape(desktopHero)}" media="(min-width: 768px)" fetchpriority="high" />`,
+].filter(Boolean).join('\n    ');
 
 for (const [slug, page] of Object.entries(pages)) {
   for (const lang of LANGS) {
     const [title, description] = page[lang];
-    await save(`seo/${lang}/${slug}/index.html`, render(template, { lang, pathname: page.path, title, description, image: `${SITE_URL}/logo.png` }));
+    await save(`seo/${lang}/${slug}/index.html`, render(template, { lang, pathname: page.path, title, description, image: `${SITE_URL}/logo.png`, headLinks: slug === 'home' ? heroPreloads : '' }));
   }
   sitemap.push(...sitemapEntry(page.path, page.changefreq, page.priority));
 }
