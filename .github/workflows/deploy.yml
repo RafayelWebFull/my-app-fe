@@ -22,7 +22,10 @@ jobs:
         run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npm run build:seo
+
+      - name: Validate SEO output
+        run: npm run seo:validate
 
       - name: Upload dist to cPanel
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5

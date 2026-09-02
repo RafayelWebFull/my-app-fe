@@ -1,8 +1,28 @@
 RewriteEngine On
 RewriteBase /
+
+# Use one secure canonical host.
+RewriteCond %{HTTPS} !=on [OR]
+RewriteCond %{HTTP_HOST} !^opticgallery\.am$ [NC]
+RewriteRule ^ https://opticgallery.am%{REQUEST_URI} [R=301,L,NE]
+
 RewriteRule ^index\.html$ - [L]
-RewriteRule ^api(/|$) - [L]
-RewriteRule ^uploads(/|$) - [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.html [L]
+RewriteRule ^(?:api|uploads)(/|$) - [L]
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Serve generated metadata for public routes while preserving the requested URL.
+RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
+RewriteRule ^(products(?:/[0-9]+)?|brands|about|contact|repair-service)/?$ /seo/%2/$1/index.html [L]
+RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
+RewriteRule ^$ /seo/%2/home/index.html [L]
+RewriteRule ^(products(?:/[0-9]+)?|brands|about|contact|repair-service)/?$ /seo/hy/$1/index.html [L]
+RewriteRule ^$ /seo/hy/home/index.html [L]
+
+# Private application routes are available but never indexable.
+RewriteRule ^(admin(?:/login)?|cart|cart-preview|checkout|order-success)/?$ /seo/noindex/index.html [L]
+
+# Unknown direct requests return a real HTTP 404 page.
+ErrorDocument 404 /404.html
+RewriteRule ^ - [R=404,L]

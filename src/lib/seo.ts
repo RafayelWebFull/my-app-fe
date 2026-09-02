@@ -18,7 +18,7 @@ type SeoOptions = {
   keywords?: string;
   robots?: string;
   image?: string;
-  type?: 'website' | 'article';
+  type?: 'website' | 'article' | 'product';
 };
 
 function upsertMetaByName(name: string, content: string) {
@@ -105,10 +105,10 @@ export function useSeo({ title, description, path = '/', keywords, robots, image
     upsertMetaByProperty('og:image', shareImage);
     upsertMetaByProperty('og:site_name', SITE_NAME);
 
-    upsertMetaByProperty('twitter:card', 'summary_large_image');
-    upsertMetaByProperty('twitter:url', canonical);
-    upsertMetaByProperty('twitter:title', fullTitle);
-    upsertMetaByProperty('twitter:description', description);
-    upsertMetaByProperty('twitter:image', shareImage);
+    upsertMetaByName('twitter:card', 'summary_large_image');
+    upsertMetaByName('twitter:url', canonical);
+    upsertMetaByName('twitter:title', fullTitle);
+    upsertMetaByName('twitter:description', description);
+    upsertMetaByName('twitter:image', shareImage);
   }, [description, image, keywords, language, path, robots, title, type]);
 }

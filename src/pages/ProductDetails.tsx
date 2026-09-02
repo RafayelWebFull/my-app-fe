@@ -64,6 +64,9 @@ export default function ProductDetails() {
       product?.description ||
       fallbackDescription,
     path: `/products/${id || ''}`,
+    image: product?.image_url ? imageUrl(product.image_url) || undefined : undefined,
+    type: 'product',
+    robots: isError ? 'noindex, nofollow' : undefined,
   });
 
   const allImages =
@@ -108,7 +111,7 @@ export default function ProductDetails() {
       },
       category: product.category_name,
       image: allImages.map((img) => imageUrl(img) || img).filter(Boolean),
-      url: `${baseUrl}/products/${product.id}`,
+      url: `${baseUrl}/products/${product.id}?lang=${language}`,
     };
 
     const numericPrice =
@@ -127,7 +130,7 @@ export default function ProductDetails() {
           product.in_stock === false || product.in_stock === 0
             ? 'https://schema.org/OutOfStock'
             : 'https://schema.org/InStock',
-        url: `${baseUrl}/products/${product.id}`,
+        url: `${baseUrl}/products/${product.id}?lang=${language}`,
       };
     }
 
@@ -141,7 +144,7 @@ export default function ProductDetails() {
       const mountedScript = document.getElementById(scriptId);
       if (mountedScript) mountedScript.remove();
     };
-  }, [allImages, baseUrl, localizedDescription, product]);
+  }, [allImages, baseUrl, language, localizedDescription, product]);
 
   if (isLoading) {
     return (

@@ -44,6 +44,7 @@ import { apiUrl, imageUrl } from '@/lib/api';
 interface Banner {
   id: number;
   image_url: string | null;
+  mobile_image_url?: string | null;
   title: string;
   description: string | null;
   start_date: string;
@@ -65,6 +66,7 @@ const emptyForm = {
   target_type: 'all' as 'all' | 'brand' | 'optic',
   target_id: '',
   image_url: '',
+  mobile_image_url: '',
 };
 
 function toDateInputValue(d: string) {
@@ -107,13 +109,16 @@ function targetLabel(
 
 export default function AdminBanners() {
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const desktopFileInputRef = useRef<HTMLInputElement>(null);
+  const mobileFileInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [editing, setEditing] = useState<Banner | null>(null);
   const [deleteBanner, setDeleteBanner] = useState<Banner | null>(null);
   const [form, setForm] = useState(emptyForm);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [desktopImageFile, setDesktopImageFile] = useState<File | null>(null);
+  const [desktopImagePreview, setDesktopImagePreview] = useState<string | null>(null);
+  const [mobileImageFile, setMobileImageFile] = useState<File | null>(null);
+  const [mobileImagePreview, setMobileImagePreview] = useState<string | null>(null);
 
   const { data: banners = [], isLoading } = useQuery({
     queryKey: ['banners', 'all'],
@@ -204,15 +209,23 @@ export default function AdminBanners() {
     setIsOpen(false);
     setEditing(null);
     setForm(emptyForm);
-    setImageFile(null);
-    setImagePreview(null);
+    setDesktopImageFile(null);
+    setDesktopImagePreview(null);
+    setMobileImageFile(null);
+    setMobileImagePreview(null);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = (kind: 'desktop' | 'mobile') => (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f) {
-      setImageFile(f);
-      setImagePreview(URL.createObjectURL(f));
+      const preview = URL.createObjectURL(f);
+      if (kind === 'desktop') {
+        setDesktopImageFile(f);
+        setDesktopImagePreview(preview);
+      } else {
+        setMobileImageFile(f);
+        setMobileImagePreview(preview);
+      }
     }
   };
 
@@ -238,8 +251,10 @@ export default function AdminBanners() {
     fd.append('discount_percent', form.discount_percent || '0');
     fd.append('target_type', form.target_type);
     fd.append('target_id', form.target_type === 'all' ? '' : form.target_id || '');
-    if (imageFile) fd.append('image', imageFile);
-    if (editing && !imageFile && form.image_url) fd.append('image_url', form.image_url);
+    if (desktopImageFile) fd.append('desktop_image', desktopImageFile);
+    if (mobileImageFile) fd.append('mobile_image', mobileImageFile);
+    if (editing && !desktopImageFile && form.image_url) fd.append('image_url', form.image_url);
+    if (editing && !mobileImageFile && form.mobile_image_url) fd.append('mobile_image_url', form.mobile_image_url);
 
     if (editing) {
       updateMu.mutate({ id: editing.id, fd });
@@ -252,8 +267,10 @@ export default function AdminBanners() {
     setEditing(null);
     const today = new Date().toISOString().slice(0, 10);
     setForm({ ...emptyForm, start_date: today, end_date: today });
-    setImageFile(null);
-    setImagePreview(null);
+    setDesktopImageFile(null);
+    setDesktopImagePreview(null);
+    setMobileImageFile(null);
+    setMobileImagePreview(null);
     setIsOpen(true);
   };
 
@@ -268,9 +285,12 @@ export default function AdminBanners() {
       target_type: b.target_type || 'all',
       target_id: b.target_id ? String(b.target_id) : '',
       image_url: b.image_url || '',
+      mobile_image_url: b.mobile_image_url || '',
     });
-    setImageFile(null);
-    setImagePreview(b.image_url || null);
+    setDesktopImageFile(null);
+    setDesktopImagePreview(b.image_url || null);
+    setMobileImageFile(null);
+    setMobileImagePreview(b.mobile_image_url || null);
     setIsOpen(true);
   };
 
@@ -302,8 +322,8 @@ export default function AdminBanners() {
                 <div key={b.id} className="p-4 space-y-2">
                   <div className="flex gap-3">
                     <div className="w-16 h-10 rounded bg-secondary overflow-hidden shrink-0">
-                      {b.image_url ? (
-                        <img src={imageUrl(b.image_url) || b.image_url || ''} alt="" className="w-full h-full object-cover" />
+                      {(b.mobile_image_url || b.image_url) ? (
+                        <img src={imageUrl(b.mobile_image_url || b.image_url) || b.mobile_image_url || b.image_url || ''} alt="" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">—</div>
                       )}
@@ -352,11 +372,18 @@ export default function AdminBanners() {
                   {banners.map((b: Banner) => (
                     <TableRow key={b.id}>
                       <TableCell>
-                        <div className="w-16 h-10 rounded bg-secondary overflow-hidden">
+                        <div className="flex gap-1">
+                          <div className="w-16 h-10 rounded bg-secondary overflow-hidden">
                           {b.image_url ? (
-                            <img src={imageUrl(b.image_url) || b.image_url || ''} alt="" className="w-full h-full object-cover" />
+                            <img src={imageUrl(b.image_url) || b.image_url || ''} alt="Desktop banner" className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">—</div>
+                          )}
+                          </div>
+                          {b.mobile_image_url && (
+                            <div className="w-7 h-10 rounded bg-secondary overflow-hidden">
+                              <img src={imageUrl(b.mobile_image_url) || b.mobile_image_url} alt="Mobile banner" className="w-full h-full object-cover" />
+                            </div>
                           )}
                         </div>
                       </TableCell>
@@ -520,32 +547,33 @@ export default function AdminBanners() {
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label>Image</Label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageChange}
-              />
-              <div className="flex items-center gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="gap-2"
-                >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Desktop image</Label>
+                <p className="text-xs text-muted-foreground">Recommended: wide landscape image</p>
+                <input ref={desktopFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange('desktop')} />
+                <Button type="button" variant="outline" onClick={() => desktopFileInputRef.current?.click()} className="gap-2 w-full">
                   <ImagePlus className="w-4 h-4" />
-                  {imageFile ? imageFile.name : 'Choose image'}
+                  <span className="truncate">{desktopImageFile ? desktopImageFile.name : 'Choose desktop image'}</span>
                 </Button>
-                {(imagePreview || (editing?.image_url && !imageFile)) && (
-                  <div className="w-24 h-14 rounded border overflow-hidden">
-                    <img
-                      src={imagePreview || imageUrl(editing?.image_url) || editing?.image_url || ''}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
+                {(desktopImagePreview || (editing?.image_url && !desktopImageFile)) && (
+                  <div className="w-full aspect-[16/7] rounded border overflow-hidden">
+                    <img src={desktopImagePreview || imageUrl(editing?.image_url) || editing?.image_url || ''} alt="Desktop preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Mobile image</Label>
+                <p className="text-xs text-muted-foreground">Optional: portrait or square image</p>
+                <input ref={mobileFileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange('mobile')} />
+                <Button type="button" variant="outline" onClick={() => mobileFileInputRef.current?.click()} className="gap-2 w-full">
+                  <ImagePlus className="w-4 h-4" />
+                  <span className="truncate">{mobileImageFile ? mobileImageFile.name : 'Choose mobile image'}</span>
+                </Button>
+                {(mobileImagePreview || (editing?.mobile_image_url && !mobileImageFile)) && (
+                  <div className="w-full aspect-square rounded border overflow-hidden">
+                    <img src={mobileImagePreview || imageUrl(editing?.mobile_image_url) || editing?.mobile_image_url || ''} alt="Mobile preview" className="w-full h-full object-cover" />
                   </div>
                 )}
               </div>

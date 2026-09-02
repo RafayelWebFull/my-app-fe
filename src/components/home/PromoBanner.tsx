@@ -14,6 +14,7 @@ import {
 interface Banner {
   id: number;
   image_url: string | null;
+  mobile_image_url?: string | null;
   title: string;
   description: string | null;
   start_date: string;
@@ -42,13 +43,21 @@ function BannerSlide({
       to={productsUrl}
       className="block w-full group relative overflow-hidden lg:rounded-3xl lg:shadow-elevated lg:hover:shadow-xl transition-shadow"
     >
-      {banner.image_url ? (
+      {(banner.image_url || banner.mobile_image_url) ? (
         <div className="relative h-[220px] sm:h-[260px] md:h-[320px] lg:h-[360px] max-h-[360px]">
-          <img
-            src={imageUrl(banner.image_url) || banner.image_url || ''}
-            alt={banner.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <picture className="block w-full h-full">
+            {banner.mobile_image_url && (
+              <source
+                media="(max-width: 767px)"
+                srcSet={imageUrl(banner.mobile_image_url) || banner.mobile_image_url}
+              />
+            )}
+            <img
+              src={imageUrl(banner.image_url || banner.mobile_image_url) || banner.image_url || banner.mobile_image_url || ''}
+              alt={banner.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          </picture>
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
         </div>
       ) : (
