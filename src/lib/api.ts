@@ -21,3 +21,11 @@ export function imageUrl(url: string | null | undefined): string | null {
   if (url.startsWith('/') && API_BASE) return `${API_BASE.replace(/\/$/, '')}${url}`;
   return url;
 }
+
+/** Ask the API image pipeline for a right-sized WebP variant. */
+export function optimizedImageUrl(url: string | null | undefined, width: number): string | null {
+  const resolved = imageUrl(url);
+  if (!resolved || !resolved.includes('/uploads/')) return resolved;
+  const uploadPath = new URL(resolved, window.location.origin).pathname;
+  return apiUrl(`/api/image?src=${encodeURIComponent(uploadPath)}&w=${Math.round(width)}`);
+}

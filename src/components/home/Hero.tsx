@@ -4,7 +4,7 @@ import { ArrowRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { apiUrl, imageUrl } from '@/lib/api';
+import { apiUrl, optimizedImageUrl } from '@/lib/api';
 
 const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
 
@@ -52,11 +52,13 @@ export function Hero() {
         <div className="absolute inset-0">
           <picture className="block w-full h-full">
             {heroMobileImage && (
-              <source media="(max-width: 767px)" srcSet={imageUrl(heroMobileImage) || heroMobileImage} />
+              <source media="(max-width: 767px)" srcSet={optimizedImageUrl(heroMobileImage, 900) || heroMobileImage} />
             )}
             <img
-              src={imageUrl(heroImage || heroMobileImage) || heroImage || heroMobileImage}
+              src={optimizedImageUrl(heroImage || heroMobileImage, 1920) || heroImage || heroMobileImage}
               alt=""
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-cover"
             />
           </picture>

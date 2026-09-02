@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Glasses, Sun, Eye, Loader2, Search, SlidersHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { apiUrl, imageUrl } from '@/lib/api';
+import { apiUrl, imageUrl, optimizedImageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -331,8 +331,10 @@ export function ProductsPreview() {
                           )}
                           {product.image_url ? (
                             <img
-                              src={imageUrl(product.image_url) || product.image_url || ''}
+                              src={optimizedImageUrl(product.image_url, 480) || product.image_url || ''}
                               alt={product.name}
+                              loading="lazy"
+                              decoding="async"
                               className="w-full h-full object-contain object-center scale-110 mix-blend-multiply group-hover:scale-115 transition-transform"
                             />
                           ) : (
@@ -384,8 +386,10 @@ export function ProductsPreview() {
               <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-110">
                 {category.imageUrl ? (
                   <img
-                    src={imageUrl(category.imageUrl) || category.imageUrl}
+                    src={optimizedImageUrl(category.imageUrl, 720) || category.imageUrl}
                     alt={category.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                   />
                 ) : (

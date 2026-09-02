@@ -6,16 +6,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
-import Index from "./pages/Index";
-import Products from "./pages/Products";
-import Brands from "./pages/Brands";
-import ProductDetails from "./pages/ProductDetails";
-import About from "./pages/About";
-import Contact from "./pages/Contact";
-import RepairService from "./pages/RepairService";
-import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
-import NotFound from "./pages/NotFound";
+const Index = lazy(() => import("./pages/Index"));
+const Products = lazy(() => import("./pages/Products"));
+const Brands = lazy(() => import("./pages/Brands"));
+const ProductDetails = lazy(() => import("./pages/ProductDetails"));
+const About = lazy(() => import("./pages/About"));
+const Contact = lazy(() => import("./pages/Contact"));
+const RepairService = lazy(() => import("./pages/RepairService"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
@@ -28,7 +28,8 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
+            <Suspense fallback={<div className="min-h-screen bg-background" aria-label="Loading" />}>
+              <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<Products />} />
               <Route path="/brands" element={<Brands />} />
@@ -40,7 +41,8 @@ const App = () => (
               <Route path="/repair-service" element={<RepairService />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
+            </Suspense>
           </BrowserRouter>
           </CartProvider>
         </AuthProvider>
@@ -50,3 +52,4 @@ const App = () => (
 );
 
 export default App;
+import { lazy, Suspense } from "react";

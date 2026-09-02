@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { apiUrl, imageUrl } from '@/lib/api';
+import { apiUrl, optimizedImageUrl } from '@/lib/api';
 import {
   Carousel,
   CarouselContent,
@@ -49,12 +49,14 @@ function BannerSlide({
             {banner.mobile_image_url && (
               <source
                 media="(max-width: 767px)"
-                srcSet={imageUrl(banner.mobile_image_url) || banner.mobile_image_url}
+                srcSet={optimizedImageUrl(banner.mobile_image_url, 900) || banner.mobile_image_url}
               />
             )}
             <img
-              src={imageUrl(banner.image_url || banner.mobile_image_url) || banner.image_url || banner.mobile_image_url || ''}
+              src={optimizedImageUrl(banner.image_url || banner.mobile_image_url, 1600) || banner.image_url || banner.mobile_image_url || ''}
               alt={banner.title}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           </picture>
