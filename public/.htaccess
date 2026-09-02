@@ -10,6 +10,12 @@ RewriteRule ^ https://opticgallery.am%{REQUEST_URI} [R=301,L,NE]
 
 RewriteRule ^index\.html$ - [L]
 RewriteRule ^(?:api|uploads)(/|$) - [L]
+
+# The document root is a real directory, so route it before the file/directory bypass.
+RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
+RewriteRule ^$ /seo/%2/home/index.html [L]
+RewriteRule ^$ /seo/hy/home/index.html [L]
+
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
@@ -17,10 +23,7 @@ RewriteRule ^ - [L]
 # Serve generated metadata for public routes while preserving the requested URL.
 RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
 RewriteRule ^(products(?:/[0-9]+)?|brands|about|contact|repair-service)/?$ /seo/%2/$1/index.html [L]
-RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
-RewriteRule ^$ /seo/%2/home/index.html [L]
 RewriteRule ^(products(?:/[0-9]+)?|brands|about|contact|repair-service)/?$ /seo/hy/$1/index.html [L]
-RewriteRule ^$ /seo/hy/home/index.html [L]
 
 # Private application routes are available but never indexable.
 RewriteRule ^(admin(?:/login)?|cart|cart-preview|checkout|order-success)/?$ /seo/noindex/index.html [L]

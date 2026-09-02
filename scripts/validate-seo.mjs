@@ -35,6 +35,7 @@ const htaccess = await readFile(`${dist}/.htaccess`, 'utf8');
 assert(htaccess.includes('https://opticgallery.am%{REQUEST_URI}'), 'canonical host redirect is missing');
 assert(htaccess.includes('ErrorDocument 404 /404.html'), 'HTTP 404 handling is missing');
 assert(htaccess.includes('RewriteCond %{REQUEST_FILENAME} -f [OR]'), 'static-file rewrite bypass is missing');
+assert(htaccess.indexOf('RewriteRule ^$ /seo/%2/home/index.html') < htaccess.indexOf('RewriteCond %{REQUEST_FILENAME} -f [OR]'), 'homepage language rewrite must run before the directory bypass');
 
 if (failures.length) {
   console.error(`SEO validation failed:\n- ${failures.join('\n- ')}`);
