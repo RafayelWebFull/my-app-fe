@@ -124,13 +124,13 @@ for (const product of products) {
     const description = localizedDescription(product, lang) || pages.products[lang][1];
     const image = absoluteImage(product.image_urls?.[0] || product.image_url);
     const numericPrice = Number(product.price);
-    const schema = {
+    const schema = numericPrice > 0 ? {
       '@context': 'https://schema.org', '@type': 'Product', name: product.name, description,
       image: (product.image_urls?.length ? product.image_urls : [product.image_url]).filter(Boolean).map(absoluteImage),
       brand: { '@type': 'Brand', name: product.brand_name }, category: product.category_name,
       url: urlFor(pathname, lang),
-      ...(numericPrice > 0 ? { offers: { '@type': 'Offer', priceCurrency: 'AMD', price: numericPrice, availability: product.in_stock === false || product.in_stock === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock', url: urlFor(pathname, lang) } } : {}),
-    };
+      offers: { '@type': 'Offer', priceCurrency: 'AMD', price: numericPrice, availability: product.in_stock === false || product.in_stock === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock', url: urlFor(pathname, lang) },
+    } : undefined;
     await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title: product.name, description, image, type: 'product', schema }));
   }
   sitemap.push(...sitemapEntry(pathname, 'weekly', '0.8'));

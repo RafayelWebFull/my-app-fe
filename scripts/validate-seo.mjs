@@ -22,7 +22,9 @@ if (productEntry) {
   const id = productEntry.match(/\/products\/(\d+)/)?.[1];
   const productHtml = await readFile(`${dist}/seo/en/products/${id}/index.html`, 'utf8');
   assert(productHtml.includes('<meta property="og:type" content="product"'), 'product page lacks product Open Graph type');
-  assert(productHtml.includes('"@type":"Product"'), 'product page lacks Product JSON-LD');
+  if (productHtml.includes('"@type":"Product"')) {
+    assert(productHtml.includes('"offers":{"@type":"Offer"'), 'Product JSON-LD lacks a valid offer');
+  }
   assert(productHtml.includes(`<link rel="canonical" href="https://opticgallery.am/products/${id}?lang=en"`), 'product canonical is incorrect');
   assert(productHtml.includes('name="twitter:image"'), 'Twitter image must use the name attribute');
 }

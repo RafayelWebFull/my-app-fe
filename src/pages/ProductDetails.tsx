@@ -102,6 +102,17 @@ export default function ProductDetails() {
 
     if (!product) return;
 
+    const numericPrice =
+      typeof product.price === 'number'
+        ? product.price
+        : typeof product.price === 'string'
+          ? Number(product.price)
+          : NaN;
+
+    // Product rich results require a real offer, review, or aggregate rating.
+    // Do not publish invalid Product markup when none of those exists.
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) return;
+
     const productSchema: Record<string, unknown> = {
       '@context': 'https://schema.org',
       '@type': 'Product',
@@ -114,17 +125,7 @@ export default function ProductDetails() {
       category: product.category_name,
       image: allImages.map((img) => imageUrl(img) || img).filter(Boolean),
       url: localizedProductUrl(product.id),
-    };
-
-    const numericPrice =
-      typeof product.price === 'number'
-        ? product.price
-        : typeof product.price === 'string'
-          ? Number(product.price)
-          : NaN;
-
-    if (Number.isFinite(numericPrice) && numericPrice > 0) {
-      productSchema.offers = {
+      offers: {
         '@type': 'Offer',
         priceCurrency: 'AMD',
         price: numericPrice,
@@ -133,8 +134,8 @@ export default function ProductDetails() {
             ? 'https://schema.org/OutOfStock'
             : 'https://schema.org/InStock',
         url: localizedProductUrl(product.id),
-      };
-    }
+      },
+    };
 
     const script = document.createElement('script');
     script.id = scriptId;
