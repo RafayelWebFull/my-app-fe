@@ -123,6 +123,14 @@ async function save(relative, content) {
   await writeFile(target, content, 'utf8');
 }
 
+async function inlineCompiledStyles(html) {
+  const stylesheetPattern = /<link rel="stylesheet"[^>]*href="(\/assets\/[^"]+\.css)"[^>]*>/;
+  const match = html.match(stylesheetPattern);
+  if (!match) throw new Error('Cannot find compiled stylesheet in dist/index.html');
+  const css = await readFile(path.join(DIST, match[1].replace(/^\//, '')), 'utf8');
+  return html.replace(stylesheetPattern, `<style data-compiled-css>${css.replace(/<\/style/gi, '<\\/style')}</style>`);
+}
+
 function sitemapEntry(pathname, changefreq, priority) {
   return LANGS.map((lang) => {
     const links = [...LANGS.map((other) => `    <xhtml:link rel="alternate" hreflang="${other}" href="${xmlEscape(urlFor(pathname, other))}" />`), `    <xhtml:link rel="alternate" hreflang="x-default" href="${xmlEscape(urlFor(pathname, 'hy'))}" />`];
@@ -130,7 +138,8 @@ function sitemapEntry(pathname, changefreq, priority) {
   });
 }
 
-const template = await readFile(path.join(DIST, 'index.html'), 'utf8');
+const template = await inlineCompiledStyles(await readFile(path.join(DIST, 'index.html'), 'utf8'));
+await save('index.html', template);
 const [products, siteSettings] = await Promise.all([fetchProducts(), fetchSiteSettings()]);
 const sitemap = [];
 
