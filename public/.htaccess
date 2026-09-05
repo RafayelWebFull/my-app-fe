@@ -33,6 +33,12 @@ RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
 RewriteRule ^$ /seo/%2/home/index.html [L]
 RewriteRule ^$ /seo/hy/home/index.html [L]
 
+# Blog assets share the /blog directory, so route the page before the directory bypass.
+RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
+RewriteRule ^blog/?$ /seo/%2/blog/index.html [L]
+RewriteRule ^blog/?$ /seo/hy/blog/index.html [L]
+RewriteRule ^blog/[^/]+/?$ /index.html [L]
+
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
