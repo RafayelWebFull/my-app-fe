@@ -5,7 +5,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Layout } from '@/components/layout/Layout';
-import { LogOut, FolderTree, Tag, Glasses, Settings, Languages, Megaphone, LayoutGrid, Instagram } from 'lucide-react';
+import { LogOut, FolderTree, Tag, Glasses, Settings, Languages, Megaphone, LayoutGrid, Instagram, Newspaper } from 'lucide-react';
 import AdminCategories from '@/components/admin/AdminCategories';
 import AdminBrands from '@/components/admin/AdminBrands';
 import AdminOptics from '@/components/admin/AdminOptics';
@@ -14,6 +14,7 @@ import AdminTranslations from '@/components/admin/AdminTranslations';
 import AdminBanners from '@/components/admin/AdminBanners';
 import AdminHomeCategoryCards from '@/components/admin/AdminHomeCategoryCards';
 import AdminInstagramImport from '@/components/admin/AdminInstagramImport';
+import AdminBlog from '@/components/admin/AdminBlog';
 import { useSeo } from '@/lib/seo';
 
 const AdminDashboard = () => {
@@ -73,6 +74,10 @@ const AdminDashboard = () => {
                 <Instagram className="w-4 h-4" />
                 Instagram Import
               </TabsTrigger>
+              <TabsTrigger value="blog" className="gap-2">
+                <Newspaper className="w-4 h-4" />
+                Blog
+              </TabsTrigger>
               <TabsTrigger value="settings" className="gap-2">
                 <Settings className="w-4 h-4" />
                 Site
@@ -100,6 +105,9 @@ const AdminDashboard = () => {
             </TabsContent>
             <TabsContent value="instagramImport">
               <AdminInstagramImport />
+            </TabsContent>
+            <TabsContent value="blog">
+              <AdminBlog />
             </TabsContent>
             <TabsContent value="settings">
               <AdminSiteSettings />

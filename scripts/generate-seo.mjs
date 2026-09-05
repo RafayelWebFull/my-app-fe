@@ -44,6 +44,12 @@ const pages = {
     ru: ['Ремонт очков в Ереване', 'Диагностика, регулировка и профессиональный ремонт очков в Ереване.'],
     en: ['Eyeglass Repair in Yerevan', 'Diagnostics, adjustments and professional eyeglass repair in Yerevan.'],
   },
+  blog: {
+    path: '/blog', priority: '0.8', changefreq: 'weekly',
+    hy: ['Ակնոցների և տեսողության խնամքի բլոգ', 'Օգտակար խորհուրդներ ակնոցների, ոսպնյակների, տեսողության խնամքի և նոր բրենդների մասին։'],
+    ru: ['Блог об очках и уходе за зрением', 'Полезные материалы об очках, линзах, уходе за зрением и новых коллекциях.'],
+    en: ['Eyewear and Vision Care Blog', 'Helpful guides about eyewear, lenses, vision care and new collections from Optic Gallery.'],
+  },
 };
 
 const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);

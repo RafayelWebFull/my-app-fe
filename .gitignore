@@ -33,6 +33,8 @@ public/
 public/*
 !public/.htaccess
 !public/logo.svg
+!public/blog/
+!public/blog/*.webp
 
 # environment variables
 .env

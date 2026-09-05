@@ -14,6 +14,7 @@ export function Header() {
     { key: 'products', path: '/products' },
     { key: 'brands', path: '/brands', fallback: 'Brands' },
     { key: 'repairServiceCenter', path: '/repair-service' },
+    { key: 'blog', path: '/blog', fallback: 'Blog' },
     { key: 'about', path: '/about' },
     { key: 'contact', path: '/contact' },
   ];
