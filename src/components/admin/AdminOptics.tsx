@@ -37,7 +37,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Plus, Pencil, Trash2, Loader2, ImagePlus, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, ImagePlus, X, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
@@ -77,6 +77,7 @@ interface Optic {
     hy?: string | null;
   };
   in_stock: boolean | number;
+  is_visible: boolean | number;
   discount: number | null;
 }
 
@@ -95,6 +96,7 @@ const emptyForm = {
   description_ru: '',
   description_hy: '',
   in_stock: 'true',
+  is_visible: 'true',
   discount: '',
 };
 
@@ -115,7 +117,7 @@ export default function AdminOptics() {
   const { data: optics = [], isLoading } = useQuery({
     queryKey: ['optics', categoryFilter],
     queryFn: async () => {
-      const url = categoryFilter !== 'all' ? `${OPTICS_API()}?category=${categoryFilter}` : OPTICS_API();
+      const url = categoryFilter !== 'all' ? `${OPTICS_API()}?admin=all&category=${categoryFilter}` : `${OPTICS_API()}?admin=all`;
       const res = await fetch(url, { credentials: 'include' });
       if (!res.ok) throw new Error('Failed to fetch');
       return res.json();
@@ -198,6 +200,27 @@ export default function AdminOptics() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const visibilityMu = useMutation({
+    mutationFn: async ({ id, isVisible }: { id: number; isVisible: boolean }) => {
+      const res = await fetch(`${OPTICS_API()}/${id}/visibility`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ is_visible: isVisible }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to update visibility');
+      }
+      return res.json();
+    },
+    onSuccess: (updated: Optic) => {
+      queryClient.invalidateQueries({ queryKey: ['optics'] });
+      toast.success(updated.is_visible ? 'Product is now visible' : 'Product is now hidden');
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const resetForm = () => {
     setIsOpen(false);
     setEditing(null);
@@ -253,6 +276,7 @@ export default function AdminOptics() {
     fd.append('description_ru', form.description_ru || '');
     fd.append('description_hy', form.description_hy || '');
     fd.append('in_stock', form.in_stock || 'true');
+    fd.append('is_visible', form.is_visible || 'true');
     if (form.discount) fd.append('discount', form.discount);
     const primary = resolvePrimarySelection();
     if (primary?.type === 'existing') {
@@ -295,6 +319,7 @@ export default function AdminOptics() {
       description_ru: o.description_translations?.ru || o.description_ru || '',
       description_hy: o.description_translations?.hy || o.description_hy || '',
       in_stock: o.in_stock ? 'true' : 'false',
+      is_visible: o.is_visible ? 'true' : 'false',
       discount: o.discount != null ? String(o.discount) : '',
     });
     const urls = Array.isArray(o.image_urls) && o.image_urls.length > 0
@@ -379,10 +404,12 @@ export default function AdminOptics() {
                     ) : '—'}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className={o.in_stock ? 'text-green-600 text-sm' : 'text-destructive text-sm'}>
-                      {o.in_stock ? 'In Stock' : 'Out of Stock'}
-                    </span>
+                    <div className="flex flex-col gap-1"><span className={o.in_stock ? 'text-green-600 text-sm' : 'text-destructive text-sm'}>{o.in_stock ? 'In Stock' : 'Out of Stock'}</span><span className={o.is_visible ? 'text-primary text-xs' : 'text-muted-foreground text-xs'}>{o.is_visible ? 'Visible' : 'Hidden'}</span></div>
                     <div className="flex items-center gap-1">
+                      <Button variant="outline" size="sm" disabled={visibilityMu.isPending} onClick={() => visibilityMu.mutate({ id: o.id, isVisible: !Boolean(o.is_visible) })}>
+                        {o.is_visible ? <EyeOff className="mr-1 size-4" /> : <Eye className="mr-1 size-4" />}
+                        {o.is_visible ? 'Hide' : 'Show'}
+                      </Button>
                       <Button variant="outline" size="sm" onClick={() => openEdit(o)}>
                         <Pencil className="w-4 h-4 mr-1" />
                         Edit
@@ -415,6 +442,7 @@ export default function AdminOptics() {
                     <TableHead>Price (AMD / USD / RUB)</TableHead>
                     <TableHead>Discount</TableHead>
                     <TableHead>Stock</TableHead>
+                    <TableHead>Visibility</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -460,7 +488,11 @@ export default function AdminOptics() {
                           {o.in_stock ? 'In Stock' : 'Out of Stock'}
                         </span>
                       </TableCell>
+                      <TableCell><span className={o.is_visible ? 'text-primary' : 'text-muted-foreground'}>{o.is_visible ? 'Visible' : 'Hidden'}</span></TableCell>
                       <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" title={o.is_visible ? 'Hide product' : 'Show product'} disabled={visibilityMu.isPending} onClick={() => visibilityMu.mutate({ id: o.id, isVisible: !Boolean(o.is_visible) })}>
+                          {o.is_visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                        </Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(o)}>
                           <Pencil className="w-4 h-4" />
                         </Button>
@@ -740,6 +772,17 @@ export default function AdminOptics() {
                 className="rounded border-input"
               />
               <Label htmlFor="in_stock">In Stock</Label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="is_visible"
+                checked={form.is_visible === 'true'}
+                onChange={(e) => setForm((f) => ({ ...f, is_visible: e.target.checked ? 'true' : 'false' }))}
+                className="rounded border-input"
+              />
+              <Label htmlFor="is_visible">Visible on website</Label>
             </div>
 
             <DialogFooter>
