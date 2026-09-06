@@ -37,7 +37,9 @@ RewriteRule ^$ /seo/hy/home/index.html [L]
 RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
 RewriteRule ^blog/?$ /seo/%2/blog/index.html [L]
 RewriteRule ^blog/?$ /seo/hy/blog/index.html [L]
-RewriteRule ^blog/[^/]+/?$ /index.html [L]
+RewriteCond %{QUERY_STRING} (^|&)lang=(en|ru|hy)(&|$) [NC]
+RewriteRule ^blog/([^/]+)/?$ /seo/%2/blog/$1/index.html [L]
+RewriteRule ^blog/([^/]+)/?$ /seo/hy/blog/$1/index.html [L]
 
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

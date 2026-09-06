@@ -9,12 +9,22 @@ const entries = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match
 assert(entries.length > 18, `sitemap has only ${entries.length} entries`);
 assert(entries.some((url) => url.includes('/products/') && url.endsWith('?lang=en')), 'sitemap lacks English product URLs');
 assert(entries.some((url) => url === 'https://opticgallery.am/'), 'sitemap lacks canonical Armenian homepage URL');
+assert(entries.some((url) => /\/blog\/[^?]+\?lang=en$/.test(url)), 'sitemap lacks English blog article URLs');
 assert(!entries.some((url) => url.includes('?lang=hy')), 'default Armenian URLs must not contain a language parameter');
 assert(sitemap.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'sitemap lacks xhtml namespace');
 assert(sitemap.includes('hreflang="x-default"'), 'sitemap lacks x-default alternates');
 
 for (const relative of ['seo/hy/home/index.html', 'seo/en/products/index.html', 'seo/ru/about/index.html', 'seo/noindex/index.html', '404.html']) {
   try { await access(`${dist}/${relative}`); } catch { failures.push(`missing ${relative}`); }
+}
+
+const blogEntry = entries.find((url) => /\/blog\/[^?]+\?lang=en$/.test(url));
+if (blogEntry) {
+  const slug = blogEntry.match(/\/blog\/([^?]+)/)?.[1];
+  const blogHtml = await readFile(`${dist}/seo/en/blog/${slug}/index.html`, 'utf8');
+  assert(blogHtml.includes('<meta property="og:type" content="article"'), 'blog page lacks article Open Graph type');
+  assert(blogHtml.includes('"@type":"BlogPosting"'), 'blog page lacks BlogPosting JSON-LD');
+  assert(blogHtml.includes(`<link rel="canonical" href="https://opticgallery.am/blog/${slug}?lang=en"`), 'blog canonical is incorrect');
 }
 
 const productEntry = entries.find((url) => /\/products\/\d+\?lang=en$/.test(url));

@@ -75,6 +75,23 @@ async function fetchProducts() {
   throw new Error(`Cannot generate complete SEO output from ${API_URL}/optics after 4 attempts: ${lastError.message}`);
 }
 
+async function fetchBlogPosts() {
+  var lastError;
+  for (let attempt = 1; attempt <= 4; attempt += 1) {
+    try {
+      const response = await fetch(`${API_URL}/blog`);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!Array.isArray(data)) throw new Error('response is not an array');
+      return data.filter((post) => post.slug && post.published_at);
+    } catch (error) {
+      lastError = error;
+      if (attempt < 4) await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
+    }
+  }
+  throw new Error(`Cannot generate blog SEO output from ${API_URL}/blog after 4 attempts: ${lastError.message}`);
+}
+
 async function fetchSiteSettings() {
   try {
     const response = await fetch(`${API_URL}/site-settings`);
@@ -146,7 +163,7 @@ function sitemapEntry(pathname, changefreq, priority) {
 
 const template = await inlineCompiledStyles(await readFile(path.join(DIST, 'index.html'), 'utf8'));
 await save('index.html', template);
-const [products, siteSettings] = await Promise.all([fetchProducts(), fetchSiteSettings()]);
+const [products, blogPosts, siteSettings] = await Promise.all([fetchProducts(), fetchBlogPosts(), fetchSiteSettings()]);
 const sitemap = [];
 
 const mobileHero = optimizedUpload(siteSettings.hero_mobile_image || siteSettings.hero_image, 768);
@@ -182,8 +199,27 @@ for (const product of products) {
   sitemap.push(...sitemapEntry(pathname, 'weekly', '0.8'));
 }
 
+for (const post of blogPosts) {
+  const pathname = `/blog/${post.slug}`;
+  for (const lang of LANGS) {
+    const title = post[`title_${lang}`] || post.title_en;
+    const description = post[`excerpt_${lang}`] || post.excerpt_en;
+    const image = post.cover_image_url
+      ? `${new URL(API_URL).origin}${post.cover_image_url.startsWith('/') ? '' : '/'}${post.cover_image_url}`
+      : `${SITE_URL}/logo.png`;
+    const schema = {
+      '@context': 'https://schema.org', '@type': 'BlogPosting', headline: title, description,
+      image: [image], datePublished: post.published_at, dateModified: post.updated_at || post.published_at,
+      inLanguage: lang, mainEntityOfPage: urlFor(pathname, lang), url: urlFor(pathname, lang),
+      publisher: { '@type': 'Organization', name: 'Optic Gallery', logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` } },
+    };
+    await save(`seo/${lang}/blog/${post.slug}/index.html`, render(template, { lang, pathname, title, description, image, type: 'article', schema }));
+  }
+  sitemap.push(...sitemapEntry(pathname, 'monthly', '0.8'));
+}
+
 await save('seo/noindex/index.html', render(template, { lang: 'hy', pathname: '/', title: 'Private page', description: 'This page is not available in search results.', image: `${SITE_URL}/logo.png`, robots: 'noindex, nofollow' }));
 const notFound = render(template, { lang: 'hy', pathname: '/', title: 'Page not found', description: 'The requested page does not exist.', image: `${SITE_URL}/logo.png`, robots: 'noindex, nofollow' });
 await save('404.html', notFound);
 await save('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${sitemap.join('\n')}\n</urlset>\n`);
-console.log(`Generated ${LANGS.length * (Object.keys(pages).length + products.length)} SEO pages and ${sitemap.length} sitemap URLs for ${products.length} products.`);
+console.log(`Generated ${LANGS.length * (Object.keys(pages).length + products.length + blogPosts.length)} SEO pages and ${sitemap.length} sitemap URLs for ${products.length} products and ${blogPosts.length} blog posts.`);
