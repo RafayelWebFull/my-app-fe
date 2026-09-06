@@ -54,7 +54,7 @@ export default function Cart() {
                 >
                   <div className="w-24 h-24 rounded-lg bg-secondary shrink-0 overflow-hidden">
                     {item.image_url ? (
-                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt="" loading="lazy" className="w-full h-full object-cover" />
+                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt={item.name} loading="lazy" className="w-full h-full object-contain bg-white" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">—</div>
                     )}

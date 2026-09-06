@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, ShoppingCart } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl, imageUrl } from '@/lib/api';
@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { useCart } from '@/contexts/CartContext';
+import { toast } from 'sonner';
 
 type OpticDetails = {
   id: number;
@@ -37,6 +39,7 @@ export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
   const { data: rates } = useExchangeRates();
+  const { addItem } = useCart();
   const baseUrl = 'https://opticgallery.am';
   const localizedProductUrl = (productId: number) =>
     `${baseUrl}/products/${productId}${language === 'hy' ? '' : `?lang=${language}`}`;
@@ -290,6 +293,28 @@ export default function ProductDetails() {
               <p className={product.in_stock === false || product.in_stock === 0 ? 'text-destructive text-sm' : 'text-green-600 text-sm'}>
                 {product.in_stock === false || product.in_stock === 0 ? t('outOfStock') : t('inStock')}
               </p>
+
+              <Button
+                type="button"
+                size="lg"
+                className="w-full sm:w-auto gap-2"
+                disabled={product.in_stock === false || product.in_stock === 0 || priceNum == null || !Number.isFinite(priceNum)}
+                onClick={() => {
+                  addItem({
+                    id: product.id,
+                    name: product.name,
+                    brand_name: product.brand_name,
+                    style: product.style,
+                    image_url: product.image_url,
+                    price: product.price,
+                    discount: product.discount,
+                  });
+                  toast.success(t('addedToCart'));
+                }}
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {t('addToCart')}
+              </Button>
 
               <div className="pt-2">
                 <h2 className="font-semibold mb-2">{t('description')}</h2>

@@ -13,6 +13,10 @@ const Contact = lazy(() => import("./pages/Contact"));
 const RepairService = lazy(() => import("./pages/RepairService"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Cart = lazy(() => import("./pages/Cart"));
+const CartPreview = lazy(() => import("./pages/CartPreview"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
 const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -55,6 +59,10 @@ const App = () => (
               <Route path="/repair-service" element={<RepairService />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/cart-preview" element={<CartPreview />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/order-success" element={<OrderSuccess />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
               </Routes>

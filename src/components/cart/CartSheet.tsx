@@ -52,7 +52,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
                 >
                   <div className="w-16 h-16 rounded-lg bg-secondary shrink-0 overflow-hidden">
                     {item.image_url ? (
-                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt="" className="w-full h-full object-cover" />
+                      <img src={imageUrl(item.image_url) || item.image_url || ''} alt={item.name} className="w-full h-full object-contain bg-white" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
                         —

@@ -55,7 +55,7 @@ export default function CartPreview() {
                     <img
                       src={imageUrl(item.image_url) || item.image_url || ''}
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-white"
                     />
                   ) : (
                     <ImageIcon className="w-10 h-10 text-muted-foreground/50" />
@@ -89,4 +89,3 @@ export default function CartPreview() {
     </Layout>
   );
 }
-

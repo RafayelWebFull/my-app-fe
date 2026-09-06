@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, ShoppingCart, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
+import { CartSheet } from '@/components/cart/CartSheet';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { totalItems } = useCart();
   const { language, setLanguage, t } = useLanguage();
   const location = useLocation();
 
@@ -86,6 +90,21 @@ export function Header() {
               ))}
             </div>
 
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative"
+              onClick={() => setIsCartOpen(true)}
+              aria-label={`${t('cart')} (${totalItems})`}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold text-primary-foreground">
+                  {totalItems > 99 ? '99+' : totalItems}
+                </span>
+              )}
+            </Button>
+
             {/* Mobile Menu Button */}
             <Button
               variant="ghost"
@@ -143,6 +162,7 @@ export function Header() {
             </nav>
           </div>
       )}
+      <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />
     </header>
   );
 }
