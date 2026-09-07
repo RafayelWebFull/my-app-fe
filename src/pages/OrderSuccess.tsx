@@ -4,9 +4,10 @@ import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSeo } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
+import { localizedPath } from '@/lib/localizedUrl';
 
 export default function OrderSuccess() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useSeo({
     title: 'Order Confirmed',
@@ -32,10 +33,10 @@ export default function OrderSuccess() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Button asChild>
-            <Link to="/products">{t('products')}</Link>
+            <Link to={localizedPath('/products', language)}>{t('products')}</Link>
           </Button>
           <Button asChild variant="outline">
-            <Link to="/">{t('home')}</Link>
+            <Link to={localizedPath('/', language)}>{t('home')}</Link>
           </Button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { CartSheet } from '@/components/cart/CartSheet';
+import { localizedPath } from '@/lib/localizedUrl';
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,7 +41,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 group">
+          <Link to={localizedPath('/', language)} className="flex items-center gap-2 group">
             <div className="w-10 h-10 rounded-full bg-white border border-white/70 shadow-sm flex items-center justify-center">
               <img src="/logo-small.webp" alt="Optic Gallery" width="28" height="28" className="w-7 h-7 object-contain" />
             </div>
@@ -54,7 +55,7 @@ export function Header() {
             {navItems.map((item) => (
               <Link
                 key={item.key}
-                to={item.path}
+                to={localizedPath(item.path, language)}
                 className={`relative font-medium transition-colors hover:text-accent ${
                   isActive(item.path) ? 'text-primary' : 'text-foreground'
                 }`}
@@ -130,7 +131,7 @@ export function Header() {
               {navItems.map((item) => (
                 <Link
                   key={item.key}
-                  to={item.path}
+                  to={localizedPath(item.path, language)}
                   onClick={() => setIsMenuOpen(false)}
                   className={`px-4 py-3 rounded-lg font-medium transition-colors ${
                     isActive(item.path)

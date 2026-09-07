@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { localizedPath } from '@/lib/localizedUrl';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -41,7 +42,7 @@ export default function Cart() {
           <div className="text-center py-16">
             <p className="text-muted-foreground mb-6">{t('cartEmpty')}</p>
             <Button asChild>
-              <Link to="/products">{t('products')}</Link>
+              <Link to={localizedPath('/products', language)}>{t('products')}</Link>
             </Button>
           </div>
         ) : (
@@ -105,13 +106,13 @@ export default function Cart() {
                   <span>{formatMoney(subtotal)}</span>
                 </p>
                 <Button asChild className="w-full" size="lg">
-                  <Link to="/checkout" className="gap-2">
+                  <Link to={localizedPath('/checkout', language)} className="gap-2">
                     {t('proceedToCheckout')}
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full mt-3">
-                  <Link to="/products">{t('continueShopping') || 'Continue shopping'}</Link>
+                  <Link to={localizedPath('/products', language)}>{t('continueShopping') || 'Continue shopping'}</Link>
                 </Button>
               </div>
             </div>

@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { localizedPath } from '@/lib/localizedUrl';
 
 export interface Optic {
   id: number;
@@ -327,7 +328,7 @@ export function ProductsPreview() {
                       transition={{ delay: index * 0.05 }}
                     >
                       <Link
-                        to={`/products/${product.id}`}
+                        to={localizedPath(`/products/${product.id}`, language)}
                         className="block group bg-card rounded-2xl p-4 shadow-card hover:shadow-elevated transition-all h-full"
                       >
                         <div className="aspect-square rounded-xl bg-secondary/60 mb-3 flex items-center justify-center overflow-hidden relative">
@@ -382,7 +383,7 @@ export function ProductsPreview() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {categoryCards.map((category, index) => (
-            <Link key={`${category.slug}-${index}`} to={`/products?category=${category.slug}`}>
+            <Link key={`${category.slug}-${index}`} to={localizedPath(`/products?category=${category.slug}`, language)}>
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -436,7 +437,7 @@ export function ProductsPreview() {
           className="text-center mt-12"
         >
           <Button asChild size="lg" variant="outline" className="border-2">
-            <Link to="/products">
+            <Link to={localizedPath('/products', language)}>
               {t('viewCollection')}
               <ArrowRight className="w-5 h-5 ml-2" />
             </Link>

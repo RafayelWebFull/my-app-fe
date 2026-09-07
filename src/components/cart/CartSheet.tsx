@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { localizedPath } from '@/lib/localizedUrl';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -107,10 +108,10 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
               <span>{formatMoney(subtotal)}</span>
             </p>
             <Button asChild className="w-full" onClick={() => onOpenChange(false)}>
-              <Link to="/checkout">{t('checkout')}</Link>
+              <Link to={localizedPath('/checkout', language)}>{t('checkout')}</Link>
             </Button>
             <Button asChild variant="outline" className="w-full" onClick={() => onOpenChange(false)}>
-              <Link to="/cart">{t('viewCart')}</Link>
+              <Link to={localizedPath('/cart', language)}>{t('viewCart')}</Link>
             </Button>
           </div>
         )}

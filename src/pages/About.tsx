@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { useSeo } from '@/lib/seo';
+import { localizedPath } from '@/lib/localizedUrl';
 
 const ABOUT_SEO_COPY: Record<
   'en' | 'ru' | 'hy',
@@ -270,13 +271,13 @@ const About = () => {
             </ul>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
-                to="/products"
+                to={localizedPath('/products', language)}
                 className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {language === 'ru' ? 'Смотреть продукцию' : language === 'hy' ? 'Դիտել արտադրանք' : 'Browse products'}
               </Link>
               <Link
-                to="/contact"
+                to={localizedPath('/contact', language)}
                 className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {language === 'ru' ? 'Контакты оптики' : language === 'hy' ? 'Օպտիկայի կոնտակտներ' : 'Optical store contact'}

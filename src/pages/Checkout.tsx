@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { useSeo } from '@/lib/seo';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { localizedPath } from '@/lib/localizedUrl';
 
 function getItemPrice(item: { price: number | string | null; discount?: number | null; quantity: number }) {
   const priceNum = item.price != null ? (typeof item.price === 'string' ? parseFloat(item.price) : item.price) : 0;
@@ -49,7 +50,7 @@ export default function Checkout() {
         <div className="container mx-auto px-4 py-24 text-center">
           <p className="text-muted-foreground mb-6">{t('cartEmpty')}</p>
           <Button asChild>
-            <Link to="/products">{t('products')}</Link>
+            <Link to={localizedPath('/products', language)}>{t('products')}</Link>
           </Button>
         </div>
       </Layout>
@@ -94,7 +95,7 @@ export default function Checkout() {
       const data = await res.json();
       clearCart();
       toast.success(t('orderSuccess'));
-      navigate('/order-success', { state: { orderNumber: data.order_number } });
+      navigate(localizedPath('/order-success', language), { state: { orderNumber: data.order_number } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed');
       setLoading(false);

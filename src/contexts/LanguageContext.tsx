@@ -18,23 +18,20 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+function getInitialLanguage(): Language {
+  const urlLanguage = new URLSearchParams(window.location.search).get('lang');
+  if (urlLanguage && ['en', 'ru', 'hy'].includes(urlLanguage)) return urlLanguage as Language;
+
+  const savedLanguage = localStorage.getItem('language');
+  return savedLanguage && ['en', 'ru', 'hy'].includes(savedLanguage)
+    ? savedLanguage as Language
+    : 'hy';
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('hy');
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
   const [backendTranslations, setBackendTranslations] = useState<BackendTranslations>({});
   const [loading, setLoading] = useState<boolean>(true);
-
-  // Load language from localStorage on initial render
-  useEffect(() => {
-    const urlLang = new URLSearchParams(window.location.search).get('lang') as Language | null;
-    if (urlLang && ['en', 'ru', 'hy'].includes(urlLang)) {
-      setLanguageState(urlLang);
-      return;
-    }
-    const savedLanguage = localStorage.getItem('language') as Language | null;
-    if (savedLanguage && ['en', 'ru', 'hy'].includes(savedLanguage)) {
-      setLanguageState(savedLanguage);
-    }
-  }, []);
 
   const fetchTranslationsFor = async (lang: Language) => {
     setLoading(true);

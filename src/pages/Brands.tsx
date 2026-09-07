@@ -6,6 +6,7 @@ import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl } from '@/lib/api';
 import { useSeo } from '@/lib/seo';
+import { localizedPath } from '@/lib/localizedUrl';
 
 interface Brand {
   id: number;
@@ -129,7 +130,7 @@ const Brands = () => {
                   transition={{ duration: 0.4, delay: index * 0.04 }}
                 >
                   <Link
-                    to={`/products?brand=${encodeURIComponent(String(brand.id))}`}
+                    to={localizedPath(`/products?brand=${encodeURIComponent(String(brand.id))}`, language)}
                     className="group flex items-center justify-between gap-4 rounded-2xl bg-card px-6 py-5 shadow-card hover:shadow-elevated transition-all"
                   >
                     <div>

@@ -6,6 +6,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { imageUrl } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
+import { localizedPath } from '@/lib/localizedUrl';
 
 type PreviewCard = {
   id: number;
@@ -22,7 +23,7 @@ function toPreviewCards(items: PreviewCard[]): Array<PreviewCard | null> {
 }
 
 export default function CartPreview() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { items, totalItems } = useCart();
   const cards = toPreviewCards(items as PreviewCard[]);
 
@@ -75,13 +76,13 @@ export default function CartPreview() {
 
           <div className="max-w-sm mx-auto mt-10 space-y-3">
             <Button asChild className="w-full" size="lg">
-              <Link to="/cart" className="gap-2">
+              <Link to={localizedPath('/cart', language)} className="gap-2">
                 {t('viewCart')}
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full">
-              <Link to="/products">{t('continueShopping') || 'Continue shopping'}</Link>
+              <Link to={localizedPath('/products', language)}>{t('continueShopping') || 'Continue shopping'}</Link>
             </Button>
           </div>
         </div>

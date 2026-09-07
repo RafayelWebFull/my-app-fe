@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { apiUrl, optimizedImageUrl } from '@/lib/api';
+import { localizedPath } from '@/lib/localizedUrl';
 
 const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
 
@@ -13,7 +14,7 @@ function toColorOrUndefined(raw: string | undefined): string | undefined {
 }
 
 export function Hero() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const { data: settings = {} } = useQuery({
     queryKey: ['site-settings'],
@@ -88,13 +89,13 @@ export function Hero() {
             className="flex flex-col sm:flex-row gap-4 mt-auto pt-6"
           >
             <Button asChild size="lg" className="gradient-hero border-0 text-lg px-8 py-6 shadow-elevated hover:opacity-90 transition-opacity">
-              <Link to="/contact">
+              <Link to={localizedPath('/contact', language)}>
                 <MapPin className="w-5 h-5 mr-2" />
                 {t('visitStore')}
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="text-lg px-8 py-6 border-2 hover:bg-secondary">
-              <Link to="/contact">
+              <Link to={localizedPath('/contact', language)}>
                 {t('contactUs')}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>

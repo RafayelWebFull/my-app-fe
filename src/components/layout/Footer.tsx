@@ -4,9 +4,10 @@ import { Instagram, Phone, MapPin } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl } from '@/lib/api';
 import { parseMultiValue } from '@/lib/contactInfo';
+import { localizedPath } from '@/lib/localizedUrl';
 
 export function Footer() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { data: settings = {} } = useQuery({
     queryKey: ['site-settings'],
     queryFn: async () => {
@@ -27,7 +28,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Logo & Description */}
           <div className="md:col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
+            <Link to={localizedPath('/', language)} className="flex items-center gap-2 mb-4">
               <div className="w-10 h-10 rounded-full bg-white border border-white/70 shadow-sm flex items-center justify-center shrink-0">
                 <img src="/logo-small.webp" alt="Optic Gallery" width="28" height="28" loading="lazy" className="w-7 h-7 object-contain" />
               </div>

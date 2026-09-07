@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { localizedPath } from '@/lib/localizedUrl';
 
 type Copy = {
   title: string;
@@ -86,7 +87,7 @@ export function LocalSeoContent() {
             {copy.links.map((item) => (
               <Link
                 key={item.to}
-                to={item.to}
+                to={localizedPath(item.to, language)}
                 className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {item.label}

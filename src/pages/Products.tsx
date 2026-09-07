@@ -20,6 +20,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { useSeo } from '@/lib/seo';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { localizedPath } from '@/lib/localizedUrl';
 
 export interface Optic {
   id: number;
@@ -104,12 +105,6 @@ const Products = () => {
   const meta = PRODUCTS_META[language];
   const seoCopy = PRODUCTS_SEO_COPY[language];
 
-  useSeo({
-    title: meta.title,
-    description: meta.description,
-    path: '/products',
-    keywords: meta.keywords,
-  });
   const [searchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [categoryFilter, setCategoryFilter] = useState<string>(
@@ -202,6 +197,15 @@ const Products = () => {
     discountFilter !== 'all' ||
     bannerFilter !== 'all' ||
     search.trim();
+
+  useSeo({
+    title: meta.title,
+    description: meta.description,
+    path: '/products',
+    keywords: meta.keywords,
+    robots: hasFilters ? 'noindex,follow' : undefined,
+  });
+
   const opticsByCategory = hasFilters
     ? { filtered: optics }
     : {
@@ -240,7 +244,7 @@ const Products = () => {
         transition={{ duration: 0.5, delay: index * 0.1 }}
         className="group rounded-2xl"
       >
-        <Link to={`/products/${product.id}`} className="block bg-card rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all">
+        <Link to={localizedPath(`/products/${product.id}`, language)} className="block bg-card rounded-2xl p-6 shadow-card hover:shadow-elevated transition-all">
           <div className="aspect-square rounded-xl bg-secondary/60 mb-4 flex items-center justify-center overflow-hidden relative">
             {product.discount != null && product.discount > 0 && (
               <span className="absolute top-2 right-2 z-10 bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded-md">
@@ -518,13 +522,13 @@ const Products = () => {
             </ul>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
-                to="/contact"
+                to={localizedPath('/contact', language)}
                 className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {language === 'ru' ? 'Оптика в Ереване: контакты' : language === 'hy' ? 'Օպտիկա Երևանում՝ կոնտակտներ' : 'Optical store Yerevan contact'}
               </Link>
               <Link
-                to="/about"
+                to={localizedPath('/about', language)}
                 className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {language === 'ru' ? 'О нашей оптике' : language === 'hy' ? 'Մեր օպտիկայի մասին' : 'About our optical store'}

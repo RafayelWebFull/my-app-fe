@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { localizedPath } from '@/lib/localizedUrl';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
 
@@ -168,7 +169,7 @@ export default function ProductDetails() {
         <div className="container mx-auto px-4 py-20 text-center">
           <p className="text-muted-foreground mb-6">Product not found.</p>
           <Button asChild variant="outline">
-            <Link to="/products">Back to products</Link>
+            <Link to={localizedPath('/products', language)}>Back to products</Link>
           </Button>
         </div>
       </Layout>
@@ -208,7 +209,7 @@ export default function ProductDetails() {
       <section className="py-14">
         <div className="container mx-auto px-4">
           <Button asChild variant="ghost" className="mb-6 gap-2">
-            <Link to="/products">
+            <Link to={localizedPath('/products', language)}>
               <ArrowLeft className="w-4 h-4" />
               {t('products')}
             </Link>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl, optimizedImageUrl } from '@/lib/api';
+import { localizedPath } from '@/lib/localizedUrl';
 import {
   Carousel,
   CarouselContent,
@@ -32,15 +33,17 @@ function formatDate(d: string) {
 function BannerSlide({
   banner,
   t,
+  language,
 }: {
   banner: Banner;
   t: (key: string) => string;
+  language: 'en' | 'ru' | 'hy';
 }) {
   const productsUrl = `/products?banner=${encodeURIComponent(String(banner.id))}`;
 
   return (
     <Link
-      to={productsUrl}
+      to={localizedPath(productsUrl, language)}
       className="block w-full group relative overflow-hidden lg:rounded-3xl lg:shadow-elevated lg:hover:shadow-xl transition-shadow"
     >
       {(banner.image_url || banner.mobile_image_url) ? (
@@ -88,7 +91,7 @@ function BannerSlide({
 }
 
 export function PromoBanner({ overlap = true }: { overlap?: boolean }) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
@@ -129,7 +132,7 @@ export function PromoBanner({ overlap = true }: { overlap?: boolean }) {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.3 }}
                     >
-                      <BannerSlide banner={banner} t={t} />
+                      <BannerSlide banner={banner} t={t} language={language} />
                     </motion.div>
                   </CarouselItem>
                 ))}
@@ -156,7 +159,7 @@ export function PromoBanner({ overlap = true }: { overlap?: boolean }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <BannerSlide banner={banners[0]} t={t} />
+            <BannerSlide banner={banners[0]} t={t} language={language} />
           </motion.div>
         )}
       </div>

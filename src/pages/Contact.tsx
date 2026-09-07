@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl } from '@/lib/api';
 import { parseMultiValue } from '@/lib/contactInfo';
 import { useSeo } from '@/lib/seo';
+import { localizedPath } from '@/lib/localizedUrl';
 
 const CONTACT_SEO_COPY: Record<'en' | 'ru' | 'hy', { title: string; text: string }> = {
   en: {
@@ -286,13 +287,13 @@ const Contact = () => {
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link
-                to="/products"
+                to={localizedPath('/products', language)}
                 className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {language === 'ru' ? 'Каталог оптики' : language === 'hy' ? 'Օպտիկայի կատալոգ' : 'Optical catalog'}
               </Link>
               <Link
-                to="/about"
+                to={localizedPath('/about', language)}
                 className="inline-flex rounded-full border border-border px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
               >
                 {language === 'ru' ? 'О нашей оптике' : language === 'hy' ? 'Մեր օպտիկայի մասին' : 'About our optical store'}

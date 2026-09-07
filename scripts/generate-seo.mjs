@@ -57,6 +57,33 @@ const xmlEscape = (value) => htmlEscape(value).replace(/&#39;/g, '&apos;');
 const absoluteImage = (value) => !value ? `${SITE_URL}/logo.png` : /^https?:\/\//.test(value) ? value : `${SITE_URL}${value.startsWith('/') ? '' : '/'}${value}`;
 const localizedDescription = (product, lang) => product.description_translations?.[lang] || product[`description_${lang}`] || product.description || '';
 const urlFor = (pathname, lang) => `${SITE_URL}${pathname === '/' ? '/' : pathname}${lang === 'hy' ? '' : `?lang=${lang}`}`;
+const linkFor = (pathname, lang, label) => `<a href="${htmlEscape(urlFor(pathname, lang))}">${htmlEscape(label)}</a>`;
+
+function fallbackShell(lang, title, content) {
+  const navigation = [
+    ['/', pages.home[lang][0]],
+    ['/products', pages.products[lang][0]],
+    ['/brands', pages.brands[lang][0]],
+    ['/repair-service', pages['repair-service'][lang][0]],
+    ['/blog', pages.blog[lang][0]],
+    ['/about', pages.about[lang][0]],
+    ['/contact', pages.contact[lang][0]],
+  ].map(([pathname, label]) => linkFor(pathname, lang, label)).join(' ');
+
+  return `<main data-seo-fallback lang="${lang}">
+      <nav aria-label="Primary">${navigation}</nav>
+      <h1>${htmlEscape(title)}</h1>
+      ${content}
+    </main>`;
+}
+
+function productLinks(products, lang, limit = products.length) {
+  return `<ul>${products.slice(0, limit).map((product) => `<li>${linkFor(`/products/${Number(product.id)}`, lang, product.name)}</li>`).join('')}</ul>`;
+}
+
+function blogLinks(posts, lang) {
+  return `<ul>${posts.map((post) => `<li>${linkFor(`/blog/${post.slug}`, lang, post[`title_${lang}`] || post.title_en)}</li>`).join('')}</ul>`;
+}
 
 async function fetchProducts() {
   var lastError;
@@ -66,7 +93,14 @@ async function fetchProducts() {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       if (!Array.isArray(data)) throw new Error('response is not an array');
-      return data.filter((item) => Number.isInteger(Number(item.id)) && Number(item.id) > 0);
+      return data.filter((item) =>
+        Number.isInteger(Number(item.id)) &&
+        Number(item.id) > 0 &&
+        item.is_visible !== false &&
+        Number(item.is_visible ?? 1) !== 0 &&
+        typeof item.name === 'string' &&
+        item.name.trim().length > 0
+      );
     } catch (error) {
       lastError = error;
       if (attempt < 4) await new Promise((resolve) => setTimeout(resolve, attempt * 2000));
@@ -114,7 +148,7 @@ function alternates(pathname) {
   return [...LANGS.map((lang) => `<link rel="alternate" hreflang="${lang}" href="${htmlEscape(urlFor(pathname, lang))}" data-seo-lang="${lang}" />`), `<link rel="alternate" hreflang="x-default" href="${htmlEscape(urlFor(pathname, 'hy'))}" data-seo-lang="x-default" />`].join('\n    ');
 }
 
-function render(template, { lang, pathname, title, description, image, type = 'website', robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1', schema, headLinks = '' }) {
+function render(template, { lang, pathname, title, description, image, type = 'website', robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1', schema, headLinks = '', bodyFallback = '' }) {
   const canonical = urlFor(pathname, lang);
   const fullTitle = `${title} | Optic Gallery`;
   let html = template
@@ -137,6 +171,7 @@ function render(template, { lang, pathname, title, description, image, type = 'w
   html = html.replace('</head>', `    <meta property="og:locale" content="${locales[lang]}" />\n  </head>`);
   if (headLinks) html = html.replace('</head>', `    ${headLinks}\n  </head>`);
   if (schema) html = html.replace('</head>', `    <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>\n  </head>`);
+  if (bodyFallback) html = html.replace('<div id="root"></div>', `<div id="root">${bodyFallback}</div>`);
   return html;
 }
 
@@ -176,12 +211,28 @@ const heroPreloads = [
 for (const [slug, page] of Object.entries(pages)) {
   for (const lang of LANGS) {
     const [title, description] = page[lang];
-    await save(`seo/${lang}/${slug}/index.html`, render(template, { lang, pathname: page.path, title, description, image: `${SITE_URL}/logo.png`, headLinks: slug === 'home' ? heroPreloads : '' }));
+    let links = '';
+    if (slug === 'home') links = `<h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(products, lang, 12)}`;
+    if (slug === 'products') links = productLinks(products, lang);
+    if (slug === 'blog') links = blogLinks(blogPosts, lang);
+    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p>${links}`);
+    await save(`seo/${lang}/${slug}/index.html`, render(template, { lang, pathname: page.path, title, description, image: `${SITE_URL}/logo.png`, headLinks: slug === 'home' ? heroPreloads : '', bodyFallback }));
+    if (slug === 'products') {
+      await save(`seo/${lang}/products-filter/index.html`, render(template, {
+        lang,
+        pathname: page.path,
+        title,
+        description,
+        image: `${SITE_URL}/logo.png`,
+        robots: 'noindex,follow',
+        bodyFallback,
+      }));
+    }
   }
   sitemap.push(...sitemapEntry(page.path, page.changefreq, page.priority));
 }
 
-for (const product of products) {
+for (const [productIndex, product] of products.entries()) {
   const pathname = `/products/${Number(product.id)}`;
   for (const lang of LANGS) {
     const description = localizedDescription(product, lang) || pages.products[lang][1];
@@ -194,7 +245,9 @@ for (const product of products) {
       url: urlFor(pathname, lang),
       offers: { '@type': 'Offer', priceCurrency: 'AMD', price: numericPrice, availability: product.in_stock === false || product.in_stock === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock', url: urlFor(pathname, lang) },
     } : undefined;
-    await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title: product.name, description, image, type: 'product', schema }));
+    const nearbyProducts = products.filter((_, index) => index !== productIndex).slice(Math.max(0, productIndex - 3), productIndex + 4);
+    const bodyFallback = fallbackShell(lang, product.name, `<p>${htmlEscape(description)}</p><p>${linkFor('/products', lang, pages.products[lang][0])}</p><h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(nearbyProducts, lang, 6)}`);
+    await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title: product.name, description, image, type: 'product', schema, bodyFallback }));
   }
   sitemap.push(...sitemapEntry(pathname, 'weekly', '0.8'));
 }
@@ -213,7 +266,8 @@ for (const post of blogPosts) {
       inLanguage: lang, mainEntityOfPage: urlFor(pathname, lang), url: urlFor(pathname, lang),
       publisher: { '@type': 'Organization', name: 'Optic Gallery', logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` } },
     };
-    await save(`seo/${lang}/blog/${post.slug}/index.html`, render(template, { lang, pathname, title, description, image, type: 'article', schema }));
+    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p><p>${linkFor('/blog', lang, pages.blog[lang][0])}</p>${blogLinks(blogPosts.filter((item) => item.slug !== post.slug).slice(0, 6), lang)}`);
+    await save(`seo/${lang}/blog/${post.slug}/index.html`, render(template, { lang, pathname, title, description, image, type: 'article', schema, bodyFallback }));
   }
   sitemap.push(...sitemapEntry(pathname, 'monthly', '0.8'));
 }
