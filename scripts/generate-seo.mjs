@@ -52,6 +52,33 @@ const pages = {
   },
 };
 
+const repairDetails = {
+  hy: {
+    servicesTitle: 'Ի՞նչ ենք վերանորոգում',
+    services: ['Շրջանակի զոդում', 'Ոսպնյակի փոխարինում', 'Պտուտակների և բռնիչների փոխարինում', 'Ակնոցի ձևի կարգավորում', 'Փայլեցում և ուլտրաձայնային մաքրում', 'Արևային ակնոցների վերանորոգում'],
+    processTitle: 'Ինչպես է ընթանում վերանորոգումը',
+    process: ['Բերեք ակնոցը կամ ուղարկեք լուսանկարը', 'Ստացեք անվճար ախտորոշում և ճշգրիտ գին', 'Վերանորոգման մեծ մասը կատարվում է 15–60 րոպեում', 'Ստուգում, կարգավորում և հանձնում'],
+    benefitsTitle: 'Ինչո՞ւ Optic Gallery',
+    benefits: ['Անհատական մոտեցում', 'Ազնիվ գին մինչև աշխատանքի սկիզբը', 'Որակյալ պահեստամասեր և ոսպնյակներ', 'Երաշխիք կատարված աշխատանքին'],
+  },
+  ru: {
+    servicesTitle: 'Что мы ремонтируем',
+    services: ['Пайка металлических оправ', 'Замена линз по рецепту', 'Замена винтов, шарниров и носоупоров', 'Регулировка формы и посадки очков', 'Полировка и ультразвуковая чистка', 'Ремонт солнцезащитных очков'],
+    processTitle: 'Как проходит ремонт',
+    process: ['Принесите очки или отправьте фотографию', 'Получите бесплатную диагностику и точную цену', 'Большинство ремонтов выполняется за 15–60 минут', 'Проверка, регулировка и выдача'],
+    benefitsTitle: 'Почему Optic Gallery',
+    benefits: ['Индивидуальный подход', 'Честная цена до начала работы', 'Качественные детали и линзы', 'Гарантия на выполненную работу'],
+  },
+  en: {
+    servicesTitle: 'What we repair',
+    services: ['Metal frame soldering', 'Prescription lens replacement', 'Screw, hinge and nose-pad replacement', 'Frame shape and fit adjustment', 'Polishing and ultrasonic cleaning', 'Sunglasses repair'],
+    processTitle: 'How the repair works',
+    process: ['Bring your glasses or send a photo', 'Receive a free diagnosis and exact price', 'Most repairs are completed within 15–60 minutes', 'Final inspection, adjustment and collection'],
+    benefitsTitle: 'Why Optic Gallery',
+    benefits: ['Personal approach', 'Honest pricing before work begins', 'Quality parts and lenses', 'Warranty on completed work'],
+  },
+};
+
 const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
 const xmlEscape = (value) => htmlEscape(value).replace(/&#39;/g, '&apos;');
 const absoluteImage = (value) => !value ? `${SITE_URL}/logo.png` : /^https?:\/\//.test(value) ? value : `${SITE_URL}${value.startsWith('/') ? '' : '/'}${value}`;
@@ -83,6 +110,15 @@ function productLinks(products, lang, limit = products.length) {
 
 function blogLinks(posts, lang) {
   return `<ul>${posts.map((post) => `<li>${linkFor(`/blog/${post.slug}`, lang, post[`title_${lang}`] || post.title_en)}</li>`).join('')}</ul>`;
+}
+
+function repairFallback(lang, description) {
+  const details = repairDetails[lang];
+  const list = (items) => `<ul>${items.map((item) => `<li>${htmlEscape(item)}</li>`).join('')}</ul>`;
+  return `<p>${htmlEscape(description)}</p>
+      <section><h2>${htmlEscape(details.servicesTitle)}</h2>${list(details.services)}</section>
+      <section><h2>${htmlEscape(details.processTitle)}</h2>${list(details.process)}</section>
+      <section><h2>${htmlEscape(details.benefitsTitle)}</h2>${list(details.benefits)}</section>`;
 }
 
 async function fetchProducts() {
@@ -144,11 +180,21 @@ function optimizedUpload(value, width) {
   return `${apiOrigin}/api/image?src=${encodeURIComponent(pathname)}&w=${width}`;
 }
 
+function firstRepairImage(value) {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  try {
+    const images = JSON.parse(value);
+    return Array.isArray(images) && typeof images[0] === 'string' ? images[0] : null;
+  } catch {
+    return null;
+  }
+}
+
 function alternates(pathname) {
   return [...LANGS.map((lang) => `<link rel="alternate" hreflang="${lang}" href="${htmlEscape(urlFor(pathname, lang))}" data-seo-lang="${lang}" />`), `<link rel="alternate" hreflang="x-default" href="${htmlEscape(urlFor(pathname, 'hy'))}" data-seo-lang="x-default" />`].join('\n    ');
 }
 
-function render(template, { lang, pathname, title, description, image, type = 'website', robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1', schema, headLinks = '', bodyFallback = '' }) {
+function render(template, { lang, pathname, title, description, image, type = 'website', robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1', schema, schemaId, headLinks = '', bodyFallback = '' }) {
   const canonical = urlFor(pathname, lang);
   const fullTitle = `${title} | Optic Gallery`;
   let html = template
@@ -170,7 +216,7 @@ function render(template, { lang, pathname, title, description, image, type = 'w
   }
   html = html.replace('</head>', `    <meta property="og:locale" content="${locales[lang]}" />\n  </head>`);
   if (headLinks) html = html.replace('</head>', `    ${headLinks}\n  </head>`);
-  if (schema) html = html.replace('</head>', `    <script type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>\n  </head>`);
+  if (schema) html = html.replace('</head>', `    <script${schemaId ? ` id="${htmlEscape(schemaId)}"` : ''} type="application/ld+json">${JSON.stringify(schema).replace(/</g, '\\u003c')}</script>\n  </head>`);
   if (bodyFallback) html = html.replace('<div id="root"></div>', `<div id="root">${bodyFallback}</div>`);
   return html;
 }
@@ -208,6 +254,13 @@ const heroPreloads = [
   desktopHero && `<link rel="preload" as="image" href="${htmlEscape(desktopHero)}" media="(min-width: 768px)" fetchpriority="high" />`,
 ].filter(Boolean).join('\n    ');
 
+const repairImageValue = firstRepairImage(siteSettings.repair_images) || '/uploads/hero-1771540352856.webp';
+const repairImage = /^https?:\/\//.test(repairImageValue)
+  ? repairImageValue
+  : `${new URL(API_URL).origin}${repairImageValue.startsWith('/') ? '' : '/'}${repairImageValue}`;
+const repairPhone = String(siteSettings.contact_phone || '+37411000000').split(/[\n,;|]/)[0].trim();
+const repairInstagram = String(siteSettings.contact_instagram || '@opticgallery.am').replace(/^@/, '');
+
 for (const [slug, page] of Object.entries(pages)) {
   for (const lang of LANGS) {
     const [title, description] = page[lang];
@@ -215,8 +268,30 @@ for (const [slug, page] of Object.entries(pages)) {
     if (slug === 'home') links = `<h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(products, lang, 12)}`;
     if (slug === 'products') links = productLinks(products, lang);
     if (slug === 'blog') links = blogLinks(blogPosts, lang);
-    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p>${links}`);
-    await save(`seo/${lang}/${slug}/index.html`, render(template, { lang, pathname: page.path, title, description, image: `${SITE_URL}/logo.png`, headLinks: slug === 'home' ? heroPreloads : '', bodyFallback }));
+    const repairSchema = slug === 'repair-service' ? {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'OpticalStore', '@id': `${SITE_URL}/#store`, name: 'Optic Gallery', url: `${SITE_URL}/`,
+          telephone: repairPhone, image: repairImage, sameAs: [`https://instagram.com/${repairInstagram}`],
+        },
+        {
+          '@type': 'Service', '@id': `${urlFor(page.path, lang)}#service`, name: title, description,
+          url: urlFor(page.path, lang), image: [repairImage], provider: { '@id': `${SITE_URL}/#store` },
+          areaServed: { '@type': 'City', name: 'Yerevan' }, serviceType: repairDetails[lang].services,
+        },
+      ],
+    } : undefined;
+    const bodyContent = slug === 'repair-service' ? repairFallback(lang, description) : `<p>${htmlEscape(description)}</p>${links}`;
+    const bodyFallback = fallbackShell(lang, title, bodyContent);
+    await save(`seo/${lang}/${slug}/index.html`, render(template, {
+      lang, pathname: page.path, title, description,
+      image: slug === 'repair-service' ? repairImage : `${SITE_URL}/logo.png`,
+      schema: repairSchema,
+      schemaId: slug === 'repair-service' ? 'repair-service-json-ld' : undefined,
+      headLinks: slug === 'home' ? heroPreloads : '',
+      bodyFallback,
+    }));
     if (slug === 'products') {
       await save(`seo/${lang}/products-filter/index.html`, render(template, {
         lang,

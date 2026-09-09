@@ -51,6 +51,16 @@ for (const lang of ['hy', 'ru', 'en']) {
   assert(filtered.includes(`<link rel="canonical" href="${canonical}"`), `${lang} filtered catalog canonical is incorrect`);
 }
 
+const repairHeadings = { hy: 'Ի՞նչ ենք վերանորոգում', ru: 'Что мы ремонтируем', en: 'What we repair' };
+for (const lang of ['hy', 'ru', 'en']) {
+  const repairHtml = await readFile(`${dist}/seo/${lang}/repair-service/index.html`, 'utf8');
+  assert(repairHtml.includes('id="repair-service-json-ld"'), `${lang} repair page lacks identified JSON-LD`);
+  assert(repairHtml.includes('"@type":"Service"'), `${lang} repair page lacks Service schema`);
+  assert(repairHtml.includes('"@type":"OpticalStore"'), `${lang} repair page lacks OpticalStore schema`);
+  assert(repairHtml.includes('property="og:image" content="https://api.opticgallery.am/uploads/'), `${lang} repair Open Graph image is not a repair photo`);
+  assert(repairHtml.includes(`<h2>${repairHeadings[lang]}</h2>`), `${lang} repair server fallback lacks full service content`);
+}
+
 const productIds = [...new Set(entries.map((url) => new URL(url).pathname.match(/^\/products\/(\d+)$/)?.[1]).filter(Boolean))];
 for (const lang of ['hy', 'ru', 'en']) {
   const catalogHtml = await readFile(`${dist}/seo/${lang}/products/index.html`, 'utf8');
