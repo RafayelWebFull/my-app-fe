@@ -112,6 +112,35 @@ function blogLinks(posts, lang) {
   return `<ul>${posts.map((post) => `<li>${linkFor(`/blog/${post.slug}`, lang, post[`title_${lang}`] || post.title_en)}</li>`).join('')}</ul>`;
 }
 
+const blogActions = {
+  hy: {
+    title: 'Հաջորդ քայլը',
+    text: 'Դիտեք ակնոցների տեսականին, ծանոթացեք վերանորոգման ծառայությանը կամ կապվեք մեզ հետ։',
+    products: 'Դիտել ակնոցները',
+    repair: 'Ակնոցների վերանորոգում',
+    contact: 'Կապվել մեզ հետ',
+  },
+  ru: {
+    title: 'Следующий шаг',
+    text: 'Посмотрите каталог очков, узнайте о ремонте очков или свяжитесь с нами.',
+    products: 'Выбрать очки',
+    repair: 'Ремонт очков',
+    contact: 'Связаться с нами',
+  },
+  en: {
+    title: 'Next step',
+    text: 'Browse our eyewear, learn about eyeglass repair, or contact our optical store in Yerevan.',
+    products: 'Browse eyewear',
+    repair: 'Eyeglass repair',
+    contact: 'Contact us',
+  },
+};
+
+function blogActionLinks(lang) {
+  const copy = blogActions[lang];
+  return `<section><h2>${htmlEscape(copy.title)}</h2><p>${htmlEscape(copy.text)}</p><ul><li>${linkFor('/products', lang, copy.products)}</li><li>${linkFor('/repair-service', lang, copy.repair)}</li><li>${linkFor('/contact', lang, copy.contact)}</li></ul></section>`;
+}
+
 function repairFallback(lang, description) {
   const details = repairDetails[lang];
   const list = (items) => `<ul>${items.map((item) => `<li>${htmlEscape(item)}</li>`).join('')}</ul>`;
@@ -235,10 +264,17 @@ async function inlineCompiledStyles(html) {
   return html.replace(stylesheetPattern, `<style data-compiled-css>${css.replace(/<\/style/gi, '<\\/style')}</style>`);
 }
 
-function sitemapEntry(pathname, changefreq, priority) {
+function sitemapDate(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString().slice(0, 10);
+}
+
+function sitemapEntry(pathname, changefreq, priority, lastmod) {
   return LANGS.map((lang) => {
     const links = [...LANGS.map((other) => `    <xhtml:link rel="alternate" hreflang="${other}" href="${xmlEscape(urlFor(pathname, other))}" />`), `    <xhtml:link rel="alternate" hreflang="x-default" href="${xmlEscape(urlFor(pathname, 'hy'))}" />`];
-    return `  <url>\n    <loc>${xmlEscape(urlFor(pathname, lang))}</loc>\n${links.join('\n')}\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+    const modified = sitemapDate(lastmod);
+    return `  <url>\n    <loc>${xmlEscape(urlFor(pathname, lang))}</loc>${modified ? `\n    <lastmod>${modified}</lastmod>` : ''}\n${links.join('\n')}\n    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
   });
 }
 
@@ -324,7 +360,7 @@ for (const [productIndex, product] of products.entries()) {
     const bodyFallback = fallbackShell(lang, product.name, `<p>${htmlEscape(description)}</p><p>${linkFor('/products', lang, pages.products[lang][0])}</p><h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(nearbyProducts, lang, 6)}`);
     await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title: product.name, description, image, type: 'product', schema, bodyFallback }));
   }
-  sitemap.push(...sitemapEntry(pathname, 'weekly', '0.8'));
+  sitemap.push(...sitemapEntry(pathname, 'weekly', '0.8', product.updated_at || product.created_at));
 }
 
 for (const post of blogPosts) {
@@ -341,10 +377,10 @@ for (const post of blogPosts) {
       inLanguage: lang, mainEntityOfPage: urlFor(pathname, lang), url: urlFor(pathname, lang),
       publisher: { '@type': 'Organization', name: 'Optic Gallery', logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` } },
     };
-    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p><p>${linkFor('/blog', lang, pages.blog[lang][0])}</p>${blogLinks(blogPosts.filter((item) => item.slug !== post.slug).slice(0, 6), lang)}`);
+    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p>${blogActionLinks(lang)}<p>${linkFor('/blog', lang, pages.blog[lang][0])}</p>${blogLinks(blogPosts.filter((item) => item.slug !== post.slug).slice(0, 6), lang)}`);
     await save(`seo/${lang}/blog/${post.slug}/index.html`, render(template, { lang, pathname, title, description, image, type: 'article', schema, bodyFallback }));
   }
-  sitemap.push(...sitemapEntry(pathname, 'monthly', '0.8'));
+  sitemap.push(...sitemapEntry(pathname, 'monthly', '0.8', post.updated_at || post.published_at));
 }
 
 await save('seo/noindex/index.html', render(template, { lang: 'hy', pathname: '/', title: 'Private page', description: 'This page is not available in search results.', image: `${SITE_URL}/logo.png`, robots: 'noindex, nofollow' }));

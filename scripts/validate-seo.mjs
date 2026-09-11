@@ -17,6 +17,9 @@ assert(entries.some((url) => /\/blog\/[^?]+\?lang=en$/.test(url)), 'sitemap lack
 assert(!entries.some((url) => url.includes('?lang=hy')), 'default Armenian URLs must not contain a language parameter');
 assert(sitemap.includes('xmlns:xhtml="http://www.w3.org/1999/xhtml"'), 'sitemap lacks xhtml namespace');
 assert(sitemap.includes('hreflang="x-default"'), 'sitemap lacks x-default alternates');
+const lastmodValues = [...sitemap.matchAll(/<lastmod>(.*?)<\/lastmod>/g)].map((match) => match[1]);
+assert(lastmodValues.length >= 3, 'sitemap lacks modification dates for dynamic content');
+assert(lastmodValues.every((value) => /^\d{4}-\d{2}-\d{2}$/.test(value)), 'sitemap contains an invalid lastmod date');
 
 function outputPathFor(urlValue) {
   const url = new URL(urlValue);
@@ -77,6 +80,9 @@ if (blogEntry) {
   assert(blogHtml.includes('<meta property="og:type" content="article"'), 'blog page lacks article Open Graph type');
   assert(blogHtml.includes('"@type":"BlogPosting"'), 'blog page lacks BlogPosting JSON-LD');
   assert(blogHtml.includes(`<link rel="canonical" href="https://opticgallery.am/blog/${slug}?lang=en"`), 'blog canonical is incorrect');
+  assert(blogHtml.includes('href="https://opticgallery.am/products?lang=en"'), 'blog page does not link to the English catalog');
+  assert(blogHtml.includes('href="https://opticgallery.am/repair-service?lang=en"'), 'blog page does not link to the English repair service');
+  assert(blogHtml.includes('href="https://opticgallery.am/contact?lang=en"'), 'blog page does not link to the English contact page');
 }
 
 const productEntry = entries.find((url) => /\/products\/\d+\?lang=en$/.test(url));
