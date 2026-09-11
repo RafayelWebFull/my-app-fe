@@ -225,7 +225,7 @@ function alternates(pathname) {
 
 function render(template, { lang, pathname, title, description, image, type = 'website', robots = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1', schema, schemaId, headLinks = '', bodyFallback = '' }) {
   const canonical = urlFor(pathname, lang);
-  const fullTitle = `${title} | Optic Gallery`;
+  const fullTitle = /optic gallery/i.test(title) ? title : `${title} | Optic Gallery`;
   let html = template
     .replace(/<html lang="[^"]*">/, `<html lang="${lang}">`)
     .replace(/<title>[^<]*<\/title>/, `<title>${htmlEscape(fullTitle)}</title>`)
@@ -283,11 +283,16 @@ await save('index.html', template);
 const [products, blogPosts, siteSettings] = await Promise.all([fetchProducts(), fetchBlogPosts(), fetchSiteSettings()]);
 const sitemap = [];
 
-const mobileHero = optimizedUpload(siteSettings.hero_mobile_image || siteSettings.hero_image, 768);
-const desktopHero = optimizedUpload(siteSettings.hero_image || siteSettings.hero_mobile_image, 1920);
+const mobileHeroSource = siteSettings.hero_mobile_image || siteSettings.hero_image;
+const desktopHeroSource = siteSettings.hero_image || siteSettings.hero_mobile_image;
+const mobileHero = optimizedUpload(mobileHeroSource, 768);
+const mobileHero480 = optimizedUpload(mobileHeroSource, 480);
+const desktopHero = optimizedUpload(desktopHeroSource, 1920);
+const desktopHero960 = optimizedUpload(desktopHeroSource, 960);
+const desktopHero1440 = optimizedUpload(desktopHeroSource, 1440);
 const heroPreloads = [
-  mobileHero && `<link rel="preload" as="image" href="${htmlEscape(mobileHero)}" media="(max-width: 767px)" fetchpriority="high" />`,
-  desktopHero && `<link rel="preload" as="image" href="${htmlEscape(desktopHero)}" media="(min-width: 768px)" fetchpriority="high" />`,
+  mobileHero && `<link rel="preload" as="image" href="${htmlEscape(mobileHero)}" imagesrcset="${htmlEscape(`${mobileHero480} 480w, ${mobileHero} 768w`)}" imagesizes="100vw" media="(max-width: 767px)" fetchpriority="high" />`,
+  desktopHero && `<link rel="preload" as="image" href="${htmlEscape(desktopHero)}" imagesrcset="${htmlEscape(`${desktopHero960} 960w, ${desktopHero1440} 1440w, ${desktopHero} 1920w`)}" imagesizes="100vw" media="(min-width: 768px)" fetchpriority="high" />`,
 ].filter(Boolean).join('\n    ');
 
 const repairImageValue = firstRepairImage(siteSettings.repair_images) || '/uploads/hero-1771540352856.webp';

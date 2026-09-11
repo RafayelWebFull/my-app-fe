@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -119,11 +119,11 @@ export default function AdminTranslations() {
     onError: (err: Error) => toast.error(`Failed to save translations: ${err.message}`),
   });
 
-  const fillValuesForKey = (key: string): TranslationValues => ({
+  const fillValuesForKey = useCallback((key: string): TranslationValues => ({
     en: translationsByLang.en[key] || '',
     ru: translationsByLang.ru[key] || '',
     hy: translationsByLang.hy[key] || '',
-  });
+  }), [translationsByLang]);
 
   const handleKeySelect = (key: string) => {
     setSelectedKey(key);
@@ -155,7 +155,7 @@ export default function AdminTranslations() {
   useEffect(() => {
     if (!selectedKey) return;
     setValues(fillValuesForKey(selectedKey));
-  }, [selectedKey, translationsByLang]);
+  }, [fillValuesForKey, selectedKey]);
 
   const handleSave = () => {
     if (!activeKey) return;

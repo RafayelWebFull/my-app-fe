@@ -83,7 +83,7 @@ export function useSeo({ title, description, path = '/', keywords, robots, image
     const canonicalUrl = new URL(path, BASE_URL);
     if (language !== 'hy') canonicalUrl.searchParams.set('lang', language);
     const canonical = canonicalUrl.toString();
-    const fullTitle = `${title} | ${SITE_NAME}`;
+    const fullTitle = new RegExp(SITE_NAME, 'i').test(title) ? title : `${title} | ${SITE_NAME}`;
     const shareImage = image || DEFAULT_OG_IMAGE;
 
     document.documentElement.setAttribute('lang', language);

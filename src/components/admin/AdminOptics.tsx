@@ -406,7 +406,7 @@ export default function AdminOptics() {
                   <div className="flex items-center justify-between">
                     <div className="flex flex-col gap-1"><span className={o.in_stock ? 'text-green-600 text-sm' : 'text-destructive text-sm'}>{o.in_stock ? 'In Stock' : 'Out of Stock'}</span><span className={o.is_visible ? 'text-primary text-xs' : 'text-muted-foreground text-xs'}>{o.is_visible ? 'Visible' : 'Hidden'}</span></div>
                     <div className="flex items-center gap-1">
-                      <Button variant="outline" size="sm" disabled={visibilityMu.isPending} onClick={() => visibilityMu.mutate({ id: o.id, isVisible: !Boolean(o.is_visible) })}>
+                      <Button variant="outline" size="sm" disabled={visibilityMu.isPending} onClick={() => visibilityMu.mutate({ id: o.id, isVisible: !o.is_visible })}>
                         {o.is_visible ? <EyeOff className="mr-1 size-4" /> : <Eye className="mr-1 size-4" />}
                         {o.is_visible ? 'Hide' : 'Show'}
                       </Button>
@@ -490,7 +490,7 @@ export default function AdminOptics() {
                       </TableCell>
                       <TableCell><span className={o.is_visible ? 'text-primary' : 'text-muted-foreground'}>{o.is_visible ? 'Visible' : 'Hidden'}</span></TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" title={o.is_visible ? 'Hide product' : 'Show product'} disabled={visibilityMu.isPending} onClick={() => visibilityMu.mutate({ id: o.id, isVisible: !Boolean(o.is_visible) })}>
+                        <Button variant="ghost" size="icon" title={o.is_visible ? 'Hide product' : 'Show product'} disabled={visibilityMu.isPending} onClick={() => visibilityMu.mutate({ id: o.id, isVisible: !o.is_visible })}>
                           {o.is_visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(o)}>

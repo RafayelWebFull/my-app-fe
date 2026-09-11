@@ -52,10 +52,23 @@ export function Hero() {
         <div className="absolute inset-0">
           <picture className="block w-full h-full">
             {heroMobileImage && (
-              <source media="(max-width: 767px)" srcSet={optimizedImageUrl(heroMobileImage, 768) || heroMobileImage} />
+              <source
+                media="(max-width: 767px)"
+                srcSet={[
+                  `${optimizedImageUrl(heroMobileImage, 480) || heroMobileImage} 480w`,
+                  `${optimizedImageUrl(heroMobileImage, 768) || heroMobileImage} 768w`,
+                ].join(', ')}
+                sizes="100vw"
+              />
             )}
             <img
               src={optimizedImageUrl(heroImage || heroMobileImage, 1920) || heroImage || heroMobileImage}
+              srcSet={[
+                `${optimizedImageUrl(heroImage || heroMobileImage, 960) || heroImage || heroMobileImage} 960w`,
+                `${optimizedImageUrl(heroImage || heroMobileImage, 1440) || heroImage || heroMobileImage} 1440w`,
+                `${optimizedImageUrl(heroImage || heroMobileImage, 1920) || heroImage || heroMobileImage} 1920w`,
+              ].join(', ')}
+              sizes="100vw"
               alt=""
               fetchPriority="high"
               decoding="async"

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiUrl } from '@/lib/api';
 
 // Types for our languages and translations
@@ -33,7 +33,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [backendTranslations, setBackendTranslations] = useState<BackendTranslations>({});
   const [loading, setLoading] = useState<boolean>(true);
 
-  const fetchTranslationsFor = async (lang: Language) => {
+  const fetchTranslationsFor = useCallback(async (lang: Language) => {
     setLoading(true);
     try {
       const response = await fetch(apiUrl(`/api/translations/${lang}`));
@@ -50,13 +50,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     } finally {
       if (lang === language) setLoading(false);
     }
-  };
+  }, [language]);
 
-  const refreshTranslations = async (lang?: Language) => {
+  const refreshTranslations = useCallback(async (lang?: Language) => {
     const target = lang || language;
     if (target !== language) return;
     await fetchTranslationsFor(target);
-  };
+  }, [fetchTranslationsFor, language]);
 
   // Fetch translations from backend when language changes
   useEffect(() => {
@@ -73,7 +73,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       url.searchParams.set('lang', language);
     }
     window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
-  }, [language]);
+  }, [fetchTranslationsFor, language]);
 
   const setLanguage = (lang: Language) => {
     // Update language and trigger backend API call to persist the change

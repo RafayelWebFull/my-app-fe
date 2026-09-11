@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowLeft, ChevronLeft, ChevronRight, Loader2, ShoppingCart } from 'lucide-react';
@@ -42,8 +42,8 @@ export default function ProductDetails() {
   const { data: rates } = useExchangeRates();
   const { addItem } = useCart();
   const baseUrl = 'https://opticgallery.am';
-  const localizedProductUrl = (productId: number) =>
-    `${baseUrl}/products/${productId}${language === 'hy' ? '' : `?lang=${language}`}`;
+  const localizedProductUrl = useCallback((productId: number) =>
+    `${baseUrl}/products/${productId}${language === 'hy' ? '' : `?lang=${language}`}`, [language]);
   const fallbackTitle = language === 'ru' ? 'Товар' : language === 'hy' ? 'Ապրանք' : 'Product';
   const fallbackDescription =
     language === 'ru'
@@ -75,13 +75,13 @@ export default function ProductDetails() {
     robots: isError ? 'noindex, nofollow' : undefined,
   });
 
-  const allImages =
+  const allImages = useMemo(() => (
     Array.isArray(product?.image_urls) && product.image_urls.length > 0
       ? product.image_urls
       : product?.image_url
         ? [product.image_url]
-        : [];
-  const imagesKey = allImages.join('|');
+        : []
+  ), [product?.image_url, product?.image_urls]);
   const activeIndex = allImages.findIndex((img) => img === activeImage);
   const hasMultipleImages = allImages.length > 1;
 
@@ -91,7 +91,7 @@ export default function ProductDetails() {
       if (prev && allImages.includes(prev)) return prev;
       return allImages[0];
     });
-  }, [id, imagesKey]);
+  }, [allImages, id]);
   const localizedDescription = product
     ? product.description_translations?.[language] ||
       (language === 'en' ? product.description_en : language === 'ru' ? product.description_ru : product.description_hy) ||
@@ -151,7 +151,7 @@ export default function ProductDetails() {
       const mountedScript = document.getElementById(scriptId);
       if (mountedScript) mountedScript.remove();
     };
-  }, [allImages, baseUrl, language, localizedDescription, product]);
+  }, [allImages, language, localizedDescription, localizedProductUrl, product]);
 
   if (isLoading) {
     return (
