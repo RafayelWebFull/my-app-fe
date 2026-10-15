@@ -12,14 +12,18 @@ import { formatAmdByLanguage } from '@/lib/currency';
 import { localizedPath } from '@/lib/localizedUrl';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
+import { productSeoDescription, productSeoTitle } from '@/lib/productSeo';
 
 type OpticDetails = {
   id: number;
   name: string;
   brand_name: string;
+  brand_id?: number;
   style: string;
   gender?: 'male' | 'female' | 'unisex';
   category_name: string;
+  category_id?: number;
+  category_slug?: string;
   image_url: string | null;
   image_urls?: string[];
   price: number | string | null;
@@ -61,14 +65,22 @@ export default function ProductDetails() {
     },
     enabled: Boolean(id),
   });
+  const { data: relatedCandidates = [] } = useQuery({
+    queryKey: ['optic-related-candidates'],
+    queryFn: async () => {
+      const res = await fetch(apiUrl('/api/optics'));
+      if (!res.ok) return [];
+      const data = await res.json();
+      return Array.isArray(data) ? data as OpticDetails[] : [];
+    },
+    enabled: Boolean(product),
+    staleTime: 5 * 60 * 1000,
+  });
   const [activeImage, setActiveImage] = useState<string | null>(null);
 
   useSeo({
-    title: product?.name || fallbackTitle,
-    description:
-      product?.description_translations?.[language] ||
-      product?.description ||
-      fallbackDescription,
+    title: product ? productSeoTitle(product, language) : fallbackTitle,
+    description: product ? productSeoDescription(product, language) : fallbackDescription,
     path: `/products/${id || ''}`,
     image: product?.image_url ? imageUrl(product.image_url) || undefined : undefined,
     type: 'product',
@@ -98,6 +110,20 @@ export default function ProductDetails() {
       product.description ||
       fallbackDescription
     : null;
+  const seoDescription = product ? productSeoDescription(product, language) : fallbackDescription;
+  const relatedProducts = useMemo(() => {
+    if (!product) return [];
+    return relatedCandidates
+      .filter((candidate) => candidate.id !== product.id && candidate.category_slug !== 'lenses')
+      .sort((a, b) => {
+        const score = (candidate: OpticDetails) =>
+          (candidate.brand_id && candidate.brand_id === product.brand_id ? 4 : 0) +
+          (candidate.category_id && candidate.category_id === product.category_id ? 2 : 0) +
+          (candidate.in_stock === false || candidate.in_stock === 0 ? 0 : 1);
+        return score(b) - score(a);
+      })
+      .slice(0, 4);
+  }, [product, relatedCandidates]);
 
   useEffect(() => {
     const scriptId = 'product-json-ld';
@@ -121,7 +147,7 @@ export default function ProductDetails() {
       '@context': 'https://schema.org',
       '@type': 'Product',
       name: product.name,
-      description: localizedDescription || 'Product details at Optic Gallery.',
+      description: seoDescription,
       brand: {
         '@type': 'Brand',
         name: product.brand_name,
@@ -151,7 +177,7 @@ export default function ProductDetails() {
       const mountedScript = document.getElementById(scriptId);
       if (mountedScript) mountedScript.remove();
     };
-  }, [allImages, language, localizedDescription, localizedProductUrl, product]);
+  }, [allImages, localizedProductUrl, product, seoDescription]);
 
   if (isLoading) {
     return (
@@ -325,6 +351,49 @@ export default function ProductDetails() {
               </div>
             </div>
           </div>
+
+          {relatedProducts.length > 0 && (
+            <div className="mt-16 border-t pt-12">
+              <div className="mb-7 flex items-end justify-between gap-4">
+                <h2 className="font-heading text-2xl font-bold text-foreground sm:text-3xl">
+                  {language === 'ru' ? 'Похожие оправы' : language === 'hy' ? 'Նմանատիպ շրջանակներ' : 'Similar frames'}
+                </h2>
+                <Link to={localizedPath('/products', language)} className="text-sm font-medium text-primary hover:text-accent">
+                  {t('viewCollection')}
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                {relatedProducts.map((related) => {
+                  const relatedPrice = Number(related.price);
+                  const price = Number.isFinite(relatedPrice) && relatedPrice > 0
+                    ? formatAmdByLanguage(relatedPrice, language, rates)
+                    : null;
+                  return (
+                    <Link
+                      key={related.id}
+                      to={localizedPath(`/products/${related.id}`, language)}
+                      className="group rounded-2xl bg-card p-3 shadow-card transition-shadow hover:shadow-elevated sm:p-4"
+                    >
+                      <div className="mb-3 aspect-square overflow-hidden rounded-xl bg-white">
+                        {related.image_url ? (
+                          <img
+                            src={imageUrl(related.image_url) || related.image_url}
+                            alt={productSeoTitle(related, language)}
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                          />
+                        ) : null}
+                      </div>
+                      <p className="text-xs font-medium text-accent">{related.brand_name}</p>
+                      <h3 className="truncate font-heading font-semibold text-foreground">{related.name}</h3>
+                      {price ? <p className="mt-1 text-sm text-muted-foreground">{price}</p> : null}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     </Layout>

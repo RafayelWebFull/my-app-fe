@@ -7,6 +7,7 @@ import { useSeo } from '@/lib/seo';
 
 const PromoBanner = lazy(() => import('@/components/home/PromoBanner').then((module) => ({ default: module.PromoBanner })));
 const ProductsPreview = lazy(() => import('@/components/home/ProductsPreview').then((module) => ({ default: module.ProductsPreview })));
+const BlogPreview = lazy(() => import('@/components/home/BlogPreview').then((module) => ({ default: module.BlogPreview })));
 const Features = lazy(() => import('@/components/home/Features').then((module) => ({ default: module.Features })));
 
 function DeferredSection({ children, minHeight }: { children: ReactNode; minHeight: number }) {
@@ -83,6 +84,9 @@ const Index = () => {
       </DeferredSection>
       <DeferredSection minHeight={1400}>
         <ProductsPreview />
+      </DeferredSection>
+      <DeferredSection minHeight={620}>
+        <BlogPreview />
       </DeferredSection>
       <DeferredSection minHeight={400}>
         <Features />

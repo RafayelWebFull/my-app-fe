@@ -83,6 +83,39 @@ const htmlEscape = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => 
 const xmlEscape = (value) => htmlEscape(value).replace(/&#39;/g, '&apos;');
 const absoluteImage = (value) => !value ? `${SITE_URL}/logo.png` : /^https?:\/\//.test(value) ? value : `${SITE_URL}${value.startsWith('/') ? '' : '/'}${value}`;
 const localizedDescription = (product, lang) => product.description_translations?.[lang] || product[`description_${lang}`] || product.description || '';
+const productCategoryNames = {
+  hy: { optic: 'օպտիկական ակնոցի շրջանակ', sunglasses: 'արևային ակնոց', lenses: 'կոնտակտային ոսպնյակ' },
+  ru: { optic: 'оправа для очков', sunglasses: 'солнцезащитные очки', lenses: 'контактные линзы' },
+  en: { optic: 'eyeglass frame', sunglasses: 'sunglasses', lenses: 'contact lenses' },
+};
+const normalized = (value) => String(value || '').trim();
+const productDisplayName = (product) => {
+  const name = normalized(product.name);
+  const brand = normalized(product.brand_name);
+  return brand && !name.toLocaleLowerCase().includes(brand.toLocaleLowerCase()) ? `${brand} ${name}` : name;
+};
+const productCategoryName = (product, lang) => productCategoryNames[lang][normalized(product.category_slug).toLowerCase()] || normalized(product.category_name);
+const productSeoTitle = (product, lang) => {
+  const name = productDisplayName(product);
+  const category = productCategoryName(product, lang);
+  return category ? `${name} — ${category}` : name;
+};
+const productSeoDescription = (product, lang) => {
+  const stored = normalized(localizedDescription(product, lang))
+    .replace(/\s+/g, ' ')
+    .replace(/\\+$/, '')
+    .trim()
+    .replace(/[.!?՜։]\s?$/, '');
+  const name = productDisplayName(product);
+  const category = productCategoryName(product, lang);
+  const hasPrice = Number.isFinite(Number(product.price)) && Number(product.price) > 0;
+  const context = {
+    hy: `${name}${category ? ` — ${category}` : ''} Optic Gallery-ում՝ Երևանում։ ${hasPrice ? 'Դիտեք գինը, լուսանկարները և առկայությունը' : 'Դիտեք լուսանկարները և ճշտեք գինն ու առկայությունը'}։`,
+    ru: `${name}${category ? ` — ${category}` : ''} в Optic Gallery, Ереван. ${hasPrice ? 'Посмотрите цену, фотографии и наличие' : 'Посмотрите фотографии и уточните цену и наличие'}.`,
+    en: `${name}${category ? ` — ${category}` : ''} at Optic Gallery in Yerevan. ${hasPrice ? 'View the price, photos and current availability' : 'View the photos and ask about the price and current availability'}.`,
+  }[lang];
+  return stored ? `${stored}. ${context}` : context;
+};
 const urlFor = (pathname, lang) => `${SITE_URL}${pathname === '/' ? '/' : pathname}${lang === 'hy' ? '' : `?lang=${lang}`}`;
 const linkFor = (pathname, lang, label) => `<a href="${htmlEscape(urlFor(pathname, lang))}">${htmlEscape(label)}</a>`;
 
@@ -306,7 +339,7 @@ for (const [slug, page] of Object.entries(pages)) {
   for (const lang of LANGS) {
     const [title, description] = page[lang];
     let links = '';
-    if (slug === 'home') links = `<h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(products, lang, 12)}`;
+    if (slug === 'home') links = `<h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(products, lang, 12)}<h2>${htmlEscape(pages.blog[lang][0])}</h2>${blogLinks(blogPosts.slice(0, 4), lang)}`;
     if (slug === 'products') links = productLinks(products, lang);
     if (slug === 'blog') links = blogLinks(blogPosts, lang);
     const repairSchema = slug === 'repair-service' ? {
@@ -351,7 +384,8 @@ for (const [slug, page] of Object.entries(pages)) {
 for (const [productIndex, product] of products.entries()) {
   const pathname = `/products/${Number(product.id)}`;
   for (const lang of LANGS) {
-    const description = localizedDescription(product, lang) || pages.products[lang][1];
+    const title = productSeoTitle(product, lang);
+    const description = productSeoDescription(product, lang);
     const image = absoluteImage(product.image_urls?.[0] || product.image_url);
     const numericPrice = Number(product.price);
     const schema = numericPrice > 0 ? {
@@ -361,9 +395,12 @@ for (const [productIndex, product] of products.entries()) {
       url: urlFor(pathname, lang),
       offers: { '@type': 'Offer', priceCurrency: 'AMD', price: numericPrice, availability: product.in_stock === false || product.in_stock === 0 ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock', url: urlFor(pathname, lang) },
     } : undefined;
-    const nearbyProducts = products.filter((_, index) => index !== productIndex).slice(Math.max(0, productIndex - 3), productIndex + 4);
-    const bodyFallback = fallbackShell(lang, product.name, `<p>${htmlEscape(description)}</p><p>${linkFor('/products', lang, pages.products[lang][0])}</p><h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(nearbyProducts, lang, 6)}`);
-    await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title: product.name, description, image, type: 'product', schema, bodyFallback }));
+    const nearbyProducts = products
+      .filter((_, index) => index !== productIndex)
+      .sort((a, b) => Number(b.brand_id === product.brand_id) - Number(a.brand_id === product.brand_id) || Number(b.category_id === product.category_id) - Number(a.category_id === product.category_id))
+      .slice(0, 6);
+    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p><p>${linkFor('/products', lang, pages.products[lang][0])}</p><h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(nearbyProducts, lang, 6)}`);
+    await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title, description, image, type: 'product', schema, bodyFallback }));
   }
   sitemap.push(...sitemapEntry(pathname, 'weekly', '0.8', product.updated_at || product.created_at));
 }
