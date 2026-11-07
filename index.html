@@ -50,37 +50,116 @@
       "@context": "https://schema.org",
       "@graph": [
         {
-          "@type": "OpticalStore",
-          "@id": "https://opticgallery.am/#optical-store",
+          "@type": "Organization",
+          "@id": "https://opticgallery.am/#organization",
           "name": "Optic Gallery",
-          "description": "Optical store in Yerevan, Armenia offering eyeglasses, sunglasses, and contact lenses.",
           "url": "https://opticgallery.am/",
+          "logo": "https://opticgallery.am/logo.png",
+          "telephone": [
+            "+37496744555",
+            "+37433369268"
+          ],
+          "sameAs": [
+            "https://www.instagram.com/optic__gallery/"
+          ],
+          "subOrganization": [
+            {
+              "@id": "https://opticgallery.am/#store-teryan"
+            },
+            {
+              "@id": "https://opticgallery.am/#store-komitas"
+            }
+          ]
+        },
+        {
+          "@type": "OpticalStore",
+          "@id": "https://opticgallery.am/#store-teryan",
+          "name": "Optic Gallery — Teryan 52",
+          "alternateName": [
+            "Optic Gallery Տերյան 52",
+            "Optic Gallery Теряна 52"
+          ],
+          "url": "https://opticgallery.am/contact/teryan",
           "image": "https://opticgallery.am/logo.png",
+          "telephone": "+37496744555",
           "address": {
             "@type": "PostalAddress",
+            "streetAddress": "52 Teryan St",
             "addressLocality": "Yerevan",
             "addressCountry": "AM"
           },
-          "areaServed": [
+          "hasMap": "https://www.google.com/maps/search/?api=1&query=Optic%20Gallery%2C%20Teryan%2052%2C%20Yerevan",
+          "openingHoursSpecification": [
             {
-              "@type": "City",
-              "name": "Yerevan"
-            },
-            {
-              "@type": "Country",
-              "name": "Armenia"
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "opens": "10:00",
+              "closes": "20:00"
             }
           ],
-          "sameAs": [
-            "https://instagram.com/opticgallery.am"
-          ]
+          "parentOrganization": {
+            "@id": "https://opticgallery.am/#organization"
+          }
+        },
+        {
+          "@type": "OpticalStore",
+          "@id": "https://opticgallery.am/#store-komitas",
+          "name": "Optic Gallery — Komitas 15",
+          "alternateName": [
+            "Optic Gallery Կոմիտաս 15",
+            "Optic Gallery Комитаса 15"
+          ],
+          "url": "https://opticgallery.am/contact/komitas",
+          "image": "https://opticgallery.am/logo.png",
+          "telephone": "+37496744555",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "15 Komitas Ave",
+            "addressLocality": "Yerevan",
+            "addressCountry": "AM"
+          },
+          "hasMap": "https://www.google.com/maps/search/?api=1&query=Optic%20Gallery%2C%20Komitas%2015%2C%20Yerevan",
+          "openingHoursSpecification": [
+            {
+              "@type": "OpeningHoursSpecification",
+              "dayOfWeek": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+              ],
+              "opens": "09:00",
+              "closes": "21:00"
+            }
+          ],
+          "parentOrganization": {
+            "@id": "https://opticgallery.am/#organization"
+          }
         },
         {
           "@type": "WebSite",
           "@id": "https://opticgallery.am/#website",
           "url": "https://opticgallery.am/",
           "name": "Optic Gallery",
-          "inLanguage": ["en", "ru", "hy"]
+          "inLanguage": [
+            "hy",
+            "ru",
+            "en"
+          ],
+          "publisher": {
+            "@id": "https://opticgallery.am/#organization"
+          }
         }
       ]
     }

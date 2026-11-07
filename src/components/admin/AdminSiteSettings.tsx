@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { apiUrl, imageUrl } from '@/lib/api';
+import { STORE } from '@/lib/store';
 
 const API = () => apiUrl('/api/site-settings');
 const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3}){1,2}$/;
@@ -300,23 +301,24 @@ export default function AdminSiteSettings() {
       <div>
         <h3 className="font-semibold text-lg mb-4">Contact Info</h3>
         <div className="space-y-4">
+          {/* Phones, Instagram, addresses and hours are read from src/data/store.json
+              (footer, contact and branch pages, structured data, SEO pages), so they are read-only here. */}
           <div className="space-y-2">
             <Label>Phone</Label>
             <Textarea
-              value={form.contact_phone || ''}
-              onChange={(e) => setForm((f) => ({ ...f, contact_phone: e.target.value }))}
-              rows={3}
-              placeholder={'+374 XX XXX XXX\n+374 YY YYY YYY'}
+              value={STORE.phones.map((phone) => phone.display).join('\n')}
+              rows={2}
+              disabled
+              readOnly
             />
-            <p className="text-xs text-muted-foreground">Add one phone per line.</p>
           </div>
           <div className="space-y-2">
             <Label>Instagram</Label>
-            <Input
-              value={form.contact_instagram || ''}
-              onChange={(e) => setForm((f) => ({ ...f, contact_instagram: e.target.value }))}
-            />
+            <Input value={`@${STORE.instagram.handle}`} disabled readOnly />
           </div>
+          <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            Phones, Instagram, addresses and opening hours are edited in <code>src/data/store.json</code> in the website code, not here.
+          </p>
           <div className="space-y-2">
             <Label>Map Embed URL</Label>
             <Textarea

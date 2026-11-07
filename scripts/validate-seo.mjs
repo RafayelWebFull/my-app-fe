@@ -59,7 +59,7 @@ for (const lang of ['hy', 'ru', 'en']) {
   const repairHtml = await readFile(`${dist}/seo/${lang}/repair-service/index.html`, 'utf8');
   assert(repairHtml.includes('id="repair-service-json-ld"'), `${lang} repair page lacks identified JSON-LD`);
   assert(repairHtml.includes('"@type":"Service"'), `${lang} repair page lacks Service schema`);
-  assert(repairHtml.includes('"@type":"OpticalStore"'), `${lang} repair page lacks OpticalStore schema`);
+  assert(repairHtml.includes('"provider":{"@id":"https://opticgallery.am/#organization"}'), `${lang} repair Service is not provided by the organization`);
   assert(repairHtml.includes('property="og:image" content="https://api.opticgallery.am/uploads/'), `${lang} repair Open Graph image is not a repair photo`);
   assert(repairHtml.includes(`<h2>${repairHeadings[lang]}</h2>`), `${lang} repair server fallback lacks full service content`);
 }
@@ -83,6 +83,8 @@ if (blogEntry) {
   assert(blogHtml.includes('href="https://opticgallery.am/products?lang=en"'), 'blog page does not link to the English catalog');
   assert(blogHtml.includes('href="https://opticgallery.am/repair-service?lang=en"'), 'blog page does not link to the English repair service');
   assert(blogHtml.includes('href="https://opticgallery.am/contact?lang=en"'), 'blog page does not link to the English contact page');
+  const articleText = (blogHtml.match(/<article>([\s\S]*?)<\/article>/)?.[1] || '').replace(/<[^>]+>/g, ' ');
+  assert(articleText.split(/\s+/).filter(Boolean).length > 200, 'blog fallback lacks the full article body');
 }
 
 const productEntry = entries.find((url) => /\/products\/\d+\?lang=en$/.test(url));
@@ -90,11 +92,24 @@ if (productEntry) {
   const id = productEntry.match(/\/products\/(\d+)/)?.[1];
   const productHtml = await readFile(`${dist}/seo/en/products/${id}/index.html`, 'utf8');
   assert(productHtml.includes('<meta property="og:type" content="product"'), 'product page lacks product Open Graph type');
+  assert((productHtml.match(/"@type":"Product"/g) || []).length <= 1, 'product page has duplicate Product JSON-LD');
+  assert(productHtml.includes('<dl>'), 'product fallback lacks product specifications');
   if (productHtml.includes('"@type":"Product"')) {
+    assert(productHtml.includes('id="product-json-ld"'), 'Product JSON-LD lacks the id the client uses to replace it');
     assert(productHtml.includes('"offers":{"@type":"Offer"'), 'Product JSON-LD lacks a valid offer');
   }
   assert(productHtml.includes(`<link rel="canonical" href="https://opticgallery.am/products/${id}?lang=en"`), 'product canonical is incorrect');
   assert(productHtml.includes('name="twitter:image"'), 'Twitter image must use the name attribute');
+}
+
+// Store details: one entity graph, both branches, correct Instagram, NAP visible without JS.
+for (const relative of ['seo/hy/home/index.html', 'seo/ru/contact/index.html', 'seo/en/contact/teryan/index.html', 'seo/hy/contact/komitas/index.html']) {
+  const html = await readFile(`${dist}/${relative}`, 'utf8');
+  assert((html.match(/"@type":"OpticalStore"/g) || []).length === 2, `${relative} must describe exactly the two branches`);
+  assert(html.includes('"openingHoursSpecification"') && html.includes('"streetAddress"'), `${relative} store schema lacks address or hours`);
+  assert(!html.includes('instagram.com/opticgallery.am'), `${relative} still references the old Instagram handle`);
+  assert(html.includes('href="tel:+37496744555"') && html.includes('href="tel:+37433369268"'), `${relative} lacks click-to-call links in the server HTML`);
+  assert(html.includes('google.com/maps/search'), `${relative} lacks map links in the server HTML`);
 }
 
 const noindex = await readFile(`${dist}/seo/noindex/index.html`, 'utf8');

@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl } from '@/lib/api';
 import { useSeo } from '@/lib/seo';
 import { localizedPath } from '@/lib/localizedUrl';
+import pageMeta from '@/data/pageMeta.json';
 
 interface Brand {
   id: number;
@@ -18,23 +19,7 @@ interface OpticBrandRef {
   category_slug: string;
 }
 
-const BRANDS_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
-  en: {
-    title: 'Browse Eyewear Brands',
-    description: 'View all eyewear brands available at Optic Gallery and open each brand collection.',
-    keywords: 'optic gallery brands, eyewear brands, sunglasses brands, glasses brands',
-  },
-  ru: {
-    title: 'Бренды оптики',
-    description: 'Смотрите все бренды очков в Optic Gallery и открывайте коллекции по брендам.',
-    keywords: 'бренды оптики, бренды очков ереван, бренды солнцезащитных очков, optic gallery бренды',
-  },
-  hy: {
-    title: 'Օպտիկայի բրենդներ',
-    description: 'Դիտեք Optic Gallery-ի բոլոր բրենդները և բացեք յուրաքանչյուր բրենդի հավաքածուն:',
-    keywords: 'օպտիկայի բրենդներ, ակնոցների բրենդներ երևան, արևային ակնոցների բրենդներ, optic gallery բրենդներ',
-  },
-};
+const BRANDS_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = pageMeta.brands;
 
 const Brands = () => {
   const { t, language } = useLanguage();

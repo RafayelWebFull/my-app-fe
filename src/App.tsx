@@ -10,6 +10,7 @@ const Brands = lazy(() => import("./pages/Brands"));
 const ProductDetails = lazy(() => import("./pages/ProductDetails"));
 const About = lazy(() => import("./pages/About"));
 const Contact = lazy(() => import("./pages/Contact"));
+const StoreBranch = lazy(() => import("./pages/StoreBranch"));
 const RepairService = lazy(() => import("./pages/RepairService"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/about" element={<About />} />
               <Route path="/contact" element={<Contact />} />
+              <Route path="/contact/:branch" element={<StoreBranch />} />
               <Route path="/repair-service" element={<RepairService />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />

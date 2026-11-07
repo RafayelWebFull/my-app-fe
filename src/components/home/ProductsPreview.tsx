@@ -17,6 +17,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { AmdPriceHint } from '@/components/AmdPriceHint';
 import { localizedPath } from '@/lib/localizedUrl';
 
 export interface Optic {
@@ -127,9 +128,9 @@ export function ProductsPreview() {
     if (hasDiscount) {
       const discounted = priceNum * (1 - product.discount! / 100);
       const discountedFormatted = formatAmdByLanguage(discounted, language, rates);
-      return { original, discounted: discountedFormatted };
+      return { original, discounted: discountedFormatted, amountAmd: discounted };
     }
-    return { original, discounted: null };
+    return { original, discounted: null, amountAmd: priceNum };
   };
 
   const slugToIcon: Record<string, typeof Glasses> = { optic: Glasses, sunglasses: Sun, lenses: Eye, glasses: Glasses, sun: Sun, eye: Eye };
@@ -365,6 +366,7 @@ export function ProductsPreview() {
                             ) : (
                               priceDisplay.original
                             )}
+                            <AmdPriceHint amountAmd={priceDisplay.amountAmd} language={language} rates={rates} />
                           </p>
                         )}
                         {product.in_stock === false || product.in_stock === 0 ? (
