@@ -9,6 +9,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { apiUrl, imageUrl } from '@/lib/api';
 import { useSeo } from '@/lib/seo';
 import { localizedPath } from '@/lib/localizedUrl';
+import pageMeta from '@/data/pageMeta.json';
 
 const ABOUT_SEO_COPY: Record<
   'en' | 'ru' | 'hy',
@@ -46,27 +47,7 @@ const ABOUT_SEO_COPY: Record<
   },
 };
 
-const ABOUT_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
-  en: {
-    title: 'About Optical Store in Yerevan, Armenia',
-    description:
-      'Learn about Optic Gallery, an optical store in Yerevan, Armenia, and our service standards for eyeglasses, sunglasses, and lenses.',
-    keywords:
-      'about optic yerevan, optical store yerevan, optical store armenia, eyeglasses yerevan, sunglasses armenia',
-  },
-  ru: {
-    title: 'О нашей оптике в Ереване, Армения',
-    description:
-      'Узнайте об Optic Gallery - оптике в Ереване, наших стандартах и сервисе для подбора очков и линз в Армении.',
-    keywords: 'о нас оптика ереван, оптика в ереване, оптика армения, очки ереван, линзы армения',
-  },
-  hy: {
-    title: 'Մեր օպտիկայի մասին՝ Երևան, Հայաստան',
-    description:
-      'Ծանոթացեք Optic Gallery-ին՝ օպտիկա Երևանում, մեր սպասարկման չափանիշներին և ակնոցների ու լինզաների ընտրության մոտեցմանը։',
-    keywords: 'մեր մասին օպտիկա երևան, օպտիկա երևանում, օպտիկա հայաստան, ակնոցներ երևան, լինզաներ հայաստան',
-  },
-};
+const ABOUT_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = pageMeta.about;
 
 const About = () => {
   const { t, language } = useLanguage();

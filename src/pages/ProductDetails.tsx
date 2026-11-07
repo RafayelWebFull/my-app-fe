@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useSeo } from '@/lib/seo';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { AmdPriceHint } from '@/components/AmdPriceHint';
 import { localizedPath } from '@/lib/localizedUrl';
 import { useCart } from '@/contexts/CartContext';
 import { toast } from 'sonner';
@@ -306,13 +307,13 @@ export default function ProductDetails() {
                   {discountedPrice ? (
                     <div className="flex items-center gap-3 flex-wrap">
                       <span className="line-through text-muted-foreground">{originalPrice}</span>
-                      <span>{discountedPrice}</span>
+                      <span>{discountedPrice}<AmdPriceHint amountAmd={priceNum! * (1 - product.discount! / 100)} language={language} rates={rates} /></span>
                       <span className="text-xs px-2 py-1 rounded bg-amber-100 text-amber-700">
                         -{product.discount}%
                       </span>
                     </div>
                   ) : (
-                    <span>{originalPrice}</span>
+                    <span>{originalPrice}<AmdPriceHint amountAmd={priceNum} language={language} rates={rates} /></span>
                   )}
                 </div>
               )}
@@ -387,7 +388,7 @@ export default function ProductDetails() {
                       </div>
                       <p className="text-xs font-medium text-accent">{related.brand_name}</p>
                       <h3 className="truncate font-heading font-semibold text-foreground">{related.name}</h3>
-                      {price ? <p className="mt-1 text-sm text-muted-foreground">{price}</p> : null}
+                      {price ? <p className="mt-1 text-sm text-muted-foreground">{price}<AmdPriceHint amountAmd={relatedPrice} language={language} rates={rates} /></p> : null}
                     </Link>
                   );
                 })}

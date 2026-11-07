@@ -1,5 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import store from '../src/data/store.json' with { type: 'json' };
+import pageMeta from '../src/data/pageMeta.json' with { type: 'json' };
+import { storeGraph } from './store-schema.mjs';
 
 const SITE_URL = (process.env.SITE_URL || 'https://opticgallery.am').replace(/\/$/, '');
 const API_URL = (process.env.API_BASE_URL || `${process.env.VITE_API_URL || 'https://api.opticgallery.am'}/api`).replace(/\/$/, '');
@@ -7,49 +10,17 @@ const DIST = process.env.SEO_DIST || 'dist';
 const LANGS = ['hy', 'ru', 'en'];
 const locales = { hy: 'hy_AM', ru: 'ru_RU', en: 'en_US' };
 
+// Titles and descriptions are shared with the React pages (src/data/pageMeta.json)
+// so the pre-rendered HTML and the hydrated page carry identical metadata.
+const pageMetaFor = (key) => Object.fromEntries(LANGS.map((lang) => [lang, [pageMeta[key][lang].title, pageMeta[key][lang].description]]));
 const pages = {
-  home: {
-    path: '/', priority: '1.0', changefreq: 'weekly',
-    hy: ['Optic Gallery — Օպտիկա Երևանում', 'Ակնոցներ, արևային ակնոցներ և կոնտակտային լինզաներ Երևանում՝ Optic Gallery-ում։'],
-    ru: ['Optic Gallery — оптика в Ереване', 'Очки, солнцезащитные очки и контактные линзы в Optic Gallery, Ереван.'],
-    en: ['Optic Gallery — Optical Store in Yerevan', 'Eyeglasses, sunglasses and contact lenses at Optic Gallery in Yerevan, Armenia.'],
-  },
-  products: {
-    path: '/products', priority: '0.9', changefreq: 'daily',
-    hy: ['Ակնոցներ և արևային ակնոցներ Երևանում', 'Բացահայտեք ակնոցներ, արևային ակնոցներ և օպտիկական շրջանակներ Optic Gallery-ում՝ Երևան։'],
-    ru: ['Очки и солнцезащитные очки в Ереване', 'Выберите очки, солнцезащитные очки и оправы в Optic Gallery, Ереван.'],
-    en: ['Eyeglasses and Sunglasses in Yerevan', 'Browse eyeglasses, sunglasses and optical frames at Optic Gallery in Yerevan.'],
-  },
-  brands: {
-    path: '/brands', priority: '0.8', changefreq: 'weekly',
-    hy: ['Ակնոցների ապրանքանիշեր', 'Բացահայտեք Optic Gallery-ում ներկայացված ակնոցների ապրանքանիշերը։'],
-    ru: ['Бренды очков', 'Откройте для себя бренды очков, представленные в Optic Gallery.'],
-    en: ['Eyewear Brands', 'Discover eyewear brands available at Optic Gallery.'],
-  },
-  about: {
-    path: '/about', priority: '0.7', changefreq: 'monthly',
-    hy: ['Optic Gallery-ի մասին', 'Իմացեք Optic Gallery օպտիկայի և Երևանում մեր ծառայությունների մասին։'],
-    ru: ['Об Optic Gallery', 'Узнайте об оптике Optic Gallery и наших услугах в Ереване.'],
-    en: ['About Optic Gallery', 'Learn about Optic Gallery and our optical services in Yerevan.'],
-  },
-  contact: {
-    path: '/contact', priority: '0.7', changefreq: 'monthly',
-    hy: ['Կապ Optic Gallery-ի հետ', 'Optic Gallery-ի հասցեն, հեռախոսահամարները, աշխատանքային ժամերը և քարտեզը։'],
-    ru: ['Контакты Optic Gallery', 'Адрес, телефоны, часы работы и карта Optic Gallery в Ереване.'],
-    en: ['Contact Optic Gallery', 'Address, phone numbers, opening hours and directions for Optic Gallery in Yerevan.'],
-  },
-  'repair-service': {
-    path: '/repair-service', priority: '0.7', changefreq: 'monthly',
-    hy: ['Ակնոցների վերանորոգում Երևանում', 'Ակնոցների ախտորոշում, կարգավորում և մասնագիտական վերանորոգում Երևանում։'],
-    ru: ['Ремонт очков в Ереване', 'Диагностика, регулировка и профессиональный ремонт очков в Ереване.'],
-    en: ['Eyeglass Repair in Yerevan', 'Diagnostics, adjustments and professional eyeglass repair in Yerevan.'],
-  },
-  blog: {
-    path: '/blog', priority: '0.8', changefreq: 'weekly',
-    hy: ['Ակնոցների և տեսողության խնամքի բլոգ', 'Օգտակար խորհուրդներ ակնոցների, ոսպնյակների, տեսողության խնամքի և նոր բրենդների մասին։'],
-    ru: ['Блог об очках и уходе за зрением', 'Полезные материалы об очках, линзах, уходе за зрением и новых коллекциях.'],
-    en: ['Eyewear and Vision Care Blog', 'Helpful guides about eyewear, lenses, vision care and new collections from Optic Gallery.'],
-  },
+  home: { path: '/', priority: '1.0', changefreq: 'weekly', ...pageMetaFor('home') },
+  products: { path: '/products', priority: '0.9', changefreq: 'daily', ...pageMetaFor('products') },
+  brands: { path: '/brands', priority: '0.8', changefreq: 'weekly', ...pageMetaFor('brands') },
+  about: { path: '/about', priority: '0.7', changefreq: 'monthly', ...pageMetaFor('about') },
+  contact: { path: '/contact', priority: '0.7', changefreq: 'monthly', ...pageMetaFor('contact') },
+  'repair-service': { path: '/repair-service', priority: '0.7', changefreq: 'monthly', ...pageMetaFor('repair') },
+  blog: { path: '/blog', priority: '0.8', changefreq: 'weekly', ...pageMetaFor('blog') },
 };
 
 const repairDetails = {
@@ -116,8 +87,36 @@ const productSeoDescription = (product, lang) => {
   }[lang];
   return stored ? `${stored}. ${context}` : context;
 };
-const urlFor = (pathname, lang) => `${SITE_URL}${pathname === '/' ? '/' : pathname}${lang === 'hy' ? '' : `?lang=${lang}`}`;
+const urlFor = (pathname, lang) => `${SITE_URL}${pathname === '/' ? '/' : pathname}${lang === 'hy' ? '' : `${pathname.includes('?') ? '&' : '?'}lang=${lang}`}`;
 const linkFor = (pathname, lang, label) => `<a href="${htmlEscape(urlFor(pathname, lang))}">${htmlEscape(label)}</a>`;
+
+const fill = (template, values) => template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? ''));
+const branchHours = (branch) => `${branch.opens}–${branch.closes}`;
+const branchHoursText = (branch, lang) => `${store.labels[lang].daily}: ${branchHours(branch)}`;
+const branchValues = (branch, lang) => ({ name: branch.shortName[lang], address: branch.address[lang], hours: branchHours(branch) });
+const externalLink = (href, label) => `<a href="${htmlEscape(href)}" rel="noopener">${htmlEscape(label)}</a>`;
+const phoneLinks = () => store.phones.map((phone) => `<a href="tel:${phone.e164}">${htmlEscape(phone.display)}</a>`).join(', ');
+
+function branchDetails(branch, lang, { heading = 'h3', withPageLink = true } = {}) {
+  const labels = store.labels[lang];
+  const title = withPageLink ? linkFor(`/contact/${branch.slug}`, lang, branch.address[lang]) : htmlEscape(branch.address[lang]);
+  return `<section><${heading}>${title}</${heading}><ul>
+        <li>${htmlEscape(branchHoursText(branch, lang))}</li>
+        <li>${htmlEscape(labels.phones)}: ${phoneLinks()}</li>
+        <li>${externalLink(branch.mapUrl, labels.directions)}</li>
+      </ul></section>`;
+}
+
+// Static NAP footer present in every pre-rendered page, so non-JS crawlers always see it.
+function storeFooter(lang) {
+  const labels = store.labels[lang];
+  return `<footer>
+      <h2>${htmlEscape(labels.stores)}</h2>
+      ${store.branches.map((branch) => branchDetails(branch, lang)).join('\n      ')}
+      <p>Instagram: ${externalLink(store.instagram.url, `@${store.instagram.handle}`)}</p>
+      <p>${htmlEscape(fill(labels.copyright, { year: new Date().getFullYear() }))}</p>
+    </footer>`;
+}
 
 function fallbackShell(lang, title, content) {
   const navigation = [
@@ -134,6 +133,7 @@ function fallbackShell(lang, title, content) {
       <nav aria-label="Primary">${navigation}</nav>
       <h1>${htmlEscape(title)}</h1>
       ${content}
+      ${storeFooter(lang)}
     </main>`;
 }
 
@@ -234,6 +234,33 @@ async function fetchSiteSettings() {
   }
 }
 
+async function fetchOptional(pathname, fallback) {
+  try {
+    const response = await fetch(`${API_URL}${pathname}`);
+    if (!response.ok) return fallback;
+    return await response.json();
+  } catch {
+    return fallback;
+  }
+}
+
+const fetchBrands = async () => {
+  const data = await fetchOptional('/brands', []);
+  return Array.isArray(data) ? data.filter((brand) => brand.id && normalized(brand.name)) : [];
+};
+
+const fetchTranslations = async () => Object.fromEntries(await Promise.all(LANGS.map(async (lang) => {
+  const data = await fetchOptional(`/translations/${lang}`, {});
+  return [lang, data.translations || data || {}];
+})));
+
+// Blog bodies come from our own CMS; drop anything executable before inlining them.
+const safeArticleHtml = (value) => String(value || '')
+  .replace(/<(script|style|iframe|object|embed)[\s\S]*?<\/\1>/gi, '')
+  .replace(/\son\w+="[^"]*"/gi, '')
+  .replace(/\son\w+='[^']*'/gi, '')
+  .replace(/href="javascript:[^"]*"/gi, 'href="#"');
+
 function optimizedUpload(value, width) {
   if (!value) return null;
   const apiOrigin = new URL(API_URL).origin;
@@ -311,9 +338,14 @@ function sitemapEntry(pathname, changefreq, priority, lastmod) {
   });
 }
 
-const template = await inlineCompiledStyles(await readFile(path.join(DIST, 'index.html'), 'utf8'));
+const storeJsonLd = `<script type="application/ld+json">${JSON.stringify(storeGraph(store)).replace(/</g, '\\u003c')}</script>`;
+const builtIndex = await readFile(path.join(DIST, 'index.html'), 'utf8');
+const jsonLdPattern = /<script type="application\/ld\+json">[\s\S]*?<\/script>/;
+if (!jsonLdPattern.test(builtIndex)) throw new Error('Cannot find the site-wide JSON-LD block in dist/index.html');
+const template = await inlineCompiledStyles(builtIndex.replace(jsonLdPattern, storeJsonLd));
 await save('index.html', template);
-const [products, blogPosts, siteSettings] = await Promise.all([fetchProducts(), fetchBlogPosts(), fetchSiteSettings()]);
+const [products, blogPosts, siteSettings, brands, translations] = await Promise.all([fetchProducts(), fetchBlogPosts(), fetchSiteSettings(), fetchBrands(), fetchTranslations()]);
+const tr = (lang, key) => normalized(translations[lang]?.[key]);
 const sitemap = [];
 
 const mobileHeroSource = siteSettings.hero_mobile_image || siteSettings.hero_image;
@@ -332,8 +364,6 @@ const repairImageValue = firstRepairImage(siteSettings.repair_images) || '/uploa
 const repairImage = /^https?:\/\//.test(repairImageValue)
   ? repairImageValue
   : `${new URL(API_URL).origin}${repairImageValue.startsWith('/') ? '' : '/'}${repairImageValue}`;
-const repairPhone = String(siteSettings.contact_phone || '+37411000000').split(/[\n,;|]/)[0].trim();
-const repairInstagram = String(siteSettings.contact_instagram || '@opticgallery.am').replace(/^@/, '');
 
 for (const [slug, page] of Object.entries(pages)) {
   for (const lang of LANGS) {
@@ -346,16 +376,25 @@ for (const [slug, page] of Object.entries(pages)) {
       '@context': 'https://schema.org',
       '@graph': [
         {
-          '@type': 'OpticalStore', '@id': `${SITE_URL}/#store`, name: 'Optic Gallery', url: `${SITE_URL}/`,
-          telephone: repairPhone, image: repairImage, sameAs: [`https://instagram.com/${repairInstagram}`],
-        },
-        {
           '@type': 'Service', '@id': `${urlFor(page.path, lang)}#service`, name: title, description,
-          url: urlFor(page.path, lang), image: [repairImage], provider: { '@id': `${SITE_URL}/#store` },
+          url: urlFor(page.path, lang), image: [repairImage], provider: { '@id': `${SITE_URL}/#organization` },
           areaServed: { '@type': 'City', name: 'Yerevan' }, serviceType: repairDetails[lang].services,
         },
       ],
     } : undefined;
+    if (slug === 'about') {
+      const paragraphs = [tr(lang, 'aboutText1'), tr(lang, 'aboutText2')].filter(Boolean).map((text) => `<p>${htmlEscape(text)}</p>`).join('');
+      const highlights = [['premiumBrands', 'qualityDesc'], ['expertService', 'serviceDesc'], ['modernDesign', 'styleDesc']]
+        .filter(([heading, text]) => tr(lang, heading) && tr(lang, text))
+        .map(([heading, text]) => `<section><h2>${htmlEscape(tr(lang, heading))}</h2><p>${htmlEscape(tr(lang, text))}</p></section>`).join('');
+      links = `${paragraphs}${highlights}`;
+    }
+    if (slug === 'contact') {
+      links = `<h2>${htmlEscape(store.labels[lang].stores)}</h2>${store.branches.map((branch) => branchDetails(branch, lang)).join('')}`;
+    }
+    if (slug === 'brands') {
+      links = `<ul>${brands.map((brand) => `<li>${linkFor(`/products?brand=${Number(brand.id)}`, lang, brand.name)}</li>`).join('')}</ul>`;
+    }
     const bodyContent = slug === 'repair-service' ? repairFallback(lang, description) : `<p>${htmlEscape(description)}</p>${links}`;
     const bodyFallback = fallbackShell(lang, title, bodyContent);
     await save(`seo/${lang}/${slug}/index.html`, render(template, {
@@ -381,6 +420,45 @@ for (const [slug, page] of Object.entries(pages)) {
   sitemap.push(...sitemapEntry(page.path, page.changefreq, page.priority));
 }
 
+for (const branch of store.branches) {
+  const pathname = `/contact/${branch.slug}`;
+  for (const lang of LANGS) {
+    const labels = store.labels[lang];
+    const values = branchValues(branch, lang);
+    const title = fill(labels.branchTitle, values);
+    const description = fill(labels.branchDescription, values);
+    const otherBranches = store.branches.filter((other) => other.slug !== branch.slug)
+      .map((other) => `<li>${linkFor(`/contact/${other.slug}`, lang, `Optic Gallery — ${other.shortName[lang]}`)}</li>`).join('');
+    const content = `<p>${htmlEscape(fill(labels.branchIntro, values))}</p>
+      ${branchDetails(branch, lang, { heading: 'h2', withPageLink: false })}
+      <ul>${otherBranches}<li>${linkFor('/contact', lang, labels.allStores)}</li><li>${linkFor('/products', lang, pages.products[lang][0])}</li><li>${linkFor('/repair-service', lang, pages['repair-service'][lang][0])}</li></ul>`;
+    await save(`seo/${lang}/contact/${branch.slug}/index.html`, render(template, {
+      lang, pathname, title, description, image: store.logo, bodyFallback: fallbackShell(lang, title, content),
+    }));
+  }
+  sitemap.push(...sitemapEntry(pathname, 'monthly', '0.7'));
+}
+
+const productSpecLabels = {
+  hy: { brand: 'Բրենդ', category: 'Կատեգորիա', style: 'Ձև', gender: 'Ում համար', availability: 'Առկայություն', inStock: 'Առկա է', outOfStock: 'Առկա չէ', genders: { male: 'տղամարդկանց', female: 'կանանց', unisex: 'ունիսեքս' } },
+  ru: { brand: 'Бренд', category: 'Категория', style: 'Форма', gender: 'Для кого', availability: 'Наличие', inStock: 'В наличии', outOfStock: 'Нет в наличии', genders: { male: 'мужские', female: 'женские', unisex: 'унисекс' } },
+  en: { brand: 'Brand', category: 'Category', style: 'Shape', gender: 'For', availability: 'Availability', inStock: 'In stock', outOfStock: 'Out of stock', genders: { male: 'men', female: 'women', unisex: 'unisex' } },
+};
+
+function productSpecs(product, lang) {
+  const labels = productSpecLabels[lang];
+  const inStock = !(product.in_stock === false || Number(product.in_stock) === 0);
+  const gender = normalized(product.gender).toLowerCase();
+  const rows = [
+    [labels.brand, normalized(product.brand_name)],
+    [labels.category, productCategoryName(product, lang)],
+    [labels.style, normalized(product.style)],
+    [labels.gender, labels.genders[gender] || ''],
+    [labels.availability, inStock ? labels.inStock : labels.outOfStock],
+  ].filter(([, value]) => value);
+  return `<dl>${rows.map(([label, value]) => `<dt>${htmlEscape(label)}</dt><dd>${htmlEscape(value)}</dd>`).join('')}</dl>`;
+}
+
 for (const [productIndex, product] of products.entries()) {
   const pathname = `/products/${Number(product.id)}`;
   for (const lang of LANGS) {
@@ -399,8 +477,13 @@ for (const [productIndex, product] of products.entries()) {
       .filter((_, index) => index !== productIndex)
       .sort((a, b) => Number(b.brand_id === product.brand_id) - Number(a.brand_id === product.brand_id) || Number(b.category_id === product.category_id) - Number(a.category_id === product.category_id))
       .slice(0, 6);
-    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p><p>${linkFor('/products', lang, pages.products[lang][0])}</p><h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(nearbyProducts, lang, 6)}`);
-    await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title, description, image, type: 'product', schema, bodyFallback }));
+    const productImage = optimizedUpload(product.image_urls?.[0] || product.image_url, 720) || image;
+    const productBody = `<img src="${htmlEscape(productImage)}" alt="${htmlEscape(productDisplayName(product))}" width="720" height="960" />
+      <p>${htmlEscape(normalized(localizedDescription(product, lang)))}</p>
+      ${productSpecs(product, lang)}
+      <p>${linkFor('/products', lang, pages.products[lang][0])}</p><h2>${htmlEscape(pages.products[lang][0])}</h2>${productLinks(nearbyProducts, lang, 6)}`;
+    const bodyFallback = fallbackShell(lang, productDisplayName(product), productBody);
+    await save(`seo/${lang}/products/${product.id}/index.html`, render(template, { lang, pathname, title, description, image, type: 'product', schema, schemaId: 'product-json-ld', bodyFallback }));
   }
   sitemap.push(...sitemapEntry(pathname, 'weekly', '0.8', product.updated_at || product.created_at));
 }
@@ -419,7 +502,10 @@ for (const post of blogPosts) {
       inLanguage: lang, mainEntityOfPage: urlFor(pathname, lang), url: urlFor(pathname, lang),
       publisher: { '@type': 'Organization', name: 'Optic Gallery', logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` } },
     };
-    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p>${blogActionLinks(lang)}<p>${linkFor('/blog', lang, pages.blog[lang][0])}</p>${blogLinks(blogPosts.filter((item) => item.slug !== post.slug).slice(0, 6), lang)}`);
+    const articleBody = safeArticleHtml(post[`content_${lang}`] || post.content_en);
+    const coverAlt = post[`cover_image_alt_${lang}`] || title;
+    const cover = post.cover_image_url ? `<img src="${htmlEscape(image)}" alt="${htmlEscape(coverAlt)}" />` : '';
+    const bodyFallback = fallbackShell(lang, title, `<p>${htmlEscape(description)}</p>${cover}<article>${articleBody}</article>${blogActionLinks(lang)}<p>${linkFor('/blog', lang, pages.blog[lang][0])}</p>${blogLinks(blogPosts.filter((item) => item.slug !== post.slug).slice(0, 6), lang)}`);
     await save(`seo/${lang}/blog/${post.slug}/index.html`, render(template, { lang, pathname, title, description, image, type: 'article', schema, bodyFallback }));
   }
   sitemap.push(...sitemapEntry(pathname, 'monthly', '0.8', post.updated_at || post.published_at));
@@ -429,4 +515,4 @@ await save('seo/noindex/index.html', render(template, { lang: 'hy', pathname: '/
 const notFound = render(template, { lang: 'hy', pathname: '/', title: 'Page not found', description: 'The requested page does not exist.', image: `${SITE_URL}/logo.png`, robots: 'noindex, nofollow' });
 await save('404.html', notFound);
 await save('sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${sitemap.join('\n')}\n</urlset>\n`);
-console.log(`Generated ${LANGS.length * (Object.keys(pages).length + products.length + blogPosts.length)} SEO pages and ${sitemap.length} sitemap URLs for ${products.length} products and ${blogPosts.length} blog posts.`);
+console.log(`Generated ${LANGS.length * (Object.keys(pages).length + store.branches.length + products.length + blogPosts.length)} SEO pages and ${sitemap.length} sitemap URLs for ${products.length} products and ${blogPosts.length} blog posts.`);

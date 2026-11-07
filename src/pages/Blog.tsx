@@ -7,6 +7,7 @@ import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { apiUrl, imageUrl } from '@/lib/api';
 import { useSeo } from '@/lib/seo';
 import { localizedPath } from '@/lib/localizedUrl';
+import pageMeta from '@/data/pageMeta.json';
 
 type Category = { id: number; slug: string; name_hy: string; name_ru: string; name_en: string };
 export type BlogPostData = {
@@ -35,7 +36,7 @@ export default function Blog() {
   const categoriesQuery = useQuery({ queryKey: ['blog-categories'], queryFn: () => getJson<Category[]>('/api/blog/categories') });
   const posts = postsQuery.data || []; const featured = posts.find((post) => post.is_featured) || posts[0];
   const visible = selected === 'all' ? posts : posts.filter((post) => post.category_slug === selected);
-  useSeo({ title: copy.title, description: copy.description, path: '/blog', image: imageUrl(featured?.cover_image_url) || undefined, type: 'article' });
+  useSeo({ title: pageMeta.blog[language].title, description: pageMeta.blog[language].description, path: '/blog', image: imageUrl(featured?.cover_image_url) || undefined, type: 'article' });
   return <Layout><div className="relative overflow-hidden bg-[radial-gradient(circle_at_15%_10%,hsl(var(--accent)/0.10),transparent_28%)]">
     {featured && <section className="px-4 pt-5 sm:px-7"><div className="mx-auto max-w-[1320px] rounded-2xl border bg-white/70 p-4 shadow-card sm:p-7"><div className="grid items-center gap-8 lg:grid-cols-2 lg:gap-14"><div className="relative overflow-hidden rounded-xl bg-secondary"><img src={imageUrl(featured.cover_image_url) || '/placeholder.svg'} alt={local(featured, 'cover_image_alt', language) || local(featured, 'title', language)} className="aspect-[4/3] w-full object-cover lg:aspect-square"/><span className="absolute left-4 top-4 rounded-md bg-primary/90 px-3 py-1.5 text-[10px] font-semibold uppercase text-primary-foreground">{copy.featured}</span></div><div><p className="mb-4 text-xs font-semibold uppercase text-accent">{local(featured, 'category_name', language)} · {formatDate(featured.published_at, language)}</p><h1 className="font-heading text-3xl font-semibold text-primary sm:text-5xl">{local(featured, 'title', language)}</h1><p className="mt-5 text-[15px] leading-7 text-muted-foreground">{local(featured, 'excerpt', language)}</p><Link to={localizedPath(`/blog/${featured.slug}`, language)} className="mt-7 inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm text-primary-foreground">{copy.read}<ArrowRight className="size-4"/></Link></div></div></div></section>}
     <section className="mx-auto max-w-[1320px] px-4 pb-20 pt-14 sm:px-7"><div className="mb-7 flex flex-wrap items-end justify-between gap-6"><div><p className="mb-2 text-xs font-semibold uppercase text-accent">{copy.guides}</p><h2 className="font-heading text-3xl font-semibold text-primary">{copy.latest}</h2></div><div className="flex flex-wrap gap-2"><Filter active={selected === 'all'} onClick={() => setSelected('all')}>{copy.all}</Filter>{(categoriesQuery.data || []).map((category) => <Filter key={category.id} active={selected === category.slug} onClick={() => setSelected(category.slug)}>{local(category, 'name', language)}</Filter>)}</div></div>

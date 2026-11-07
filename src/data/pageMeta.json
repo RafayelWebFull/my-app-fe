@@ -1,0 +1,115 @@
+{
+  "home": {
+    "en": {
+      "title": "Optical Store in Armenia and Yerevan",
+      "description": "Optic Gallery is an optical store in Yerevan, Armenia. Shop eyeglasses, sunglasses, and contact lenses.",
+      "keywords": "optical store armenia, optical store yerevan, optic yerevan, eyeglasses armenia, sunglasses yerevan, contact lenses armenia"
+    },
+    "ru": {
+      "title": "Оптика в Армении и Ереване",
+      "description": "Optic Gallery - оптика в Ереване, Армения. Очки для зрения, солнцезащитные очки и контактные линзы.",
+      "keywords": "оптика армения, оптика ереван, очки ереван, солнцезащитные очки армения, контактные линзы ереван"
+    },
+    "hy": {
+      "title": "Օպտիկա Հայաստանում և Երևանում",
+      "description": "Optic Gallery-ը օպտիկա է Երևանում, Հայաստանում։ Տեսողության ակնոցներ, արևային ակնոցներ և կոնտակտային լինզաներ։",
+      "keywords": "օպտիկա հայաստան, օպտիկա երևան, ակնոցներ երևան, արևային ակնոցներ հայաստան, կոնտակտային լինզաներ երևան"
+    }
+  },
+  "products": {
+    "en": {
+      "title": "Optical Store in Yerevan: Eyeglasses and Sunglasses",
+      "description": "Optic Gallery is an optical store in Yerevan, Armenia. Browse eyeglasses, sunglasses, and contact lenses from trusted brands.",
+      "keywords": "optic yerevan, optical store yerevan, eyeglasses yerevan, sunglasses yerevan, contact lenses armenia"
+    },
+    "ru": {
+      "title": "Оптика в Ереване: очки и линзы",
+      "description": "Optic Gallery - оптика в Ереване, Армения. Каталог очков для зрения, солнцезащитных очков и контактных линз.",
+      "keywords": "оптика ереван, оптика в ереване, очки ереван, солнцезащитные очки ереван, линзы армения"
+    },
+    "hy": {
+      "title": "Օպտիկա Երևանում․ ակնոցներ և լինզաներ",
+      "description": "Optic Gallery-ը օպտիկա է Երևանում, Հայաստանում։ Դիտեք տեսողության ակնոցների, արևային ակնոցների և լինզաների տեսականին։",
+      "keywords": "օպտիկա երևան, օպտիկա երևանում, ակնոցներ երևան, արևային ակնոցներ երևան, լինզաներ հայաստան"
+    }
+  },
+  "brands": {
+    "en": {
+      "title": "Browse Eyewear Brands",
+      "description": "View all eyewear brands available at Optic Gallery and open each brand collection.",
+      "keywords": "optic gallery brands, eyewear brands, sunglasses brands, glasses brands"
+    },
+    "ru": {
+      "title": "Бренды оптики",
+      "description": "Смотрите все бренды очков в Optic Gallery и открывайте коллекции по брендам.",
+      "keywords": "бренды оптики, бренды очков ереван, бренды солнцезащитных очков, optic gallery бренды"
+    },
+    "hy": {
+      "title": "Օպտիկայի բրենդներ",
+      "description": "Դիտեք Optic Gallery-ի բոլոր բրենդները և բացեք յուրաքանչյուր բրենդի հավաքածուն:",
+      "keywords": "օպտիկայի բրենդներ, ակնոցների բրենդներ երևան, արևային ակնոցների բրենդներ, optic gallery բրենդներ"
+    }
+  },
+  "about": {
+    "en": {
+      "title": "About Optical Store in Yerevan, Armenia",
+      "description": "Learn about Optic Gallery, an optical store in Yerevan, Armenia, and our service standards for eyeglasses, sunglasses, and lenses.",
+      "keywords": "about optic yerevan, optical store yerevan, optical store armenia, eyeglasses yerevan, sunglasses armenia"
+    },
+    "ru": {
+      "title": "О нашей оптике в Ереване, Армения",
+      "description": "Узнайте об Optic Gallery - оптике в Ереване, наших стандартах и сервисе для подбора очков и линз в Армении.",
+      "keywords": "о нас оптика ереван, оптика в ереване, оптика армения, очки ереван, линзы армения"
+    },
+    "hy": {
+      "title": "Մեր օպտիկայի մասին՝ Երևան, Հայաստան",
+      "description": "Ծանոթացեք Optic Gallery-ին՝ օպտիկա Երևանում, մեր սպասարկման չափանիշներին և ակնոցների ու լինզաների ընտրության մոտեցմանը։",
+      "keywords": "մեր մասին օպտիկա երևան, օպտիկա երևանում, օպտիկա հայաստան, ակնոցներ երևան, լինզաներ հայաստան"
+    }
+  },
+  "contact": {
+    "en": {
+      "title": "Contact Optical Store in Armenia",
+      "description": "Visit Optic Gallery in Yerevan, Armenia. Get phone numbers, address, working hours, and map directions.",
+      "keywords": "optic contact yerevan, optical store armenia address, optical store yerevan phone, optica armenia location"
+    },
+    "ru": {
+      "title": "Контакты оптики в Армении",
+      "description": "Посетите Optic Gallery в Ереване, Армения. Адрес, телефоны, часы работы и карта.",
+      "keywords": "контакты оптики ереван, адрес оптики армения, телефон оптики ереван, оптика локация"
+    },
+    "hy": {
+      "title": "Օպտիկայի կոնտակտներ Հայաստանում",
+      "description": "Այցելեք Optic Gallery-ը Երևանում, Հայաստանում։ Հասցե, հեռախոս, աշխատանքային ժամեր և քարտեզ:",
+      "keywords": "օպտիկայի կոնտակտներ երևան, օպտիկայի հասցե հայաստան, օպտիկայի հեռախոս երևան, օպտիկայի տեղակայություն"
+    }
+  },
+  "repair": {
+    "en": {
+      "title": "Eyewear Repair Service in Yerevan",
+      "description": "Professional eyeglass repair in Yerevan: frame soldering, lens replacement, adjustment, cleaning and restoration."
+    },
+    "ru": {
+      "title": "Ремонт очков в Ереване",
+      "description": "Профессиональный ремонт очков в Ереване: пайка оправ, замена линз, регулировка, чистка и восстановление."
+    },
+    "hy": {
+      "title": "Ակնոցների վերանորոգում Երևանում",
+      "description": "Ակնոցների պրոֆեսիոնալ վերանորոգում Երևանում՝ շրջանակի զոդում, ոսպնյակի փոխարինում, կարգավորում և մաքրում։"
+    }
+  },
+  "blog": {
+    "hy": {
+      "title": "Ակնոցների և տեսողության խնամքի բլոգ",
+      "description": "Օգտակար խորհուրդներ ակնոցների, ոսպնյակների, տեսողության խնամքի և նոր բրենդների մասին։"
+    },
+    "ru": {
+      "title": "Блог об очках и уходе за зрением",
+      "description": "Полезные материалы об очках, линзах, уходе за зрением и новых коллекциях."
+    },
+    "en": {
+      "title": "Eyewear and Vision Care Blog",
+      "description": "Helpful guides about eyewear, lenses, vision care and new collections from Optic Gallery."
+    }
+  }
+}

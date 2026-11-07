@@ -6,22 +6,10 @@ import { Layout } from '@/components/layout/Layout';
 import { useLanguage, type Language } from '@/contexts/LanguageContext';
 import { useSeo } from '@/lib/seo';
 import { apiUrl, imageUrl } from '@/lib/api';
-import { parseMultiValue } from '@/lib/contactInfo';
+import { STORE } from '@/lib/store';
+import pageMeta from '@/data/pageMeta.json';
 
-const REPAIR_META: Record<Language, { title: string; description: string }> = {
-  en: {
-    title: 'Eyewear Repair Service in Yerevan',
-    description: 'Professional eyeglass repair in Yerevan: frame soldering, lens replacement, adjustment, cleaning and restoration.',
-  },
-  ru: {
-    title: 'Ремонт очков в Ереване',
-    description: 'Профессиональный ремонт очков в Ереване: пайка оправ, замена линз, регулировка, чистка и восстановление.',
-  },
-  hy: {
-    title: 'Ակնոցների վերանորոգում Երևանում',
-    description: 'Ակնոցների պրոֆեսիոնալ վերանորոգում Երևանում՝ շրջանակի զոդում, ոսպնյակի փոխարինում, կարգավորում և մաքրում։',
-  },
-};
+const REPAIR_META: Record<Language, { title: string; description: string }> = pageMeta.repair;
 
 const REPAIR_COPY: Record<Language, {
   eyebrow: string;
@@ -222,10 +210,8 @@ export default function RepairService() {
     return [result[0] || DEFAULT_REPAIR_IMAGES[0], result[1] || result[0] || DEFAULT_REPAIR_IMAGES[1]];
   }, [settings]);
 
-  const phones = parseMultiValue(settings.contact_phone || '');
-  const phone = phones[0] || '+37411000000';
-  const phoneHref = `tel:${phone.replace(/[^+\d]/g, '')}`;
-  const instagram = String(settings.contact_instagram || '@opticgallery.am').replace(/^@/, '');
+  const phone = STORE.phones[0].display;
+  const phoneHref = `tel:${STORE.phones[0].e164}`;
 
   useSeo({
     title: meta.title,
@@ -241,22 +227,13 @@ export default function RepairService() {
       '@context': 'https://schema.org',
       '@graph': [
         {
-          '@type': 'OpticalStore',
-          '@id': 'https://opticgallery.am/#store',
-          name: 'Optic Gallery',
-          url: 'https://opticgallery.am/',
-          telephone: phone,
-          image: photos[0],
-          sameAs: [`https://instagram.com/${instagram}`],
-        },
-        {
           '@type': 'Service',
           '@id': `${canonical}#service`,
           name: meta.title,
           description: meta.description,
           url: canonical,
           image: photos,
-          provider: { '@id': 'https://opticgallery.am/#store' },
+          provider: { '@id': 'https://opticgallery.am/#organization' },
           areaServed: { '@type': 'City', name: 'Yerevan' },
           serviceType: copy.services.map((service) => service.title),
         },
@@ -273,7 +250,7 @@ export default function RepairService() {
     script.textContent = JSON.stringify(schema);
 
     return () => document.getElementById(scriptId)?.remove();
-  }, [copy.services, instagram, language, meta.description, meta.title, phone, photos]);
+  }, [copy.services, language, meta.description, meta.title, photos]);
 
   return (
     <Layout>
@@ -365,7 +342,7 @@ export default function RepairService() {
             <p className="mx-auto mt-4 max-w-2xl text-white/80">{copy.ctaText}</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a href={phoneHref} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#e7b954] px-8 py-3 font-semibold text-[#253249] transition-transform hover:-translate-y-0.5"><Phone className="h-4 w-4" /> {copy.callNow}</a>
-              <a href={`https://instagram.com/${instagram}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-full border border-white/30 px-8 py-3 font-medium text-white transition-colors hover:bg-white/10">{copy.messageUs}</a>
+              <a href={STORE.instagram.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-full border border-white/30 px-8 py-3 font-medium text-white transition-colors hover:bg-white/10">{copy.messageUs}</a>
             </div>
           </motion.div>
         </section>

@@ -20,7 +20,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { useSeo } from '@/lib/seo';
 import { useExchangeRates } from '@/hooks/useExchangeRates';
 import { formatAmdByLanguage } from '@/lib/currency';
+import { AmdPriceHint } from '@/components/AmdPriceHint';
 import { localizedPath } from '@/lib/localizedUrl';
+import pageMeta from '@/data/pageMeta.json';
 
 export interface Optic {
   id: number;
@@ -44,27 +46,7 @@ const categoryIcons: Record<string, typeof Glasses> = {
   lenses: Eye,
 };
 
-const PRODUCTS_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
-  en: {
-    title: 'Optical Store in Yerevan: Eyeglasses and Sunglasses',
-    description:
-      'Optic Gallery is an optical store in Yerevan, Armenia. Browse eyeglasses, sunglasses, and contact lenses from trusted brands.',
-    keywords:
-      'optic yerevan, optical store yerevan, eyeglasses yerevan, sunglasses yerevan, contact lenses armenia',
-  },
-  ru: {
-    title: 'Оптика в Ереване: очки и линзы',
-    description:
-      'Optic Gallery - оптика в Ереване, Армения. Каталог очков для зрения, солнцезащитных очков и контактных линз.',
-    keywords: 'оптика ереван, оптика в ереване, очки ереван, солнцезащитные очки ереван, линзы армения',
-  },
-  hy: {
-    title: 'Օպտիկա Երևանում․ ակնոցներ և լինզաներ',
-    description:
-      'Optic Gallery-ը օպտիկա է Երևանում, Հայաստանում։ Դիտեք տեսողության ակնոցների, արևային ակնոցների և լինզաների տեսականին։',
-    keywords: 'օպտիկա երևան, օպտիկա երևանում, ակնոցներ երևան, արևային ակնոցներ երևան, լինզաներ հայաստան',
-  },
-};
+const PRODUCTS_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = pageMeta.products;
 
 const PRODUCTS_SEO_COPY: Record<'en' | 'ru' | 'hy', { title: string; text: string; bullets: string[] }> = {
   en: {
@@ -228,9 +210,9 @@ const Products = () => {
     if (hasDiscount) {
       const discounted = priceNum * (1 - product.discount! / 100);
       const discountedFormatted = formatAmdByLanguage(discounted, language, rates);
-      return { original, discounted: discountedFormatted };
+      return { original, discounted: discountedFormatted, amountAmd: discounted };
     }
-    return { original, discounted: null };
+    return { original, discounted: null, amountAmd: priceNum };
   };
 
   const ProductCard = ({ product, index }: { product: Optic; index: number }) => {
@@ -279,6 +261,7 @@ const Products = () => {
               ) : (
                 priceDisplay.original
               )}
+              <AmdPriceHint amountAmd={priceDisplay.amountAmd} language={language} rates={rates} />
             </p>
           )}
             {product.in_stock === false || product.in_stock === 0 ? (

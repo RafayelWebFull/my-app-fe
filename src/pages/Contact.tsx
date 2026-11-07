@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
@@ -6,9 +5,10 @@ import { MapPin, Phone, Clock, Instagram } from 'lucide-react';
 import { Layout } from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { apiUrl } from '@/lib/api';
-import { parseMultiValue } from '@/lib/contactInfo';
+import { STORE, branchHoursText, storeLabels } from '@/lib/store';
 import { useSeo } from '@/lib/seo';
 import { localizedPath } from '@/lib/localizedUrl';
+import pageMeta from '@/data/pageMeta.json';
 
 const CONTACT_SEO_COPY: Record<'en' | 'ru' | 'hy', { title: string; text: string }> = {
   en: {
@@ -28,29 +28,12 @@ const CONTACT_SEO_COPY: Record<'en' | 'ru' | 'hy', { title: string; text: string
   },
 };
 
-const CONTACT_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = {
-  en: {
-    title: 'Contact Optical Store in Armenia',
-    description: 'Visit Optic Gallery in Yerevan, Armenia. Get phone numbers, address, working hours, and map directions.',
-    keywords: 'optic contact yerevan, optical store armenia address, optical store yerevan phone, optica armenia location',
-  },
-  ru: {
-    title: 'Контакты оптики в Армении',
-    description: 'Посетите Optic Gallery в Ереване, Армения. Адрес, телефоны, часы работы и карта.',
-    keywords: 'контакты оптики ереван, адрес оптики армения, телефон оптики ереван, оптика локация',
-  },
-  hy: {
-    title: 'Օպտիկայի կոնտակտներ Հայաստանում',
-    description: 'Այցելեք Optic Gallery-ը Երևանում, Հայաստանում։ Հասցե, հեռախոս, աշխատանքային ժամեր և քարտեզ:',
-    keywords: 'օպտիկայի կոնտակտներ երևան, օպտիկայի հասցե հայաստան, օպտիկայի հեռախոս երևան, օպտիկայի տեղակայություն',
-  },
-};
+const CONTACT_META: Record<'en' | 'ru' | 'hy', { title: string; description: string; keywords: string }> = pageMeta.contact;
 
 const Contact = () => {
   const { t, language } = useLanguage();
   const seoCopy = CONTACT_SEO_COPY[language];
   const meta = CONTACT_META[language];
-  const baseUrl = 'https://opticgallery.am';
 
   useSeo({
     title: meta.title,
@@ -68,73 +51,33 @@ const Contact = () => {
     },
   });
 
-  const phoneRaw = settings.contact_phone || '+374 XX XXX XXX';
-  const instagram = settings.contact_instagram || '@opticgallery.am';
+  const labels = storeLabels(language);
   const mapEmbed = settings.contact_map_embed || 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d97459.36117797645!2d44.43373!3d40.17712!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x406abd2ad0420d43%3A0x5c7825e2d8e72100!2sYerevan%2C%20Armenia!5e0!3m2!1sen!2s!4v1704067200000!5m2!1sen!2s';
-  const addresses = parseMultiValue(t('addressValue'));
-  const phones = parseMultiValue(phoneRaw);
-  const workingHours = parseMultiValue(t('workingHoursValue'));
-  const primaryAddress = (addresses[0] || t('addressValue') || '').trim();
-  const primaryPhone = (phones[0] || phoneRaw || '').trim();
-  const openingHours = (workingHours[0] || '').trim();
+  const primaryPhone = STORE.phones[0];
 
-  useEffect(() => {
-    const scriptId = 'contact-localbusiness-json-ld';
-    const oldScript = document.getElementById(scriptId);
-    if (oldScript) oldScript.remove();
-
-    const schema: Record<string, unknown> = {
-      '@context': 'https://schema.org',
-      '@type': 'OpticalStore',
-      name: 'Optic Gallery',
-      url: `${baseUrl}/contact`,
-      image: `${baseUrl}/logo.png`,
-      address: {
-        '@type': 'PostalAddress',
-        streetAddress: primaryAddress || undefined,
-        addressLocality: 'Yerevan',
-        addressCountry: 'AM',
-      },
-      telephone: primaryPhone || undefined,
-      openingHours: openingHours || undefined,
-      sameAs: [`https://instagram.com/${instagram.replace('@', '')}`],
-    };
-
-    const script = document.createElement('script');
-    script.id = scriptId;
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify(schema);
-    document.head.appendChild(script);
-
-    return () => {
-      const mountedScript = document.getElementById(scriptId);
-      if (mountedScript) mountedScript.remove();
-    };
-  }, [baseUrl, instagram, openingHours, primaryAddress, primaryPhone]);
-
-  const contactInfo = [
-    {
+  type ContactLine = { text: string; href?: string; internal?: boolean; icon?: typeof Phone };
+  const contactInfo: Array<{ key: string; icon: typeof Phone; title: string; lines: ContactLine[] }> = [
+    ...STORE.branches.map((branch) => ({
+      key: branch.slug,
       icon: MapPin,
-      title: t('address'),
-      values: addresses.length ? addresses : [t('addressValue')],
-    },
+      title: branch.shortName[language],
+      lines: [
+        { text: branch.address[language], href: localizedPath(`/contact/${branch.slug}`, language), internal: true },
+        { text: branchHoursText(branch, language), icon: Clock },
+        { text: labels.directions, href: branch.mapUrl },
+      ],
+    })),
     {
+      key: 'phones',
       icon: Phone,
-      title: t('phone'),
-      values: phones.length ? phones : [phoneRaw],
-      linkForValue: (value: string) => `tel:${value.replace(/\s/g, '')}`,
-      valueIcon: Phone,
+      title: labels.phones,
+      lines: STORE.phones.map((phone) => ({ text: phone.display, href: `tel:${phone.e164}`, icon: Phone })),
     },
     {
-      icon: Clock,
-      title: t('workingHours'),
-      values: workingHours.length ? workingHours : [t('workingHoursValue')],
-    },
-    {
+      key: 'instagram',
       icon: Instagram,
       title: 'Instagram',
-      values: [instagram],
-      linkForValue: () => `https://instagram.com/${instagram.replace('@', '')}`,
+      lines: [{ text: `@${STORE.instagram.handle}`, href: STORE.instagram.url }],
     },
   ];
 
@@ -165,7 +108,7 @@ const Contact = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {contactInfo.map((info, index) => (
               <motion.div
-                key={info.title}
+                key={info.key}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -179,28 +122,38 @@ const Contact = () => {
                   {info.title}
                 </h3>
                 <div className="space-y-1">
-                  {info.values.map((value, valueIndex) => {
-                    const link = info.linkForValue ? info.linkForValue(value) : '';
-                    const isExternal = link.startsWith('http');
-                    const ValueIcon = info.valueIcon;
-                    if (link) {
+                  {info.lines.map((line) => {
+                    const LineIcon = line.icon;
+                    const content = (
+                      <>
+                        {LineIcon && <LineIcon className="w-4 h-4 shrink-0" />}
+                        {line.text}
+                      </>
+                    );
+                    if (line.href && line.internal) {
+                      return (
+                        <Link key={line.text} to={line.href} className="flex items-center gap-2 py-1 text-accent hover:underline">
+                          {content}
+                        </Link>
+                      );
+                    }
+                    if (line.href) {
+                      const isExternal = line.href.startsWith('http');
                       return (
                         <a
-                          key={`${info.title}-${value}-${valueIndex}`}
-                          href={link}
+                          key={line.text}
+                          href={line.href}
                           target={isExternal ? '_blank' : undefined}
                           rel={isExternal ? 'noopener noreferrer' : undefined}
-                          className="flex items-center gap-2 text-accent hover:underline break-all"
+                          className="flex items-center gap-2 py-1 text-accent hover:underline break-all"
                         >
-                          {ValueIcon && <ValueIcon className="w-4 h-4 shrink-0" />}
-                          {value}
+                          {content}
                         </a>
                       );
                     }
                     return (
-                      <p key={`${info.title}-${value}-${valueIndex}`} className="flex items-center gap-2 text-muted-foreground">
-                        {ValueIcon && <ValueIcon className="w-4 h-4 shrink-0" />}
-                        {value}
+                      <p key={line.text} className="flex items-center gap-2 text-muted-foreground">
+                        {content}
                       </p>
                     );
                   })}
@@ -257,14 +210,14 @@ const Contact = () => {
             className="flex flex-col sm:flex-row gap-4 justify-center"
           >
             <a
-              href={`tel:${(phones[0] || phoneRaw).replace(/\s/g, '')}`}
+              href={`tel:${primaryPhone.e164}`}
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary rounded-xl font-medium hover:bg-white/90 transition-colors"
             >
               <Phone className="w-5 h-5" />
-              {phones[0] || phoneRaw}
+              {primaryPhone.display}
             </a>
             <a
-              href={`https://instagram.com/${instagram.replace('@', '')}`}
+              href={STORE.instagram.url}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 text-primary-foreground rounded-xl font-medium hover:bg-white/20 transition-colors border border-white/20"

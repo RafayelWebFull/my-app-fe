@@ -1,0 +1,99 @@
+{
+  "name": "Optic Gallery",
+  "siteUrl": "https://opticgallery.am",
+  "logo": "https://opticgallery.am/logo.png",
+  "instagram": {
+    "handle": "optic__gallery",
+    "url": "https://www.instagram.com/optic__gallery/"
+  },
+  "phones": [
+    { "e164": "+37496744555", "display": "+374 96 744 555" },
+    { "e164": "+37433369268", "display": "+374 33 369 268" }
+  ],
+  "branches": [
+    {
+      "slug": "teryan",
+      "opens": "10:00",
+      "closes": "20:00",
+      "streetAddress": "52 Teryan St",
+      "address": {
+        "hy": "Տերյան 52, Երևան",
+        "ru": "ул. Теряна 52, Ереван",
+        "en": "52 Teryan St, Yerevan"
+      },
+      "shortName": {
+        "hy": "Տերյան 52",
+        "ru": "Теряна 52",
+        "en": "Teryan 52"
+      },
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Optic%20Gallery%2C%20Teryan%2052%2C%20Yerevan"
+    },
+    {
+      "slug": "komitas",
+      "opens": "09:00",
+      "closes": "21:00",
+      "streetAddress": "15 Komitas Ave",
+      "address": {
+        "hy": "Կոմիտասի պողոտա 15, Երևան",
+        "ru": "пр. Комитаса 15, Ереван",
+        "en": "15 Komitas Ave, Yerevan"
+      },
+      "shortName": {
+        "hy": "Կոմիտաս 15",
+        "ru": "Комитаса 15",
+        "en": "Komitas 15"
+      },
+      "mapUrl": "https://www.google.com/maps/search/?api=1&query=Optic%20Gallery%2C%20Komitas%2015%2C%20Yerevan"
+    }
+  ],
+  "labels": {
+    "hy": {
+      "contactUs": "Կապ մեզ հետ",
+      "stores": "Մեր խանութները",
+      "address": "Հասցե",
+      "hours": "Աշխատանքային ժամեր",
+      "daily": "Ամեն օր",
+      "phones": "Հեռախոսներ",
+      "directions": "Ինչպես հասնել",
+      "call": "Զանգահարել",
+      "storePage": "Խանութի էջը",
+      "allStores": "Բոլոր խանութները",
+      "branchTitle": "Optic Gallery օպտիկա՝ {name}, Երևան",
+      "branchDescription": "Optic Gallery օպտիկայի խանութը {address} հասցեում։ Աշխատում ենք ամեն օր՝ {hours}։ Ակնոցներ, արևային ակնոցներ և ակնոցների վերանորոգում։",
+      "branchIntro": "Այցելեք Optic Gallery-ի խանութը {address} հասցեում։ Այստեղ կարող եք ընտրել ակնոցի շրջանակներ և արևային ակնոցներ, ինչպես նաև հանձնել ակնոցը վերանորոգման։",
+      "copyright": "© {year} Optic Gallery։ Բոլոր իրավունքները պաշտպանված են։"
+    },
+    "ru": {
+      "contactUs": "Свяжитесь с нами",
+      "stores": "Наши магазины",
+      "address": "Адрес",
+      "hours": "Часы работы",
+      "daily": "Ежедневно",
+      "phones": "Телефоны",
+      "directions": "Как добраться",
+      "call": "Позвонить",
+      "storePage": "Страница магазина",
+      "allStores": "Все магазины",
+      "branchTitle": "Оптика Optic Gallery на {name}, Ереван",
+      "branchDescription": "Магазин оптики Optic Gallery по адресу {address}. Работаем ежедневно: {hours}. Очки, солнцезащитные очки и ремонт очков.",
+      "branchIntro": "Приходите в Optic Gallery по адресу {address}. Здесь можно подобрать оправу или солнцезащитные очки и сдать очки в ремонт.",
+      "copyright": "© {year} Optic Gallery. Все права защищены."
+    },
+    "en": {
+      "contactUs": "Contact us",
+      "stores": "Our stores",
+      "address": "Address",
+      "hours": "Opening hours",
+      "daily": "Daily",
+      "phones": "Phones",
+      "directions": "Get directions",
+      "call": "Call",
+      "storePage": "Store page",
+      "allStores": "All stores",
+      "branchTitle": "Optic Gallery Optical Store on {name}, Yerevan",
+      "branchDescription": "Optic Gallery optical store at {address}. Open daily {hours}. Eyeglasses, sunglasses and eyeglass repair.",
+      "branchIntro": "Visit Optic Gallery at {address}. Choose eyeglass frames or sunglasses, or drop off your glasses for repair.",
+      "copyright": "© {year} Optic Gallery. All rights reserved."
+    }
+  }
+}
